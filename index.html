@@ -3,129 +3,503 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kiddush Admin Panel</title>
-    <!-- Bootstrap 3 CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-    <link rel="stylesheet" href="css/style.css"> <!-- Your general stylesheet -->
+    <title>KiddushCalendar - Simplify Your Synagogue's Kiddush Management</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <style>
-        .hidden { display: none; }
-        .embed-code { background-color: #f0f0f0; padding: 5px; font-family: monospace; word-break: break-all; }
-        /* .admin-section { margin-bottom: 20px; } /* Using panel instead */
-        .config-item { margin-bottom: 15px; }
+        /* Basic Reset & Body Styles */
+        body {
+            font-family: 'Inter', sans-serif; /* Using Inter as requested */
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+            overflow-x: hidden; /* Prevent horizontal scrolling */
+        }
+
+        h1, h2, h3 {
+            font-family: 'Playfair Display', serif;
+            color: #2c3e50;
+            margin-bottom: 0.5em;
+        }
+
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            box-sizing: border-box; /* Include padding in element's total width and height */
+        }
+
+        /* Header/Navigation */
+        header {
+            background-color: #ffffff;
+            padding: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap; /* Allow items to wrap on smaller screens */
+        }
+
+        .logo {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #2c3e50;
+            font-family: 'Playfair Display', serif;
+            padding: 5px 0; /* Add some padding for touch target */
+        }
+
+        .nav-links .button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px; /* Rounded corners */
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            display: inline-block; /* Ensure padding works */
+            font-weight: 600;
+        }
+
+        .nav-links .button:hover {
+            background-color: #0056b3;
+            text-decoration: none;
+            transform: translateY(-2px);
+        }
+
+        /* Hero Section */
+        .hero {
+            background-color: #e9f7ef; /* Light green/blue for a fresh feel */
+            text-align: center;
+            padding: 80px 20px;
+            margin-bottom: 40px;
+            border-radius: 8px; /* Rounded corners */
+        }
+
+        .hero h1 {
+            font-size: 3em;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+
+        .hero p {
+            font-size: 1.2em;
+            max-width: 800px;
+            margin: 0 auto 30px auto;
+            color: #555;
+        }
+
+        .hero-image {
+            width: 100%;
+            max-width: 600px; /* Adjust as needed */
+            height: auto;
+            margin-top: 40px;
+            border-radius: 8px; /* Rounded corners */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            display: block; /* Remove extra space below image */
+            object-fit: cover; /* Ensure image covers the area without distortion */
+        }
+
+        /* Section Styling */
+        section {
+            padding: 60px 20px;
+            margin-bottom: 20px;
+            background-color: #ffffff;
+            border-radius: 8px; /* Rounded corners */
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            box-sizing: border-box;
+        }
+
+        section:nth-of-type(even) {
+            background-color: #f2f7fb; /* Slightly different background for alternating sections */
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 40px;
+            color: #2c3e50;
+        }
+
+        /* Features Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Adjusted minmax for better mobile fit */
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .feature-item {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px; /* Rounded corners */
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .feature-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-item h3 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .feature-item p {
+            color: #666;
+        }
+
+        /* Call to Action Section (Simplify Life) */
+        .cta-simplify {
+            background-color: #d4edda; /* A soft, inviting green */
+            text-align: center;
+            padding: 80px 20px;
+            margin-top: 40px;
+            border-radius: 8px; /* Rounded corners */
+            box-sizing: border-box;
+        }
+
+        .cta-simplify h2 {
+            font-size: 2.8em;
+            color: #28a745; /* Green for success */
+            margin-bottom: 20px;
+        }
+
+        .cta-simplify ul {
+            list-style: none;
+            padding: 0;
+            margin: 0 auto 30px auto;
+            max-width: 600px;
+            text-align: left;
+        }
+
+        .cta-simplify ul li {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            padding-left: 25px;
+            position: relative;
+            color: #333;
+        }
+
+        .cta-simplify ul li::before {
+            content: '✓'; /* Checkmark icon */
+            color: #28a745;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+
+        /* Pricing Section */
+        .pricing-plan {
+            background-color: #ffffff;
+            border: 1px solid #eee;
+            border-radius: 8px; /* Rounded corners */
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            max-width: 400px; /* Keep it centered and contained */
+            margin: 0 auto;
+            box-sizing: border-box;
+        }
+
+        .pricing-plan h3 {
+            font-size: 2em;
+            color: #007bff;
+            margin-bottom: 10px;
+        }
+
+        .price {
+            font-size: 3.5em;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .price span {
+            font-size: 0.5em;
+            font-weight: 400;
+            vertical-align: super;
+        }
+
+        .pricing-plan ul {
+            list-style: none;
+            padding: 0;
+            text-align: left;
+            margin-bottom: 30px;
+        }
+
+        .pricing-plan ul li {
+            margin-bottom: 10px;
+            font-size: 1.1em;
+            color: #555;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .pricing-plan ul li::before {
+            content: '✓';
+            color: #28a745;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background-color: #007bff;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 8px; /* Rounded corners */
+            font-size: 1.2em;
+            font-weight: 600;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .cta-button:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+            text-decoration: none;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            background-color: #343a40;
+            color: #f8f9fa;
+            margin-top: 50px;
+            border-radius: 8px 8px 0 0; /* Rounded top corners for footer */
+        }
+
+        footer p {
+            margin: 0;
+            font-size: 0.9em;
+        }
+
+        footer a {
+            color: #cccccc;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5em;
+            }
+
+            .hero p {
+                font-size: 1em;
+            }
+
+            .section-title {
+                font-size: 2em;
+            }
+
+            .cta-simplify h2 {
+                font-size: 2em;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr; /* Stack features on small screens */
+            }
+
+            .pricing-plan {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logo {
+                font-size: 1.5em;
+            }
+
+            .nav-links .button {
+                padding: 8px 15px;
+                font-size: 0.9em;
+            }
+
+            .hero h1 {
+                font-size: 2em;
+            }
+
+            .hero p {
+                font-size: 0.9em;
+            }
+
+            section {
+                padding: 40px 15px;
+            }
+
+            .section-title {
+                font-size: 1.8em;
+            }
+
+            .cta-button {
+                padding: 12px 25px;
+                font-size: 1em;
+            }
+        }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-default">
-        <div class="container-fluid">
-            <div class="navbar-header">
-                <a class="navbar-brand" href="#">Kiddush Admin</a>
-            </div>
+
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">KiddushCalendar</div>
+                <div class="nav-links">
+                    <a href="/app" class="button">Login</a>
+                </div>
+            </nav>
         </div>
-    </nav>
+    </header>
 
-    <div class="container">
-        <main>
-            <section id="login-section" class="row">
-                <div class="col-md-8 col-md-offset-2">
-                    <div class="panel panel-primary">
-                        <div class="panel-heading">
-                            <h2 class="panel-title" id="auth-panel-title">Login</h2>
-                        </div>
-                        <div class="panel-body">
-                            <form id="login-form">
-                                <div class="form-group">
-                                    <label for="email">Email:</label>
-                                    <input type="email" class="form-control" id="auth-email" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="password">Password:</label>
-                                    <input type="password" class="form-control" id="auth-password" required>
-                                </div>
-                                <button type="submit" id="login-button" class="btn btn-primary">Login</button>
-                                <button type="button" id="google-login-button" class="btn btn-danger" style="margin-top: 10px;"><i class="glyphicon glyphicon-log-in"></i> Login with Google</button>
-                                <button type="submit" id="signup-button" class="btn btn-success" style="display:none;">Sign Up</button>
-                                
-                                <p id="auth-error" class="text-danger" style="margin-top:10px;"></p>
-                            </form>
-                            <hr>
-                            <p class="text-center">
-                                <a href="#" id="show-signup-link">Need an account? Sign Up</a>
-                                <a href="#" id="show-login-link" style="display:none;">Already have an account? Login</a>
-                            </p>
-                        </div>
+    <main>
+        <section class="hero">
+            <div class="container">
+                <h1>KiddushCalendar: Simplify Your Synagogue's Kiddush Management</h1>
+                <p>Are you tired of juggling Chabad forms, endless emails, and confusing web tables to manage your synagogue's kiddush sponsorships? KiddushCalendar is here to revolutionize how you organize and track your kiddushim, freeing up valuable time for your staff and volunteers.</p>
+                <center><img src="image.png" alt="KiddushCalendar Software Interface" class="hero-image" onerror="this.onerror=null;this.src='https://placehold.co/600x400/E9F7EF/2C3E50?text=Image+Not+Found';">
+                <b>Disclaimer: There is so much more featues in this snapshot, but we couldn't fit all!</b> </center>
+            </div>
+        </section>
+
+        <section id="features">
+            <div class="container">
+                <h2 class="section-title">What is KiddushCalendar?</h2>
+                <p style="text-align: center; max-width: 800px; margin: 0 auto 50px auto; font-size: 1.1em; color: #555;">KiddushCalendar is an intuitive and powerful software designed specifically for synagogues to streamline the entire kiddush sponsorship and scheduling process. From collecting donations to publishing clear calendars, we've got you covered.</p>
+
+                <h2 class="section-title">Key Features</h2>
+                <div class="features-grid">
+                    <div class="feature-item">
+                        <h3>Effortless Form Creation</h3>
+                        <p>Easily create customizable online forms for kiddush sponsorships, including options for dedications, dates, and donation amounts. Say goodbye to manual data entry!</p>
                     </div>
-                </div>
-            </section>
-
-            <section id="admin-dashboard" class="hidden">
-                <p class="lead">Welcome, <span id="user-email-display"></span>! <button id="logout-button" class="btn btn-sm btn-default">Logout</button></p>
-
-                <div class="panel panel-info admin-section" id="configurations-management">
-                    <div class="panel-heading"><h2 class="panel-title">Manage Configurations (Calendars/Forms)</h2></div>
-                    <div class="panel-body">
-                        <form id="create-config-form" class="form-horizontal">
-                            <h3>Create New Configuration</h3>
-                            <div class="form-group">
-                                <label for="config-title" class="col-sm-2 control-label">Title:</label>
-                                <div class="col-sm-10"><input type="text" class="form-control" id="config-title" required></div>
-                            </div>
-                            <div class="form-group">
-                                <label for="config-type" class="col-sm-2 control-label">Type:</label>
-                                <div class="col-sm-10">
-                                    <select id="config-type" class="form-control">
-                                        <option value="calendar">Calendar</option>
-                                        <option value="form">Form</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <div class="col-sm-offset-2 col-sm-10"><button type="submit" class="btn btn-success">Create Configuration</button></div>
-                            </div>
-                        </form>
-                        <hr>
-                        <div id="configurations-list">
-                            <h3>Existing Configurations</h3>
-                            <!-- Configurations will be listed here -->
-                        </div>
+                    <div class="feature-item">
+                        <h3>Integrated Sponsorship Tracking</h3>
+                        <p>Keep a clear, organized record of all kiddush sponsorships, including sponsor details, and dedication information,  all in one central location.</p>
                     </div>
-                </div>
-
-                <div class="panel panel-warning admin-section" id="sponsorships-management">
-                    <div class="panel-heading"><h2 class="panel-title">Manage Sponsorships</h2></div>
-                    <div class="panel-body">
-                        <h3>Pending Sponsorships</h3>
-                        <div id="pending-sponsorships-list" class="list-group">
-                            <!-- Pending sponsorships will be listed here -->
-                        </div>
-                        <hr>
-                        <h3>Approved Sponsorships</h3>
-                        <div id="approved-sponsorships-list" class="list-group">
-                            <!-- Approved sponsorships will be listed here -->
-                        </div>
+                    <div class="feature-item">
+                        <h3>Dynamic Kiddush Calendars</h3>
+                        <p>Generate and publish beautiful, easy-to-read kiddush calendars directly from your collected data. Your congregants will always know what's happening and when.</p>
                     </div>
+                    <div class="feature-item">
+                        <h3>Automated Notifications</h3>
+                        <p>Set up automatic email reminders for sponsors and administrators, ensuring no detail is missed.</p>
+                    </div>
+                    <div class="feature-item">
+                        <h3>Easy Integration</h3>
+                        <p>We know your website needs to play nice with KiddushCalendar. That's why we are working on full guides for easy integration.</p>
+                    </div>
+                    <div class="feature-item">
+                        <h3>User-Friendly Interface</h3>
+                        <p>Designed with synagogues in mind, KiddushCalendar is easy to navigate, even for those with limited technical experience.</p>
+                    </div>
+            
+                 
                 </div>
-            </section>
-        </main>
-    </div>
+            </div>
+        </section>
+
+        <section class="cta-simplify">
+            <div class="container">
+                <h2>Simplify Your Synagogue Life</h2>
+                <ul>
+                    <li>Increase efficiency and reduce administrative burden.</li>
+                    <li>Improve communication with congregants and sponsors.</li>
+                    <li>Ensure accurate record-keeping and financial transparency.</li>
+                    <li>Create a more professional and organized image for your synagogue.</li>
+                    
+                </ul>
+            </div>
+        </section>
+
+        <section id="pricing">
+            <div class="container">
+                <h2 class="section-title">Pricing</h2>
+                <p style="text-align: center; max-width: 800px; margin: 0 auto 50px auto; font-size: 1.1em; color: #555;">We believe every synagogue, regardless of size, deserves access to tools that simplify their operations. That's why KiddushCalendar offers a straightforward and accessible pricing option:</p>
+
+                <div class="pricing-plan">
+                    <h3>Free</h3>
+                    <div class="price"><span>$</span>0<span>/month</span></div>
+                    <ul>
+                        <li>Access to all core features.</li>
+                        <li>Unlimited form creations.</li>
+                        <li>Unlimited kiddush sponsorships.</li>
+                        <li>Unlimited calendar generation.</li>
+                        <li>Standard customer support.</li>
+                        <p><b>Since we are small, and we lack proper funding, we ask that you do not abuse the software, so other users can have a good experience too.</b></p>
+                    </ul>
+                    <a href="/app" class="cta-button">Get Started Free</a>
+                </div>
+            </div>
+        </section>
+
+        <section style="text-align: center;">
+            <div class="container">
+                <h2 class="section-title">Ready to Get Started?</h2>
+                <p style="font-size: 1.2em; margin-bottom: 40px; color: #555;">Join the growing number of synagogues who are simplifying their kiddush management with KiddushCalendar.</p>
+                <a href="/app" class="cta-button">Login to KiddushCalendar</a>
+            </div>
+        </section>
+
+    </main>
 
     <footer>
-        <div class="container text-center">
-            <hr>
-            <p>&copy; Kiddush Admin</p>
+        <div class="container">
+            <p>&copy; 2025 Shebo Enterprises. All rights reserved.</p>
+          
         </div>
     </footer>
 
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script>
+        // Basic JavaScript for any future interactive elements.
+        document.addEventListener('DOMContentLoaded', () => {
+            // This example JavaScript is currently minimal.
+            // If you add more sections to the page later, you might want to enable smooth scrolling.
+            // Example of a smooth scroll for internal links:
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault(); // Prevent default anchor click behavior
 
-    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <!-- Bootstrap 3 JS -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
 
-    <script src="js/firebase-init.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/admin.js"></script>
+                    if (targetElement) {
+                        targetElement.scrollIntoView({
+                            behavior: 'smooth' // Smooth scroll effect
+                        });
+                    }
+                });
+            });
+
+            // Basic error handling for image loading (for the placeholder image)
+            const heroImage = document.querySelector('.hero-image');
+            if (heroImage) {
+                heroImage.onerror = function() {
+                    console.error("Failed to load hero image. Using fallback placeholder.");
+                    this.src = "https://placehold.co/600x400/E9F7EF/2C3E50?text=Image+Not+Found";
+                };
+            }
+        });
+    </script>
 </body>
 </html>

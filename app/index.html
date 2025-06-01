@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kiddush Admin Panel</title>
+    <!-- Bootstrap 3 CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/style.css"> <!-- Your general stylesheet -->
+    <style>
+        .hidden { display: none; }
+        .embed-code { background-color: #f0f0f0; padding: 5px; font-family: monospace; word-break: break-all; }
+        /* .admin-section { margin-bottom: 20px; } /* Using panel instead */
+        .config-item { margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="#">Kiddush Admin</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <main>
+            <section id="login-section" class="row">
+                <div class="col-md-8 col-md-offset-2">
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">
+                            <h2 class="panel-title" id="auth-panel-title">Login</h2>
+                        </div>
+                        <div class="panel-body">
+                            <form id="login-form">
+                                <div class="form-group">
+                                    <label for="email">Email:</label>
+                                    <input type="email" class="form-control" id="auth-email" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="password">Password:</label>
+                                    <input type="password" class="form-control" id="auth-password" required>
+                                </div>
+                                <button type="submit" id="login-button" class="btn btn-primary">Login</button>
+                                <button type="button" id="google-login-button" class="btn btn-danger" style="margin-top: 10px;"><i class="glyphicon glyphicon-log-in"></i> Login with Google</button>
+                                <button type="submit" id="signup-button" class="btn btn-success" style="display:none;">Sign Up</button>
+                                
+                                <p id="auth-error" class="text-danger" style="margin-top:10px;"></p>
+                            </form>
+                            <hr>
+                            <p class="text-center">
+                                <a href="#" id="show-signup-link">Need an account? Sign Up</a>
+                                <a href="#" id="show-login-link" style="display:none;">Already have an account? Login</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="admin-dashboard" class="hidden">
+                <p class="lead">Welcome, <span id="user-email-display"></span>! <button id="logout-button" class="btn btn-sm btn-default">Logout</button></p>
+
+                <div class="panel panel-info admin-section" id="configurations-management">
+                    <div class="panel-heading"><h2 class="panel-title">Manage Configurations (Calendars/Forms)</h2></div>
+                    <div class="panel-body">
+                        <form id="create-config-form" class="form-horizontal">
+                            <h3>Create New Configuration</h3>
+                            <div class="form-group">
+                                <label for="config-title" class="col-sm-2 control-label">Title:</label>
+                                <div class="col-sm-10"><input type="text" class="form-control" id="config-title" required></div>
+                            </div>
+                            <div class="form-group">
+                                <label for="config-type" class="col-sm-2 control-label">Type:</label>
+                                <div class="col-sm-10">
+                                    <select id="config-type" class="form-control">
+                                        <option value="calendar">Calendar</option>
+                                        <option value="form" selected>Form</option> <!-- Default to form for easier editing flow -->
+                                    </select>
+                                </div>
+                            </div>
+                            <!-- Hidden field to store ID of config being edited -->
+                            <input type="hidden" id="editing-config-id" value="">
+
+                            <!-- Moved Payment Options inside the form -->
+                            <div class="form-group">
+                                <label for="config-notification-email" class="col-sm-2 control-label">Notification Email:</label>
+                                <div class="col-sm-10"><input type="email" class="form-control" id="config-notification-email" placeholder="Email for new sponsorship alerts"></div>
+                            </div>
+                            <div id="form-payment-options" style="display:none; margin-top: 5px; padding-top:0px;">
+                                <h4 class="col-sm-offset-2 col-sm-10" style="margin-bottom: 15px;">Payment Options for this Form</h4>
+                                <!-- Check Payments -->
+                                <div class="form-group">
+                                    <div class="col-sm-offset-2 col-sm-10">
+                                        <div class="checkbox"><label><input type="checkbox" id="config-payment-check-enabled"> Enable Check Payments</label></div>
+                                    </div>
+                                </div>
+                                <div class="form-group" id="config-check-details" style="display:none;">
+                                    <label for="config-payment-check-payableTo" class="col-sm-2 control-label">Payable To:</label>
+                                    <div class="col-sm-10"><input type="text" class="form-control" id="config-payment-check-payableTo"></div>
+                                </div>
+                                <div class="form-group" id="config-check-amounts" style="display:none;"> <!-- New wrapper for amounts -->
+                                    <label for="config-payment-check-full-amount" class="col-sm-2 control-label">Full Kiddush Amount:</label>
+                                    <div class="col-sm-4"><input type="text" class="form-control" id="config-payment-check-full-amount" placeholder="e.g., 180"></div>
+                                    <label for="config-payment-check-half-amount" class="col-sm-2 control-label">Half Kiddush Amount:</label>
+                                    <div class="col-sm-4"><input type="text" class="form-control" id="config-payment-check-half-amount" placeholder="e.g., 90"></div>
+                                </div>
+                                <!-- Card Payments -->
+                                <div class="form-group">
+                                    <div class="col-sm-offset-2 col-sm-10">
+                                        <div class="checkbox"><label><input type="checkbox" id="config-payment-card-enabled"> Enable Credit/Debit Card Payments</label></div>
+                                    </div>
+                                </div>
+                                <div id="config-card-details" style="display:none;">
+                                    <div class="form-group">
+                                        <label for="config-payment-card-fullPrice" class="col-sm-2 control-label">Full Kiddush Price:</label>
+                                        <div class="col-sm-4"><input type="text" class="form-control" id="config-payment-card-fullPrice" placeholder="e.g., 180"></div>
+                                        <label for="config-payment-card-fullLink" class="col-sm-2 control-label">Full Kiddush Link:</label>
+                                        <div class="col-sm-4"><input type="url" class="form-control" id="config-payment-card-fullLink" placeholder="https://"></div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="config-payment-card-halfPrice" class="col-sm-2 control-label">Half Kiddush Price:</label>
+                                        <div class="col-sm-4"><input type="text" class="form-control" id="config-payment-card-halfPrice" placeholder="e.g., 90"></div>
+                                        <label for="config-payment-card-halfLink" class="col-sm-2 control-label">Half Kiddush Link:</label>
+                                        <div class="col-sm-4"><input type="url" class="form-control" id="config-payment-card-halfLink" placeholder="https://"></div>
+                                    </div>
+                                </div>
+                                <!-- Placeholder for Misc Payments - can be expanded later -->
+                            </div>
+
+                            <div class="form-group">
+                                <div class="col-sm-offset-2 col-sm-10"><button type="submit" class="btn btn-success">Create Configuration</button></div>
+                            </div>
+                        </form>
+                        <hr>
+                        <div id="configurations-list">
+                            <h3>Existing Configurations</h3>
+                            <!-- Configurations will be listed here -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel panel-success admin-section" id="reserve-kiddush-section">
+                    <div class="panel-heading"><h2 class="panel-title">Reserve/Sponsor a Kiddush for Someone</h2></div>
+                    <div class="panel-body">
+                        <form id="admin-reserve-kiddush-form">
+                            <div class="form-group">
+                                <label for="admin-shabbos-select">Select Parsha/Shabbos:</label>
+                                <select class="form-control" id="admin-shabbos-select" required>
+                                    <option value="">Loading Shabbosim...</option>
+                                </select>
+                            </div>
+                            <div class="panel panel-default" id="admin-selected-shabbos-info-panel" style="display:none;">
+                                <div class="panel-body" id="admin-selected-shabbos-info"></div>
+                            </div>
+                            <div class="form-group">
+                                <label for="admin-sponsor-name">Sponsor's Name:</label>
+                                <input type="text" class="form-control" id="admin-sponsor-name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="admin-occasion">Occasion:</label>
+                                <input type="text" class="form-control" id="admin-occasion" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="admin-contact-email">Sponsor's Contact Email (Optional):</label>
+                                <input type="email" class="form-control" id="admin-contact-email">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Reserve Kiddush</button>
+                            <p id="admin-reserve-message" class="text-info" style="margin-top:10px;"></p>
+                        </form>
+                    </div>
+                </div>
+
+
+                <div class="panel panel-warning admin-section" id="sponsorships-management">
+                    <div class="panel-heading"><h2 class="panel-title">Manage Sponsorships</h2></div>
+                    <div class="panel-body">
+                        <h3>Pending Sponsorships</h3>
+                        <div id="pending-sponsorships-list" class="list-group">
+                            <!-- Pending sponsorships will be listed here -->
+                        </div>
+                        <hr>
+                        <h3>Approved Sponsorships</h3>
+                        <div id="approved-sponsorships-list" class="list-group">
+                            <!-- Approved sponsorships will be listed here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <footer>
+        <div class="container text-center">
+            <hr>
+            <p>&copy; Kiddush Admin</p>
+        </div>
+    </footer>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <!-- Bootstrap 3 JS -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+    <script src="js/firebase-init.js"></script>
+    <script src="js/parsha-service.js"></script> <!-- Add this line -->
+    <script src="js/auth.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>

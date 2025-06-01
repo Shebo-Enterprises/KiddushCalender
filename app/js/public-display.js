@@ -155,6 +155,46 @@ async function renderForm(container, configData) {
                 <input type="email" class="form-control" id="contactEmail" name="contactEmail" required>
             </div>
             <button type="submit" class="btn btn-primary">Submit Sponsorship</button>
+
+            <!-- Payment Options Display -->
+            ${configData.paymentSettings ? `
+            <div id="payment-options-display" style="margin-top: 20px;">
+                <p class="alert alert-info"><small><strong>Important:</strong> Please ensure payment arrangements are completed as per the options below for your sponsorship to be approved. If paying online, complete the payment after submitting this form.</small></p>
+                <h4>Payment Information</h4>
+                ${configData.paymentSettings.check && configData.paymentSettings.check.enabled ? `
+                    <div class="panel panel-default">
+                        <div class="panel-heading"><h5 class="panel-title">Pay by Check</h5></div>
+                        <div class="panel-body">
+                            <p>Please make checks payable to: <strong>${configData.paymentSettings.check.payableTo}</strong>.</p>
+                            ${configData.paymentSettings.check.fullAmount ? `<p>For a full sponsorship, the amount is: <strong>$${configData.paymentSettings.check.fullAmount}</strong>.</p>` : ''}
+                            ${configData.paymentSettings.check.halfAmount ? `<p>For a half (co-sponsored) sponsorship, the amount is: <strong>$${configData.paymentSettings.check.halfAmount}</strong>.</p>` : ''}
+                            ${!(configData.paymentSettings.check.fullAmount || configData.paymentSettings.check.halfAmount) ? '<p>Please contact us for the check amount.</p>' : ''}
+                            <p>You can mail or drop off the check at the office.</p>
+                        </div>
+                    </div>
+                ` : ''}
+                ${configData.paymentSettings.card && configData.paymentSettings.card.enabled ? `
+                    <div class="panel panel-default">
+                        <div class="panel-heading"><h5 class="panel-title">Pay by Credit/Debit Card</h5></div>
+                        <div class="panel-body">
+                            ${configData.paymentSettings.card.fullKiddushPrice && configData.paymentSettings.card.fullKiddushLink ?
+                                `<p><a href="${configData.paymentSettings.card.fullKiddushLink}" target="_blank" rel="noopener noreferrer" class="btn btn-info">Pay for Full Kiddush ($${configData.paymentSettings.card.fullKiddushPrice})</a></p>` : ''}
+                            ${configData.paymentSettings.card.halfKiddushPrice && configData.paymentSettings.card.halfKiddushLink ?
+                                `<p style="margin-top:10px;"><a href="${configData.paymentSettings.card.halfKiddushLink}" target="_blank" rel="noopener noreferrer" class="btn btn-info">Pay for Half Kiddush ($${configData.paymentSettings.card.halfKiddushPrice})</a></p>` : ''}
+                            <p style="margin-top:10px;"><small>You will be redirected to a secure payment page.</small></p>
+                        </div>
+                    </div>
+                ` : ''}
+                ${configData.paymentSettings.misc && configData.paymentSettings.misc.enabled ? `
+                     <div class="panel panel-default">
+                        <div class="panel-heading"><h5 class="panel-title">${configData.paymentSettings.misc.title || 'Other Payment Options'}</h5></div>
+                        <div class="panel-body">
+                            <p>${configData.paymentSettings.misc.instructions || 'Please contact us for details.'}</p>
+                        </div>
+                    </div>
+                ` : ''}
+            </div>
+            ` : ''}
         </form>
         <div id="form-message" class="alert" style="margin-top: 15px; display: none;"></div>
     `;
@@ -194,29 +234,71 @@ async function renderForm(container, configData) {
         const parsha = formParshaInput.value;
 
         if (!shabbatDate || !parsha || parsha === "N/A" || parsha === "Error fetching Parsha") {
-            formMessage.textContent = "Error: Could not determine Shabbat information. Please refresh and try again.";
+            formMessage.textContent = "Error: Could not determine Shabbat information. Please select a Parsha/Shabbos.";
+            formMessage.className = 'alert alert-danger';
+            return;
+        }
+        if (!e.target.sponsorName.value || !e.target.occasion.value || !e.target.contactEmail.value) {
+            formMessage.textContent = "Error: Please fill out Sponsor Name, Occasion, and Contact Email.";
             formMessage.className = 'alert alert-danger';
             return;
         }
 
         try {
-            await db.collection("sponsorships").add({
-                sponsorName: e.target.sponsorName.value,
-                occasion: e.target.occasion.value,
-                contactEmail: e.target.contactEmail.value,
+            const sponsorshipData = {
+                sponsorName: e.target.sponsorName.value.trim(),
+                occasion: e.target.occasion.value.trim(),
+                contactEmail: e.target.contactEmail.value.trim(),
                 shabbatDate: shabbatDate,
                 parsha: parsha,
                 submittedAt: firebase.firestore.FieldValue.serverTimestamp(),
                 status: "pending",
-                configOwnerId: configData.userId // Store the userId of the configuration owner
-            });
+                configOwnerId: configData.userId, // Store the userId of the configuration owner
+                formTitle: configData.title || "Kiddush Sponsorship Form" // Store form title for email context
+                // We are not capturing which payment method they *intend* to use on this form yet.
+                // This version just displays the options. Capturing selection would be a next step.
+            };
+
+            await db.collection("sponsorships").add(sponsorshipData);
+
+            // Send email via FormSubmit if notificationEmail is configured
+            // IMPORTANT: Do this *before* resetting the form
+            if (configData.notificationEmail) {
+                const formDataForEmail = new FormData();
+                // Important for AJAX: Disable FormSubmit's default CAPTCHA. Consider their reCAPTCHA for production.
+                formDataForEmail.append('_captcha', 'false');
+                formDataForEmail.append('_subject', `New Kiddush Sponsorship: ${sponsorshipData.sponsorName} for ${sponsorshipData.parsha}`);
+                formDataForEmail.append('Form Title', sponsorshipData.formTitle);
+                formDataForEmail.append('Sponsor Name', sponsorshipData.sponsorName);
+                formDataForEmail.append('Occasion', sponsorshipData.occasion);
+                formDataForEmail.append('Contact Email', sponsorshipData.contactEmail);
+                formDataForEmail.append('Parsha', sponsorshipData.parsha);
+                formDataForEmail.append('Shabbat Date', sponsorshipData.shabbatDate);
+                formDataForEmail.append('Status', 'Pending Review');
+                formDataForEmail.append('_replyto', sponsorshipData.contactEmail); // Set reply-to for convenience
+
+                const formSubmitURL = `https://formsubmit.co/${configData.notificationEmail}`;
+                console.log("Attempting to send email via FormSubmit to:", formSubmitURL);
+
+                fetch(formSubmitURL, {
+                    method: 'POST',
+                    body: formDataForEmail
+                })
+                .then(response => {
+                    console.log('FormSubmit response status:', response.status);
+                    return response.text(); // Use .text() to see raw response
+                })
+                .then(text => console.log('FormSubmit response text:', text))
+                .catch(error => console.error('FormSubmit fetch/network error:', error));
+            }
             formMessage.textContent = "Sponsorship submitted for review! Thank you.";
             formMessage.className = 'alert alert-success';
             e.target.reset();
-            formShabbatDateInput.value = ''; // Clear hidden fields
+            if(formShabbatDateInput) formShabbatDateInput.value = ''; // Clear hidden fields
             formParshaInput.value = '';
             selectedShabbosInfoPanel.style.display = 'none'; // Hide info panel
             // The dropdown will reset to its default "Select..." option
+
         } catch (error) {
             console.error("Error submitting sponsorship from public form: ", error);
             formMessage.textContent = "Submission failed. Please try again or contact support.";
