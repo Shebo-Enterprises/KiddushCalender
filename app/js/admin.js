@@ -8,6 +8,17 @@ const adminReserveKiddushForm = document.getElementById('admin-reserve-kiddush-f
 const adminShabbosSelect = document.getElementById('admin-shabbos-select');
 const adminSelectedShabbosInfoDiv = document.getElementById('admin-selected-shabbos-info');
 const adminSelectedShabbosInfoPanel = document.getElementById('admin-selected-shabbos-info-panel');
+const adminReserveMessage = document.getElementById('admin-reserve-message'); // Added for clarity
+
+// New elements for Custom Schedulable Events
+const createCustomEventForm = document.getElementById('create-custom-event-form');
+const customEventsListDiv = document.getElementById('custom-events-list');
+const editingCustomEventIdInput = document.getElementById('editing-custom-event-id');
+
+const adminReserveTypeSelect = document.getElementById('admin-reserve-type-select');
+const adminShabbosSelectContainer = document.getElementById('admin-shabbos-select-container');
+const adminCustomEventSelectContainer = document.getElementById('admin-custom-event-select-container');
+const adminCustomEventSelect = document.getElementById('admin-custom-event-select');
 
 // Payment option elements for config form
 const configTypeSelect = document.getElementById('config-type');
@@ -23,8 +34,10 @@ const editingConfigIdInput = document.getElementById('editing-config-id');
 // Function to be called by auth.js after successful login
 function loadAdminData() {
     loadConfigurations();
+    loadCustomEvents(); // Load custom sponsorable events
     populateAdminShabbosSelector(); // Populate the Parsha selector for admin reservation
     loadSponsorships();
+    populateAdminCustomEventSelector(); // Populate custom events for admin reservation
     resetConfigForm(); // Ensure form is in create mode initially
 }
 
@@ -286,6 +299,132 @@ async function deleteConfiguration(configId) {
     }
 }
 
+// Custom Schedulable Events Management
+if (createCustomEventForm) {
+    createCustomEventForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const currentUser = auth.currentUser;
+        if (!currentUser) {
+            alert("You must be logged in.");
+            return;
+        }
+
+        const title = createCustomEventForm['custom-event-title'].value;
+        const description = createCustomEventForm['custom-event-description'].value;
+        const startDate = createCustomEventForm['custom-event-start-date'].value;
+        const endDate = createCustomEventForm['custom-event-end-date'].value;
+        const editingId = editingCustomEventIdInput.value;
+
+        if (!title || !startDate || !endDate) {
+            alert("Please provide a title, start date, and end date for the custom event.");
+            return;
+        }
+        if (new Date(startDate) > new Date(endDate)) {
+            alert("Start date cannot be after end date.");
+            return;
+        }
+
+        const eventData = {
+            title,
+            description,
+            startDate,
+            endDate,
+            userId: currentUser.uid,
+        };
+
+        try {
+            if (editingId) {
+                eventData.lastUpdatedAt = firebase.firestore.FieldValue.serverTimestamp();
+                await db.collection("customSponsorables").doc(editingId).update(eventData);
+                alert("Custom event updated successfully!");
+            } else {
+                eventData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+                await db.collection("customSponsorables").add(eventData);
+                alert("Custom event created successfully!");
+            }
+            resetCustomEventForm();
+            loadCustomEvents();
+            populateAdminCustomEventSelector(); // Refresh dropdown for admin reservations
+        } catch (error) {
+            console.error("Error saving custom event:", error);
+            alert("Error saving custom event.");
+        }
+    });
+}
+
+function resetCustomEventForm() {
+    if (createCustomEventForm) createCustomEventForm.reset();
+    if (editingCustomEventIdInput) editingCustomEventIdInput.value = '';
+    const formHeading = createCustomEventForm.querySelector('h3'); // Assuming h3 for heading
+    if (formHeading) formHeading.textContent = 'Create New Custom Event';
+    createCustomEventForm.querySelector('button[type="submit"]').textContent = 'Create Event';
+}
+
+async function loadCustomEvents() {
+    if (!customEventsListDiv) return;
+    customEventsListDiv.innerHTML = '<div class="text-center">Loading custom events...</div>';
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+        customEventsListDiv.innerHTML = '<div class="alert alert-warning">Please login to see custom events.</div>';
+        return;
+    }
+
+    try {
+        const snapshot = await db.collection("customSponsorables").where("userId", "==", currentUser.uid).orderBy("startDate", "desc").get();
+        let html = '';
+        if (snapshot.empty) {
+            html = '<div class="alert alert-info">No custom events found. Create one above.</div>';
+        } else {
+            snapshot.forEach(doc => {
+                const event = doc.data();
+                html += `
+                    <div class="panel panel-default custom-event-item">
+                        <div class="panel-heading"><h4 class="panel-title">${event.title}</h4></div>
+                        <div class="panel-body">
+                            <p><strong>Dates:</strong> ${new Date(event.startDate + "T00:00:00Z").toLocaleDateString()} - ${new Date(event.endDate + "T00:00:00Z").toLocaleDateString()}</p>
+                            ${event.description ? `<p><strong>Description:</strong> ${event.description}</p>` : ''}
+                            <button class="btn btn-primary btn-xs" onclick='editCustomEventPrep("${doc.id}")'>Edit</button>
+                            <button class="btn btn-danger btn-xs" style="margin-left: 5px;" onclick="deleteCustomEvent('${doc.id}')">Delete</button>
+                        </div>
+                    </div>`;
+            });
+        }
+        customEventsListDiv.innerHTML = html;
+    } catch (error) {
+        console.error("Error loading custom events: ", error);
+        customEventsListDiv.innerHTML = '<div class="alert alert-danger">Error loading custom events.</div>';
+    }
+}
+
+async function editCustomEventPrep(eventId) {
+    const docSnap = await db.collection("customSponsorables").doc(eventId).get();
+    if (docSnap.exists) {
+        const data = docSnap.data();
+        createCustomEventForm['custom-event-title'].value = data.title;
+        createCustomEventForm['custom-event-description'].value = data.description || '';
+        createCustomEventForm['custom-event-start-date'].value = data.startDate;
+        createCustomEventForm['custom-event-end-date'].value = data.endDate;
+        editingCustomEventIdInput.value = eventId;
+        createCustomEventForm.querySelector('h3').textContent = `Edit Custom Event: ${data.title}`;
+        createCustomEventForm.querySelector('button[type="submit"]').textContent = 'Update Event';
+        createCustomEventForm.scrollIntoView({ behavior: 'smooth' });
+    }
+}
+
+async function deleteCustomEvent(eventId) {
+    if (confirm("Are you sure you want to delete this custom event? This cannot be undone.")) {
+        try {
+            await db.collection("customSponsorables").doc(eventId).delete();
+            alert("Custom event deleted.");
+            loadCustomEvents();
+            populateAdminCustomEventSelector(); // Refresh dropdown
+        } catch (error) {
+            console.error("Error deleting custom event:", error);
+            alert("Error deleting custom event.");
+        }
+    }
+}
+
 // Admin Reserve Kiddush Functionality
 async function populateAdminShabbosSelector() {
     if (!adminShabbosSelect) return;
@@ -309,6 +448,32 @@ async function populateAdminShabbosSelector() {
     }
 }
 
+async function populateAdminCustomEventSelector() {
+    if (!adminCustomEventSelect) return;
+    adminCustomEventSelect.innerHTML = '<option value="">Loading custom events...</option>';
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+        adminCustomEventSelect.innerHTML = '<option value="">Login to see events</option>';
+        return;
+    }
+    try {
+        const today = new Date().toISOString().split('T')[0];
+        const snapshot = await db.collection("customSponsorables")
+            .where("userId", "==", currentUser.uid)
+            .where("endDate", ">=", today) // Only show active or future events
+            .orderBy("endDate").orderBy("startDate").get();
+        let optionsHtml = '<option value="">Select a Custom Event</option>';
+        snapshot.forEach(doc => {
+            const event = doc.data();
+            optionsHtml += `<option value="${doc.id}|${event.title}">${event.title} (${new Date(event.startDate+"T00:00:00Z").toLocaleDateString()} - ${new Date(event.endDate+"T00:00:00Z").toLocaleDateString()})</option>`;
+        });
+        adminCustomEventSelect.innerHTML = optionsHtml || '<option value="">No active custom events found</option>';
+    } catch (error) {
+        console.error("Error populating admin custom event selector:", error);
+        adminCustomEventSelect.innerHTML = '<option value="">Error loading events</option>';
+    }
+}
+
 if (adminShabbosSelect) {
     adminShabbosSelect.addEventListener('change', async function() {
         const selectedValue = this.value;
@@ -323,43 +488,85 @@ if (adminShabbosSelect) {
     });
 }
 
+if (adminReserveTypeSelect) {
+    adminReserveTypeSelect.addEventListener('change', function() {
+        if (this.value === 'shabbat') {
+            if(adminShabbosSelectContainer) adminShabbosSelectContainer.style.display = 'block';
+            if(adminCustomEventSelectContainer) adminCustomEventSelectContainer.style.display = 'none';
+        } else if (this.value === 'custom') {
+            if(adminShabbosSelectContainer) adminShabbosSelectContainer.style.display = 'none';
+            if(adminCustomEventSelectContainer) adminCustomEventSelectContainer.style.display = 'block';
+        } else {
+            if(adminShabbosSelectContainer) adminShabbosSelectContainer.style.display = 'none';
+            if(adminCustomEventSelectContainer) adminCustomEventSelectContainer.style.display = 'none';
+        }
+    });
+    // Trigger change for initial state
+    adminReserveTypeSelect.dispatchEvent(new Event('change'));
+}
+
 if (adminReserveKiddushForm) {
     adminReserveKiddushForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const adminReserveMessage = document.getElementById('admin-reserve-message');
-        adminReserveMessage.textContent = 'Reserving...';
+        if(adminReserveMessage) adminReserveMessage.textContent = 'Reserving...';
 
         const currentUser = auth.currentUser;
         if (!currentUser) {
-            adminReserveMessage.textContent = "Error: You must be logged in.";
+            if(adminReserveMessage) adminReserveMessage.textContent = "Error: You must be logged in.";
             return;
         }
 
-        const selectedShabbosValue = adminShabbosSelect.value;
-        if (!selectedShabbosValue) {
-            adminReserveMessage.textContent = "Error: Please select a Parsha/Shabbos.";
-            return;
-        }
-        const [shabbatDate, parsha] = selectedShabbosValue.split('|');
         const sponsorName = document.getElementById('admin-sponsor-name').value;
         const occasion = document.getElementById('admin-occasion').value;
         const contactEmail = document.getElementById('admin-contact-email').value;
+        const reserveType = adminReserveTypeSelect.value;
+
+        let sponsorshipDetails = {
+            sponsorName, occasion, contactEmail,
+            status: "approved", // Directly approved
+            configOwnerId: currentUser.uid, // Associated with the admin user
+            submittedAt: firebase.firestore.FieldValue.serverTimestamp(),
+            reservedByAdmin: true
+        };
+
+        if (reserveType === 'shabbat') {
+            const selectedShabbosValue = adminShabbosSelect.value;
+            if (!selectedShabbosValue) {
+                if(adminReserveMessage) adminReserveMessage.textContent = "Error: Please select a Parsha/Shabbos.";
+                return;
+            }
+            const [shabbatDate, parsha] = selectedShabbosValue.split('|');
+            sponsorshipDetails.shabbatDate = shabbatDate;
+            sponsorshipDetails.parsha = parsha;
+            sponsorshipDetails.sponsorshipType = "shabbat";
+        } else if (reserveType === 'custom') {
+            const selectedCustomEventValue = adminCustomEventSelect.value;
+            if (!selectedCustomEventValue) {
+                if(adminReserveMessage) adminReserveMessage.textContent = "Error: Please select a Custom Event.";
+                return;
+            }
+            const [customEventId, customEventTitle] = selectedCustomEventValue.split('|');
+            sponsorshipDetails.customSponsorableId = customEventId;
+            sponsorshipDetails.customSponsorableTitle = customEventTitle; // For context
+            sponsorshipDetails.sponsorshipType = "custom";
+        } else {
+            if(adminReserveMessage) adminReserveMessage.textContent = "Error: Please select a reservation type.";
+            return;
+        }
 
         try {
-            await db.collection("sponsorships").add({
-                sponsorName, occasion, contactEmail, shabbatDate, parsha,
-                status: "approved", // Directly approved
-                configOwnerId: currentUser.uid, // Associated with the admin user
-                submittedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                reservedByAdmin: true // Optional flag
-            });
-            adminReserveMessage.textContent = "Kiddush reserved successfully!";
+            await db.collection("sponsorships").add(sponsorshipDetails);
+            if(adminReserveMessage) adminReserveMessage.textContent = "Kiddush/Event reserved successfully!";
             adminReserveKiddushForm.reset();
             if(adminSelectedShabbosInfoPanel) adminSelectedShabbosInfoPanel.style.display = 'none';
+            // Reset custom event selector and info panel if you add one
+            if(adminCustomEventSelect) adminCustomEventSelect.value = '';
+            if(adminReserveTypeSelect) adminReserveTypeSelect.value = ''; // Reset type selector
+            adminReserveTypeSelect.dispatchEvent(new Event('change')); // Trigger hide/show
             // loadSponsorships(); // Sponsorships list will update via onSnapshot
         } catch (error) {
             console.error("Error reserving Kiddush by admin:", error);
-            adminReserveMessage.textContent = "Error reserving Kiddush. Please try again.";
+            if(adminReserveMessage) adminReserveMessage.textContent = "Error reserving. Please try again.";
         }
     });
 }
@@ -392,7 +599,8 @@ async function loadSponsorships() {
             approvedSponsorshipsListDiv.innerHTML = '<div class="list-group-item alert alert-warning">Please login to manage sponsorships.</div>';
             return;
         }
-        db.collection("sponsorships").where("status", "==", "approved").orderBy("shabbatDate", "desc")
+        db.collection("sponsorships").where("status", "==", "approved")
+            .orderBy("submittedAt", "desc") // Order by submission time; shabbatDate is not reliable for custom events
             .where("configOwnerId", "==", currentUser.uid)
             .onSnapshot(snapshot => {
                 renderSponsorships(snapshot, approvedSponsorshipsListDiv, false);
@@ -412,11 +620,17 @@ function renderSponsorships(snapshot, container, isPending) {
     let html = '';
     snapshot.forEach(doc => {
         const s = doc.data();
+        let itemTitle = '';
+        if (s.sponsorshipType === 'custom' && s.customSponsorableTitle) {
+            itemTitle = `Custom Event: ${s.customSponsorableTitle}`;
+        } else {
+            itemTitle = `Parsha: ${s.parsha} (Shabbat: ${s.shabbatDate})`;
+        }
         const submittedDate = s.submittedAt ? s.submittedAt.toDate().toLocaleDateString() : 'N/A';
         html += ` <a href="#" class="list-group-item sponsorship-item">
                     <h4 class="list-group-item-heading">Sponsor: ${s.sponsorName}</h4>
                     <p class="list-group-item-text"><strong>Occasion:</strong> ${s.occasion}</p>
-                    <p class="list-group-item-text"><strong>Parsha:</strong> ${s.parsha} (Shabbat: ${s.shabbatDate})</p>
+                    <p class="list-group-item-text"><strong>For:</strong> ${itemTitle}</p>
                     <p class="list-group-item-text"><strong>Contact:</strong> ${s.contactEmail || 'N/A'}</p>
                     <p class="list-group-item-text"><strong>Submitted:</strong> ${submittedDate}</p>
                     <div style="margin-top: 10px;">

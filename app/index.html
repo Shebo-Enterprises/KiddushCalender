@@ -139,19 +139,85 @@
                     </div>
                 </div>
 
-                <div class="panel panel-success admin-section" id="reserve-kiddush-section">
-                    <div class="panel-heading"><h2 class="panel-title">Reserve/Sponsor a Kiddush for Someone</h2></div>
+                <!-- Section for Creating/Editing Custom Schedulable Events -->
+                <div class="panel panel-primary admin-section" id="custom-events-management">
+                    <div class="panel-heading">
+                        <h3 class="panel-title" id="custom-event-form-title-display">Create/Manage Custom Schedulable Events</h3>
+                    </div>
+                    <div class="panel-body">
+                        <form id="create-custom-event-form">
+                            <h4 id="custom-event-form-title">Create New Custom Event</h4> <!-- JS will update this for editing -->
+                            <input type="hidden" id="editing-custom-event-id">
+                            <div class="form-group">
+                                <label for="custom-event-title">Event Title:</label>
+                                <input type="text" class="form-control" id="custom-event-title" name="custom-event-title" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="custom-event-description">Description (Optional):</label>
+                                <textarea class="form-control" id="custom-event-description" name="custom-event-description" rows="3"></textarea>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="custom-event-start-date">Start Date:</label>
+                                        <input type="date" class="form-control" id="custom-event-start-date" name="custom-event-start-date" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="custom-event-end-date">End Date:</label>
+                                        <input type="date" class="form-control" id="custom-event-end-date" name="custom-event-end-date" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-success">Create Event</button>
+                            <button type="button" class="btn btn-default" onclick="resetCustomEventForm()">Cancel Edit</button>
+                        </form>
+                        <hr>
+                        <h4>Existing Custom Events</h4>
+                        <div id="custom-events-list" class="list-group">
+                            <!-- Custom events will be loaded here by admin.js -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel panel-success admin-section" id="reserve-item-section">
+                    <div class="panel-heading"><h2 class="panel-title">Admin: Reserve a Kiddush / Custom Event</h2></div>
                     <div class="panel-body">
                         <form id="admin-reserve-kiddush-form">
                             <div class="form-group">
-                                <label for="admin-shabbos-select">Select Parsha/Shabbos:</label>
-                                <select class="form-control" id="admin-shabbos-select" required>
-                                    <option value="">Loading Shabbosim...</option>
+                                <label for="admin-reserve-type-select">Reservation Type:</label>
+                                <select class="form-control" id="admin-reserve-type-select">
+                                    <option value="">-- Select Type --</option>
+                                    <option value="shabbat">Shabbos/Parsha</option>
+                                    <option value="custom">Custom Event</option>
                                 </select>
                             </div>
-                            <div class="panel panel-default" id="admin-selected-shabbos-info-panel" style="display:none;">
-                                <div class="panel-body" id="admin-selected-shabbos-info"></div>
+
+                            <!-- Container for Shabbos/Parsha Selection -->
+                            <div id="admin-shabbos-select-container" style="display:none;">
+                                <div class="form-group">
+                                    <label for="admin-shabbos-select">Select Parsha/Shabbos:</label>
+                                    <select class="form-control" id="admin-shabbos-select">
+                                        <!-- Options populated by admin.js -->
+                                    </select>
+                                </div>
+                                <div class="panel panel-default" id="admin-selected-shabbos-info-panel" style="display:none;">
+                                    <div class="panel-body" id="admin-selected-shabbos-info"></div>
+                                </div>
                             </div>
+
+                            <!-- Container for Custom Event Selection -->
+                            <div id="admin-custom-event-select-container" style="display:none;">
+                                <div class="form-group">
+                                    <label for="admin-custom-event-select">Select Custom Event:</label>
+                                    <select class="form-control" id="admin-custom-event-select">
+                                        <!-- Options populated by admin.js -->
+                                    </select>
+                                </div>
+                                <!-- Optional: Panel to show selected custom event details can be added here if needed -->
+                            </div>
+
                             <div class="form-group">
                                 <label for="admin-sponsor-name">Sponsor's Name:</label>
                                 <input type="text" class="form-control" id="admin-sponsor-name" required>
@@ -164,7 +230,7 @@
                                 <label for="admin-contact-email">Sponsor's Contact Email (Optional):</label>
                                 <input type="email" class="form-control" id="admin-contact-email">
                             </div>
-                            <button type="submit" class="btn btn-primary">Reserve Kiddush</button>
+                            <button type="submit" class="btn btn-primary">Reserve Item</button>
                             <p id="admin-reserve-message" class="text-info" style="margin-top:10px;"></p>
                         </form>
                     </div>
