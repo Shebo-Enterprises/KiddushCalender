@@ -35,7 +35,8 @@ async function loadConfigurations() {
                         <div class="panel-heading"><h4 class="panel-title">${config.title} (Type: ${config.type})</h4></div>
                         <div class="panel-body">
                             <p><strong>ID:</strong> ${doc.id}</p>
-                            <p><strong>Embed Code:</strong> <code class="embed-code">&lt;iframe src="${embedUrl}" width="100%" height="600px" style="border:1px solid #ccc;"&gt;&lt;/iframe&gt;</code></p>
+                            <p><strong>Direct Link:</strong> <a href="${embedUrl}" target="_blank">${embedUrl}</a></p>
+                            <p><strong>Embed Code:</strong> <code class="embed-code">&lt;iframe src="${embedUrl}" width="100%" height="600px" style="border:1px solid #ccc;"&gt;&lt;/iframe&gt;</code></p>                            
                             <button class="btn btn-danger btn-xs" onclick="deleteConfiguration('${doc.id}')">Delete</button>
                         </div>
                     </div>`;
