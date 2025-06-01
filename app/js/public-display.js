@@ -128,7 +128,7 @@ async function renderCalendar(container, configData) {
                 sponsorsList = approvedSponsorshipsMap.get(item.id);
 
                 html += `<div class="list-group-item week-entry">
-                            <h4 class="list-group-item-heading">${item.title} ${item.type === 'custom' ? '(Custom Event)' : ''}</h4>
+                            <h4 class="list-group-item-heading">${item.title} ${item.type === 'custom' ? '' : ''}</h4>
                             <p class="list-group-item-text">${item.type === 'shabbat' ? 'Weekend of:' : 'Dates:'} ${item.displayDateInfo}</p>`;
                 if (item.type === 'custom' && item.description) {
                     html += `<p class="list-group-item-text text-muted"><small>${item.description}</small></p>`;
