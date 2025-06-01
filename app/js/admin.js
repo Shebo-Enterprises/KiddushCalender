@@ -101,7 +101,7 @@ async function loadConfigurations() {
         } else {
             snapshot.forEach(doc => {
                 const config = doc.data();
-                const embedUrl = `${window.location.origin}/public-display.html?configId=${doc.id}`;
+                const embedUrl = `${window.location.origin}/app/public-display.html?configId=${doc.id}`;
                 const paymentDisplayHtml = generatePaymentDetailsHtml(config);
                 html += `
                     <div class="panel panel-default config-item">
