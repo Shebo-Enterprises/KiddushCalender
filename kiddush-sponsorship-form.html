@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sponsor a Kiddush</title>
+    <!-- Bootstrap 3 CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/style.css"> <!-- Your general stylesheet -->
+</head>
+<body>
+    <div class="container">
+        <div class="page-header">
+            <h2>Sponsor a Kiddush</h2>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading">Weekly Information</div>
+            <div class="panel-body" id="weekly-info-form">
+                <p>Loading weekly information...</p>
+            </div>
+        </div>
+        <form id="publicSponsorshipForm">
+            <input type="hidden" id="formShabbatDate" value="">
+            <input type="hidden" id="formParsha" value="">
+
+            <div class="form-group">
+                <label for="sponsorName">Sponsor Name:</label>
+                <input type="text" class="form-control" id="sponsorName" name="sponsorName" required>
+            </div>
+            <div class="form-group">
+                <label for="occasion">Occasion:</label>
+                <input type="text" class="form-control" id="occasion" name="occasion" required>
+            </div>
+            <div class="form-group">
+                <label for="contactEmail">Contact Email:</label>
+                <input type="email" class="form-control" id="contactEmail" name="contactEmail" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit Sponsorship</button>
+        </form>
+        <div id="form-message" class="alert" style="margin-top: 15px; display: none;"></div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="js/firebase-init.js"></script>
+    <script src="js/parsha-service.js"></script>
+    <script src="js/form.js"></script>
+</body>
+</html>

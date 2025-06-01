@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kiddush Admin Panel</title>
+    <!-- Bootstrap 3 CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/style.css"> <!-- Your general stylesheet -->
+    <style>
+        .hidden { display: none; }
+        .embed-code { background-color: #f0f0f0; padding: 5px; font-family: monospace; word-break: break-all; }
+        /* .admin-section { margin-bottom: 20px; } /* Using panel instead */
+        .config-item { margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="#">Kiddush Admin</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <main>
+            <section id="login-section" class="row">
+                <div class="col-md-8 col-md-offset-2">
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">
+                            <h2 class="panel-title" id="auth-panel-title">Login</h2>
+                        </div>
+                        <div class="panel-body">
+                            <form id="login-form">
+                                <div class="form-group">
+                                    <label for="email">Email:</label>
+                                    <input type="email" class="form-control" id="auth-email" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="password">Password:</label>
+                                    <input type="password" class="form-control" id="auth-password" required>
+                                </div>
+                                <button type="submit" id="login-button" class="btn btn-primary">Login</button>
+                                <button type="button" id="google-login-button" class="btn btn-danger" style="margin-top: 10px;"><i class="glyphicon glyphicon-log-in"></i> Login with Google</button>
+                                <button type="submit" id="signup-button" class="btn btn-success" style="display:none;">Sign Up</button>
+                                
+                                <p id="auth-error" class="text-danger" style="margin-top:10px;"></p>
+                            </form>
+                            <hr>
+                            <p class="text-center">
+                                <a href="#" id="show-signup-link">Need an account? Sign Up</a>
+                                <a href="#" id="show-login-link" style="display:none;">Already have an account? Login</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="admin-dashboard" class="hidden">
+                <p class="lead">Welcome, <span id="user-email-display"></span>! <button id="logout-button" class="btn btn-sm btn-default">Logout</button></p>
+
+                <div class="panel panel-info admin-section" id="configurations-management">
+                    <div class="panel-heading"><h2 class="panel-title">Manage Configurations (Calendars/Forms)</h2></div>
+                    <div class="panel-body">
+                        <form id="create-config-form" class="form-horizontal">
+                            <h3>Create New Configuration</h3>
+                            <div class="form-group">
+                                <label for="config-title" class="col-sm-2 control-label">Title:</label>
+                                <div class="col-sm-10"><input type="text" class="form-control" id="config-title" required></div>
+                            </div>
+                            <div class="form-group">
+                                <label for="config-type" class="col-sm-2 control-label">Type:</label>
+                                <div class="col-sm-10">
+                                    <select id="config-type" class="form-control">
+                                        <option value="calendar">Calendar</option>
+                                        <option value="form">Form</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-sm-offset-2 col-sm-10"><button type="submit" class="btn btn-success">Create Configuration</button></div>
+                            </div>
+                        </form>
+                        <hr>
+                        <div id="configurations-list">
+                            <h3>Existing Configurations</h3>
+                            <!-- Configurations will be listed here -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel panel-warning admin-section" id="sponsorships-management">
+                    <div class="panel-heading"><h2 class="panel-title">Manage Sponsorships</h2></div>
+                    <div class="panel-body">
+                        <h3>Pending Sponsorships</h3>
+                        <div id="pending-sponsorships-list" class="list-group">
+                            <!-- Pending sponsorships will be listed here -->
+                        </div>
+                        <hr>
+                        <h3>Approved Sponsorships</h3>
+                        <div id="approved-sponsorships-list" class="list-group">
+                            <!-- Approved sponsorships will be listed here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <footer>
+        <div class="container text-center">
+            <hr>
+            <p>&copy; Kiddush Admin</p>
+        </div>
+    </footer>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <!-- Bootstrap 3 JS -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+    <script src="js/firebase-init.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>
