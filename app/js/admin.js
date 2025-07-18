@@ -39,6 +39,33 @@ function loadAdminData() {
     loadSponsorships();
     populateAdminCustomEventSelector(); // Populate custom events for admin reservation
     resetConfigForm(); // Ensure form is in create mode initially
+    initializeSidebarNavigation(); // Initialize sidebar navigation
+}
+
+// Sidebar Navigation Functionality
+function initializeSidebarNavigation() {
+    const navLinks = document.querySelectorAll('.nav-link');
+    const sections = document.querySelectorAll('.admin-section');
+    
+    navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Remove active class from all links and sections
+            navLinks.forEach(l => l.classList.remove('active'));
+            sections.forEach(s => s.classList.remove('active'));
+            
+            // Add active class to clicked link
+            this.classList.add('active');
+            
+            // Show corresponding section
+            const sectionId = this.getAttribute('data-section');
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) {
+                targetSection.classList.add('active');
+            }
+        });
+    });
 }
 
 if (configTypeSelect) {
@@ -574,11 +601,11 @@ if (adminReserveKiddushForm) {
 // Sponsorships Management
 async function loadSponsorships() {
     if (pendingSponsorshipsListDiv) {
-        pendingSponsorshipsListDiv.innerHTML = '<div class="list-group-item">Loading pending sponsorships...</div>';
+        pendingSponsorshipsListDiv.innerHTML = '<div class="alert alert-info">Loading pending sponsorships...</div>';
         const currentUser = auth.currentUser; // Define currentUser here
         if (!currentUser) {
-            pendingSponsorshipsListDiv.innerHTML = '<div class="list-group-item alert alert-warning">Please login to manage sponsorships.</div>';
-            if (approvedSponsorshipsListDiv) approvedSponsorshipsListDiv.innerHTML = '<div class="list-group-item alert alert-warning">Please login to manage sponsorships.</div>';
+            pendingSponsorshipsListDiv.innerHTML = '<div class="alert alert-warning">Please login to manage sponsorships.</div>';
+            if (approvedSponsorshipsListDiv) approvedSponsorshipsListDiv.innerHTML = '<div class="alert alert-warning">Please login to manage sponsorships.</div>';
             return;
         }
         db.collection("sponsorships").where("status", "==", "pending").orderBy("submittedAt", "desc")
@@ -587,16 +614,16 @@ async function loadSponsorships() {
                 renderSponsorships(snapshot, pendingSponsorshipsListDiv, true);
             }, error => {
                 console.error("Error fetching pending sponsorships: ", error);
-                pendingSponsorshipsListDiv.innerHTML = '<div class="list-group-item list-group-item-danger">Error loading pending sponsorships.</div>';
+                pendingSponsorshipsListDiv.innerHTML = '<div class="alert alert-danger">Error loading pending sponsorships.</div>';
             });
     }
 
     if (approvedSponsorshipsListDiv) {
-        approvedSponsorshipsListDiv.innerHTML = '<div class="list-group-item">Loading approved sponsorships...</div>';
+        approvedSponsorshipsListDiv.innerHTML = '<div class="alert alert-info">Loading approved sponsorships...</div>';
         const currentUser = auth.currentUser; // Also define currentUser here for this block
         if (!currentUser) {
             // This check might be redundant if the one above already returned, but good for safety
-            approvedSponsorshipsListDiv.innerHTML = '<div class="list-group-item alert alert-warning">Please login to manage sponsorships.</div>';
+            approvedSponsorshipsListDiv.innerHTML = '<div class="alert alert-warning">Please login to manage sponsorships.</div>';
             return;
         }
         db.collection("sponsorships").where("status", "==", "approved")
@@ -606,42 +633,74 @@ async function loadSponsorships() {
                 renderSponsorships(snapshot, approvedSponsorshipsListDiv, false);
             }, error => {
                 console.error("Error fetching approved sponsorships: ", error);
-                approvedSponsorshipsListDiv.innerHTML = '<div class="list-group-item list-group-item-danger">Error loading approved sponsorships.</div>';
+                approvedSponsorshipsListDiv.innerHTML = '<div class="alert alert-danger">Error loading approved sponsorships.</div>';
             });
     }
 }
 
 function renderSponsorships(snapshot, container, isPending) {
     if (!container) return;
+    
     if (snapshot.empty) {
-        container.innerHTML = `<div class="list-group-item">No ${isPending ? 'pending' : 'approved'} sponsorships.</div>`;
+        container.innerHTML = `<div class="alert alert-info">No ${isPending ? 'pending' : 'approved'} sponsorships found.</div>`;
         return;
     }
-    let html = '';
+    
+    let html = `
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered sponsorship-table">
+                <thead>
+                    <tr>
+                        <th>Sponsor Name</th>
+                        <th>Occasion</th>
+                        <th>For</th>
+                        <th>Contact Email</th>
+                        <th>Submitted Date</th>
+                        ${isPending ? '<th>Status</th>' : ''}
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+    
     snapshot.forEach(doc => {
         const s = doc.data();
         let itemTitle = '';
         if (s.sponsorshipType === 'custom' && s.customSponsorableTitle) {
             itemTitle = `Custom Event: ${s.customSponsorableTitle}`;
         } else {
-            itemTitle = `Parsha: ${s.parsha} (Shabbat: ${s.shabbatDate})`;
+            itemTitle = `Parsha: ${s.parsha}<br><small class="text-muted">Shabbat: ${s.shabbatDate}</small>`;
         }
         const submittedDate = s.submittedAt ? s.submittedAt.toDate().toLocaleDateString() : 'N/A';
-        html += ` <a href="#" class="list-group-item sponsorship-item">
-                    <h4 class="list-group-item-heading">Sponsor: ${s.sponsorName}</h4>
-                    <p class="list-group-item-text"><strong>Occasion:</strong> ${s.occasion}</p>
-                    <p class="list-group-item-text"><strong>For:</strong> ${itemTitle}</p>
-                    <p class="list-group-item-text"><strong>Contact:</strong> ${s.contactEmail || 'N/A'}</p>
-                    <p class="list-group-item-text"><strong>Submitted:</strong> ${submittedDate}</p>
-                    <div style="margin-top: 10px;">
-                        ${isPending ? `
-                            <button class="btn btn-success btn-xs" onclick="updateSponsorshipStatus('${doc.id}', 'approved')">Approve</button>
-                            <button class="btn btn-warning btn-xs" onclick="updateSponsorshipStatus('${doc.id}', 'rejected')">Reject</button>
-                        ` : `<span class="label label-success">Approved</span>`}
-                        <button class="btn btn-danger btn-xs" style="margin-left: 5px;" onclick="deleteSponsorship('${doc.id}')">Delete</button>
-                    </div>
-                </a>`;
+        
+        html += `
+            <tr>
+                <td><strong>${s.sponsorName}</strong></td>
+                <td>${s.occasion}</td>
+                <td>${itemTitle}</td>
+                <td>${s.contactEmail || '<em class="text-muted">N/A</em>'}</td>
+                <td>${submittedDate}</td>
+                ${isPending ? '<td><span class="label label-warning">Pending</span></td>' : ''}
+                <td class="sponsorship-actions">
+                    ${isPending ? `
+                        <button class="btn btn-success btn-xs" onclick="updateSponsorshipStatus('${doc.id}', 'approved')" title="Approve">
+                            <i class="glyphicon glyphicon-ok"></i> Approve
+                        </button>
+                        <button class="btn btn-warning btn-xs" onclick="updateSponsorshipStatus('${doc.id}', 'rejected')" title="Reject">
+                            <i class="glyphicon glyphicon-remove"></i> Reject
+                        </button>
+                    ` : `<span class="label label-success">Approved</span>`}
+                    <button class="btn btn-danger btn-xs" onclick="deleteSponsorship('${doc.id}')" title="Delete">
+                        <i class="glyphicon glyphicon-trash"></i> Delete
+                    </button>
+                </td>
+            </tr>`;
     });
+    
+    html += `
+                </tbody>
+            </table>
+        </div>`;
+    
     container.innerHTML = html;
 }
 
