@@ -50,108 +50,154 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 async function renderCalendar(container, configData) {
-    container.innerHTML = `<div class="page-header"><h2>${configData.title || "Kiddush Calendar"}</h2></div><div id="calendar-entries" class="list-group"><p class="list-group-item text-center">Loading sponsorships...</p></div>`;
+    const pageTitle = configData.title || "Kiddush Calendar";
+    let currentView = 'upcoming'; // 'upcoming' or 'past'
+    let unsubscribeSponsorshipsListener = null;
+
+    // 1. Set up the static HTML structure with a toggle button
+    container.innerHTML = `
+        <div class="page-header">
+            <h2 id="calendar-title">${pageTitle} - Upcoming</h2>
+        </div>
+        <div id="calendar-controls" class="text-right" style="margin-bottom: 15px;">
+            <button id="toggle-view-btn" class="btn btn-default">View Past Sponsorships</button>
+        </div>
+        <div id="calendar-entries" class="list-group">
+            <p class="list-group-item text-center">Loading...</p>
+        </div>
+    `;
+
     const entriesContainer = document.getElementById('calendar-entries');
-    const WEEKS_TO_SHOW = 12; // Show next 12 weeks
+    const calendarTitleEl = document.getElementById('calendar-title');
+    const toggleBtn = document.getElementById('toggle-view-btn');
 
-    // 1. Fetch all upcoming Shabbosim for the defined range
-    const upcomingShabbosimList = await getUpcomingShabbosim(WEEKS_TO_SHOW); // from parsha-service.js
-    // Fetch active custom sponsorable events
-    const customSponsorablesList = await getActiveCustomSponsorables(configData.userId); // New helper function
+    // 2. Function to display UPCOMING events (adapted from original logic)
+    const displayUpcoming = async () => {
+        if (unsubscribeSponsorshipsListener) unsubscribeSponsorshipsListener(); // Detach previous listener
+        entriesContainer.innerHTML = '<p class="list-group-item text-center">Loading upcoming events...</p>';
+        
+        const WEEKS_TO_SHOW = 12;
+        const [upcomingShabbosimList, customSponsorablesList] = await Promise.all([
+            getUpcomingShabbosim(WEEKS_TO_SHOW),
+            getActiveCustomSponsorables(configData.userId)
+        ]);
 
-    // 2. Combine and sort Shabbosim and Custom Events
-    let combinedSponsorableItems = [];
-
-    upcomingShabbosimList.forEach(shabbat => {
-        if (shabbat && shabbat.shabbatDate) { // Ensure shabbat object and date are valid
-            combinedSponsorableItems.push({
-                id: shabbat.shabbatDate, // Use shabbatDate as a unique key for shabbat items
-                type: 'shabbat',
-                title: shabbat.parsha,
-                date: shabbat.shabbatDate, // Primary date for sorting
-                displayDateInfo: shabbat.weekendOf,
-                startDate: shabbat.shabbatDate, // For consistent sorting property
-            });
-        }
-    });
-
-    customSponsorablesList.forEach(event => {
-        combinedSponsorableItems.push({
-            id: event.id, // Firestore document ID
-            type: 'custom',
-            title: event.title,
-            description: event.description,
-            date: event.startDate, // Primary date for sorting
-            displayDateInfo: `From ${new Date(event.startDate + "T00:00:00Z").toLocaleDateString()} to ${new Date(event.endDate + "T00:00:00Z").toLocaleDateString()}`,
-            startDate: event.startDate,
-            endDate: event.endDate
+        let combinedSponsorableItems = [];
+        upcomingShabbosimList.forEach(shabbat => {
+            if (shabbat && shabbat.shabbatDate) {
+                combinedSponsorableItems.push({ id: shabbat.shabbatDate, type: 'shabbat', title: shabbat.parsha, displayDateInfo: shabbat.weekendOf, startDate: shabbat.shabbatDate });
+            }
         });
-    });
+        customSponsorablesList.forEach(event => {
+            combinedSponsorableItems.push({ id: event.id, type: 'custom', title: event.title, description: event.description, displayDateInfo: `From ${new Date(event.startDate + "T00:00:00Z").toLocaleDateString()} to ${new Date(event.endDate + "T00:00:00Z").toLocaleDateString()}`, startDate: event.startDate });
+        });
+        combinedSponsorableItems.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
 
-    // Sort combined list by start date
-    combinedSponsorableItems.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
-
-    db.collection("sponsorships")
-        .where("status", "==", "approved")
-        .where("configOwnerId", "==", configData.userId) // Filter by the owner of this calendar configuration
-        .onSnapshot(async (querySnapshot) => {
-            let html = "";
-            
-            // Create a map of existing approved sponsorships for quick lookup
-            const approvedSponsorshipsMap = new Map();
-            querySnapshot.forEach(doc => {
-                const sponsorship = doc.data();
-                let key;
-                if (sponsorship.sponsorshipType === 'custom' && sponsorship.customSponsorableId) {
-                    key = sponsorship.customSponsorableId;
-                } else { // Default to shabbatDate for older entries or explicit shabbat type
-                    key = sponsorship.shabbatDate;
-                }
-
-                if (key) {
-                    if (!approvedSponsorshipsMap.has(key)) {
-                        approvedSponsorshipsMap.set(key, []);
+        unsubscribeSponsorshipsListener = db.collection("sponsorships")
+            .where("status", "==", "approved")
+            .where("configOwnerId", "==", configData.userId)
+            .onSnapshot(querySnapshot => {
+                const approvedSponsorshipsMap = new Map();
+                querySnapshot.forEach(doc => {
+                    const s = doc.data();
+                    const key = s.sponsorshipType === 'custom' ? s.customSponsorableId : s.shabbatDate;
+                    if (key) {
+                        if (!approvedSponsorshipsMap.has(key)) approvedSponsorshipsMap.set(key, []);
+                        approvedSponsorshipsMap.get(key).push(s);
                     }
-                    approvedSponsorshipsMap.get(key).push(sponsorship);
-                }
-            });
+                });
 
-            // Iterate through the combined list and display status
-            if (combinedSponsorableItems.length === 0) {
-                entriesContainer.innerHTML = '<a href="#" class="list-group-item">No upcoming events or Shabbosim found.</a>';
+                if (combinedSponsorableItems.length === 0) {
+                    entriesContainer.innerHTML = '<a href="#" class="list-group-item">No upcoming events or Shabbosim found.</a>';
+                    return;
+                }
+
+                const html = combinedSponsorableItems.map(item => {
+                    const sponsorsList = approvedSponsorshipsMap.get(item.id);
+                    let sponsorsHtml = `<p class="list-group-item-text" style="color: #c09853;"><strong>Open for Sponsorship</strong></p>`;
+                    if (sponsorsList && sponsorsList.length > 0) {
+                        const sponsorItems = sponsorsList.map(s => `<li>${s.sponsorName}${s.occasion ? ` - ${s.occasion}` : ''}</li>`).join('');
+                        sponsorsHtml = `<p class="list-group-item-text" style="color: green;"><strong>Sponsored by:</strong></p><ul class="list-unstyled" style="padding-left: 20px;">${sponsorItems}</ul>`;
+                    }
+                    const descriptionHtml = item.type === 'custom' && item.description ? `<p class="list-group-item-text text-muted"><small>${item.description}</small></p>` : '';
+                    return `
+                        <div class="list-group-item week-entry">
+                            <h4 class="list-group-item-heading">${item.title}</h4>
+                            <p class="list-group-item-text">${item.type === 'shabbat' ? 'Weekend of:' : 'Dates:'} ${item.displayDateInfo}</p>
+                            ${descriptionHtml}
+                            ${sponsorsHtml}
+                        </div>
+                    `;
+                }).join('');
+                entriesContainer.innerHTML = html || '<a href="#" class="list-group-item">No items to display.</a>';
+            }, error => {
+                console.error("Error fetching sponsorships:", error);
+                entriesContainer.innerHTML = '<a href="#" class="list-group-item list-group-item-danger">Error loading sponsorships.</a>';
+            });
+    };
+
+    // 3. Function to display PAST sponsorships
+    const displayPast = async () => {
+        if (unsubscribeSponsorshipsListener) unsubscribeSponsorshipsListener(); // Detach listener
+        entriesContainer.innerHTML = '<p class="list-group-item text-center">Loading past sponsorships...</p>';
+        const todayStr = new Date().toISOString().split('T')[0];
+
+        try {
+            // Due to the data model, we can only reliably query past Shabbat sponsorships.
+            const snapshot = await db.collection("sponsorships")
+                .where("configOwnerId", "==", configData.userId)
+                .where("status", "==", "approved")
+                .where("shabbatDate", "<", todayStr)
+                .orderBy("shabbatDate", "desc")
+                .limit(50) // Prevent loading excessive data
+                .get();
+            
+            if (snapshot.empty) {
+                entriesContainer.innerHTML = '<div class="list-group-item"><p>No past sponsorships found.</p></div>';
                 return;
             }
+            
+            const html = snapshot.docs.map(doc => {
+                const s = doc.data();
+                const shabbatDate = new Date(s.shabbatDate + 'T00:00:00Z');
+                const formattedDate = shabbatDate.toLocaleDateString('en-US', { timeZone: 'UTC', month: 'long', day: 'numeric', year: 'numeric' });
+                return `
+                    <div class="list-group-item">
+                        <h4 class="list-group-item-heading">${s.parsha || 'Kiddush'} - ${formattedDate}</h4>
+                        <p class="list-group-item-text"><strong>Sponsored by:</strong> ${s.sponsorName}</p>
+                        ${s.occasion ? `<p class="list-group-item-text"><strong>For:</strong> ${s.occasion}</p>` : ''}
+                    </div>
+                `;
+            }).join('');
+            
+            entriesContainer.innerHTML = html;
+        } catch (error) {
+            console.error("Error fetching past sponsorships:", error);
+            entriesContainer.innerHTML = '<div class="list-group-item list-group-item-danger">Could not load past sponsorships.</div>';
+        }
+    };
+    
+    // 4. Controller function to switch views
+    const updateView = () => {
+        if (currentView === 'upcoming') {
+            calendarTitleEl.textContent = `${pageTitle} - Upcoming`;
+            toggleBtn.textContent = 'View Past Sponsorships';
+            displayUpcoming();
+        } else {
+            calendarTitleEl.textContent = `${pageTitle} - Past`;
+            toggleBtn.textContent = 'View Upcoming Sponsorships';
+            displayPast();
+        }
+    };
 
-            combinedSponsorableItems.forEach(item => {
-                let sponsorsList;
-                // For shabbat type, item.id is shabbatDate. For custom type, item.id is customEvent.id.
-                sponsorsList = approvedSponsorshipsMap.get(item.id);
+    // 5. Add event listener to the button
+    toggleBtn.addEventListener('click', () => {
+        currentView = currentView === 'upcoming' ? 'past' : 'upcoming';
+        updateView();
+    });
 
-                html += `<div class="list-group-item week-entry">
-                            <h4 class="list-group-item-heading">${item.title} ${item.type === 'custom' ? '' : ''}</h4>
-                            <p class="list-group-item-text">${item.type === 'shabbat' ? 'Weekend of:' : 'Dates:'} ${item.displayDateInfo}</p>`;
-                if (item.type === 'custom' && item.description) {
-                    html += `<p class="list-group-item-text text-muted"><small>${item.description}</small></p>`;
-                }
-                
-                if (sponsorsList && sponsorsList.length > 0) {
-                    html += `<p class="list-group-item-text" style="color: green;"><strong>Sponsored by:</strong></p>
-                             <ul class="list-unstyled" style="padding-left: 20px;">`;
-                    sponsorsList.forEach(s => {
-                        html += `<li>${s.sponsorName}${s.occasion ? ` - ${s.occasion}` : ''}</li>`;
-                    });
-                    html += `</ul>`;
-                } else {
-                    html += `<p class="list-group-item-text" style="color: #c09853;"><strong>Open for Sponsorship</strong></p>`;
-                }
-                html += `</div>`;
-            });
-
-            entriesContainer.innerHTML = html || '<a href="#" class="list-group-item">No items to display.</a>';
-        }, (error) => {
-            console.error("Error fetching sponsorships for calendar:", error);
-            entriesContainer.innerHTML = '<a href="#" class="list-group-item list-group-item-danger">Error loading sponsorships.</a>';
-        });
+    // 6. Initial load
+    updateView();
 }
 
 async function renderForm(container, configData) {
@@ -159,6 +205,89 @@ async function renderForm(container, configData) {
     const allYearShabbosim = await getShabbosimForYear(); // from parsha-service.js
     // Fetch active custom sponsorable events for this config's owner
     const activeCustomEvents = await getActiveCustomSponsorables(configData.userId); // New helper function
+
+    const { paymentSettings } = configData;
+    const hasCardFull = paymentSettings?.card?.enabled && paymentSettings?.card?.fullKiddushPrice && paymentSettings?.card?.fullKiddushLink;
+    const hasCardHalf = paymentSettings?.card?.enabled && paymentSettings?.card?.halfKiddushPrice && paymentSettings?.card?.halfKiddushLink;
+    const hasCheckFull = paymentSettings?.check?.enabled && paymentSettings?.check?.fullAmount;
+    const hasCheckHalf = paymentSettings?.check?.enabled && paymentSettings?.check?.halfAmount;
+
+    let sponsorshipTypeOptionsHTML = '';
+    if (hasCardFull || hasCheckFull) {
+        sponsorshipTypeOptionsHTML += `
+            <label class="radio-inline">
+                <input type="radio" name="kiddushType" id="kiddushTypeFull" value="full" required> Full Sponsorship
+            </label>
+        `;
+    }
+    if (hasCardHalf || hasCheckHalf) {
+        sponsorshipTypeOptionsHTML += `
+            <label class="radio-inline">
+                <input type="radio" name="kiddushType" id="kiddushTypeHalf" value="half" required> Half Sponsorship
+            </label>
+        `;
+    }
+
+    let paymentMethodOptionsHTML = '';
+    const canPayByCard = paymentSettings?.card?.enabled && (paymentSettings?.card?.fullKiddushLink || paymentSettings?.card?.halfKiddushLink);
+    const canPayByCheck = paymentSettings?.check?.enabled && paymentSettings?.check?.payableTo;
+
+    if (canPayByCard) {
+        paymentMethodOptionsHTML += `
+            <label class="radio-inline">
+                <input type="radio" name="paymentMethod" id="paymentMethodCard" value="card" required> Pay by Card
+            </label>`;
+    }
+    if (canPayByCheck) {
+        paymentMethodOptionsHTML += `
+            <label class="radio-inline">
+                <input type="radio" name="paymentMethod" id="paymentMethodCheck" value="check" required> Pay by Check
+            </label>`;
+    }
+
+    const hasAnyPaymentOptions = sponsorshipTypeOptionsHTML && paymentMethodOptionsHTML;
+
+    let paymentSectionHTML = '';
+    if (hasAnyPaymentOptions) {
+        paymentSectionHTML = `
+            <div class="form-group">
+                <label>Sponsorship Type:</label>
+                <div>${sponsorshipTypeOptionsHTML}</div>
+            </div>
+            <div class="form-group">
+                <label>Payment Method:</label>
+                <div>${paymentMethodOptionsHTML}</div>
+            </div>
+        `;
+    } else {
+        // Fallback for when no payment options are configured, but the form is active.
+        paymentSectionHTML = `
+            <div class="panel panel-info">
+                <div class="panel-heading"><h3 class="panel-title">Payment Information</h3></div>
+                <div class="panel-body">
+                    <p>After submitting, please contact the office to arrange for payment for your sponsorship.</p>
+                </div>
+            </div>`;
+    }
+
+    const checkInstructionsHTML = (canPayByCheck && paymentSettings?.check?.payableTo) ? `
+        <div id="check-payment-info" class="panel panel-default" style="display:none; margin-top:20px;">
+            <div class="panel-heading"><h5 class="panel-title">Payment by Check Instructions</h5></div>
+            <div class="panel-body">
+                <p>Please make checks payable to: <strong>${paymentSettings.check.payableTo}</strong>.</p>
+                <div id="check-amount-info-full" style="display:none;">
+                    <p>For a full sponsorship, the amount is: <strong>$${paymentSettings.check.fullAmount}</strong>.</p>
+                </div>
+                <div id="check-amount-info-half" style="display:none;">
+                     <p>For a half (co-sponsored) sponsorship, the amount is: <strong>$${paymentSettings.check.halfAmount}</strong>.</p>
+                </div>
+                <p>You can mail or drop off the check at the office.</p>
+                <hr>
+                <p class="text-success"><strong>Your sponsorship has been submitted for review. Please complete payment to finalize.</strong></p>
+            </div>
+        </div>
+    ` : '';
+
 
     let sponsorableOptionsHTML = '<option value="">Select an Event or Parsha/Shabbos</option>';
 
@@ -223,49 +352,14 @@ async function renderForm(container, configData) {
                 <label for="contactEmail">Contact Email:</label>
                 <input type="email" class="form-control" id="contactEmail" name="contactEmail" required>
             </div>
-            <button type="submit" class="btn btn-primary">Submit Sponsorship</button>
+            
+            <!-- Dynamically generated payment selection -->
+            ${paymentSectionHTML}
 
-            <!-- Payment Options Display -->
-            ${configData.paymentSettings ? `
-            <div id="payment-options-display" style="margin-top: 20px;">
-                <p class="alert alert-info"><small><strong>Important:</strong> Please ensure payment arrangements are completed as per the options below for your sponsorship to be approved. If paying online, complete the payment after submitting this form.</small></p>
-                <h4>Payment Information</h4>
-                ${configData.paymentSettings.check && configData.paymentSettings.check.enabled ? `
-                    <div class="panel panel-default">
-                        <div class="panel-heading"><h5 class="panel-title">Pay by Check</h5></div>
-                        <div class="panel-body">
-                            <p>Please make checks payable to: <strong>${configData.paymentSettings.check.payableTo}</strong>.</p>
-                            ${configData.paymentSettings.check.fullAmount ? `<p>For a full sponsorship, the amount is: <strong>$${configData.paymentSettings.check.fullAmount}</strong>.</p>` : ''}
-                            ${configData.paymentSettings.check.halfAmount ? `<p>For a half (co-sponsored) sponsorship, the amount is: <strong>$${configData.paymentSettings.check.halfAmount}</strong>.</p>` : ''}
-                            ${!(configData.paymentSettings.check.fullAmount || configData.paymentSettings.check.halfAmount) ? '<p>Please contact us for the check amount.</p>' : ''}
-                            <p>You can mail or drop off the check at the office.</p>
-                        </div>
-                    </div>
-                ` : ''}
-                ${configData.paymentSettings.card && configData.paymentSettings.card.enabled ? `
-                    <div class="panel panel-default">
-                        <div class="panel-heading"><h5 class="panel-title">Pay by Credit/Debit Card</h5></div>
-                        <div class="panel-body">
-                            ${configData.paymentSettings.card.fullKiddushPrice && configData.paymentSettings.card.fullKiddushLink ?
-                                `<p><a href="${configData.paymentSettings.card.fullKiddushLink}" target="_blank" rel="noopener noreferrer" class="btn btn-info">Pay for Full Kiddush ($${configData.paymentSettings.card.fullKiddushPrice})</a></p>` : ''}
-                            ${configData.paymentSettings.card.halfKiddushPrice && configData.paymentSettings.card.halfKiddushLink ?
-                                `<p style="margin-top:10px;"><a href="${configData.paymentSettings.card.halfKiddushLink}" target="_blank" rel="noopener noreferrer" class="btn btn-info">Pay for Half Kiddush ($${configData.paymentSettings.card.halfKiddushPrice})</a></p>` : ''}
-                            <p style="margin-top:10px;"><small>You will be redirected to a secure payment page.</small></p>
-                        </div>
-                    </div>
-                ` : ''}
-                ${configData.paymentSettings.misc && configData.paymentSettings.misc.enabled ? `
-                     <div class="panel panel-default">
-                        <div class="panel-heading"><h5 class="panel-title">${configData.paymentSettings.misc.title || 'Other Payment Options'}</h5></div>
-                        <div class="panel-body">
-                            <p>${configData.paymentSettings.misc.instructions || 'Please contact us for details.'}</p>
-                        </div>
-                    </div>
-                ` : ''}
-            </div>
-            ` : ''}
+            <button type="submit" class="btn btn-primary">Submit Sponsorship</button>
         </form>
         <div id="form-message" class="alert" style="margin-top: 15px; display: none;"></div>
+        ${checkInstructionsHTML}
     `;
 
     const shabbosSelect = document.getElementById('shabbos-select');
@@ -325,6 +419,9 @@ async function renderForm(container, configData) {
         const sponsorshipForm = e.target;
         const formMessage = document.getElementById('form-message');
         formMessage.textContent = "Submitting...";
+        // Hide check info panel during resubmission
+        const checkInfoPanel = document.getElementById('check-payment-info');
+        if(checkInfoPanel) checkInfoPanel.style.display = 'none';
         formMessage.className = 'alert alert-info';
         formMessage.style.display = 'block';
 
@@ -342,8 +439,12 @@ async function renderForm(container, configData) {
             return;
         }
 
+        const selectedKiddushType = sponsorshipForm.kiddushType ? sponsorshipForm.kiddushType.value : null;
+        const selectedPaymentMethod = sponsorshipForm.paymentMethod ? sponsorshipForm.paymentMethod.value : null;
+
         let emailSubjectDetails = "";
-        let emailBodyDetails = "";
+        let paymentLink = '';
+
 
         try {
             const sponsorshipData = {
@@ -353,10 +454,10 @@ async function renderForm(container, configData) {
                 sponsorshipType: sponsorshipType,
                 submittedAt: firebase.firestore.FieldValue.serverTimestamp(),
                 status: "pending",
-                configOwnerId: configData.userId, // Store the userId of the configuration owner
-                formTitle: configData.title || "Kiddush Sponsorship Form" // Store form title for email context
-                // We are not capturing which payment method they *intend* to use on this form yet.
-                // This version just displays the options. Capturing selection would be a next step.
+                configOwnerId: configData.userId, 
+                formTitle: configData.title || "Kiddush Sponsorship Form",
+                paymentMethod: selectedPaymentMethod,
+                kiddushType: selectedKiddushType
             };
 
             if (sponsorshipType === 'shabbat') {
@@ -383,7 +484,7 @@ async function renderForm(container, configData) {
                 emailSubjectDetails = `${sponsorshipData.sponsorName} for ${sponsorshipData.customSponsorableTitle}`;
             }
 
-            await db.collection("sponsorships").add(sponsorshipData);
+            const docRef = await db.collection("sponsorships").add(sponsorshipData);
 
             if (configData.notificationEmail) {
                 const formDataForEmail = new FormData();
@@ -393,8 +494,8 @@ async function renderForm(container, configData) {
                 formDataForEmail.append('Sponsor Name', sponsorshipData.sponsorName);
                 formDataForEmail.append('Occasion', sponsorshipData.occasion);
                 formDataForEmail.append('Contact Email', sponsorshipData.contactEmail);
-                formDataForEmail.append('Parsha', sponsorshipData.parsha);
-                formDataForEmail.append('Shabbat Date', sponsorshipData.shabbatDate);
+                formDataForEmail.append('Payment Method', sponsorshipData.paymentMethod);
+                formDataForEmail.append('Kiddush Type', sponsorshipData.kiddushType);
                 formDataForEmail.append('Status', 'Pending Review');
                 if (sponsorshipType === 'shabbat') {
                     formDataForEmail.append('Item Sponsored', `Parsha: ${sponsorshipData.parsha} (Date: ${sponsorshipData.shabbatDate})`);
@@ -417,15 +518,49 @@ async function renderForm(container, configData) {
                 .then(text => console.log('FormSubmit response text:', text))
                 .catch(error => console.error('FormSubmit fetch/network error:', error));
             }
-            formMessage.textContent = "Sponsorship submitted for review! Thank you.";
-            formMessage.className = 'alert alert-success';
+            
+            // PAYMENT REDIRECT/DISPLAY LOGIC
+            sponsorshipForm.style.display = 'none'; // Hide form on success
+            formMessage.style.display = 'none'; // Hide initial "submitting" message
+
+            if (selectedPaymentMethod === 'card') {
+                if (selectedKiddushType === 'full') {
+                    paymentLink = configData.paymentSettings?.card?.fullKiddushLink;
+                } else if (selectedKiddushType === 'half') {
+                    paymentLink = configData.paymentSettings?.card?.halfKiddushLink;
+                }
+
+                if (paymentLink) {
+                    // Display a final message and then redirect
+                    formMessage.textContent = "Sponsorship submitted! Redirecting to payment page...";
+                    formMessage.className = 'alert alert-success';
+                    formMessage.style.display = 'block';
+                    setTimeout(() => {
+                        window.location.href = paymentLink;
+                    }, 3000); // 3-second delay
+                } else {
+                     formMessage.textContent = "Sponsorship submitted! However, the payment link is not configured. Please contact support.";
+                     formMessage.className = 'alert alert-warning';
+                     formMessage.style.display = 'block';
+                }
+            } else if (selectedPaymentMethod === 'check') {
+                // Show the check payment info panel
+                if(checkInfoPanel) {
+                    checkInfoPanel.style.display = 'block';
+                    const fullAmountInfo = document.getElementById('check-amount-info-full');
+                    const halfAmountInfo = document.getElementById('check-amount-info-half');
+                    if(fullAmountInfo) fullAmountInfo.style.display = selectedKiddushType === 'full' ? 'block' : 'none';
+                    if(halfAmountInfo) halfAmountInfo.style.display = selectedKiddushType === 'half' ? 'block' : 'none';
+                }
+            } else {
+                // Fallback for no payment options configured
+                formMessage.textContent = "Sponsorship submitted for review! Please contact the office to arrange payment. Thank you.";
+                formMessage.className = 'alert alert-success';
+                formMessage.style.display = 'block';
+            }
+
+            // Don't reset the form, as it's now hidden
             sponsorshipForm.reset();
-            if(formShabbatDateInput) formShabbatDateInput.value = ''; // Clear hidden fields
-            if(formParshaInput) formParshaInput.value = '';
-            if(formSponsorshipTypeInput) formSponsorshipTypeInput.value = '';
-            if(formCustomEventIdInput) formCustomEventIdInput.value = '';
-            if(formCustomEventTitleInput) formCustomEventTitleInput.value = '';
-            selectedShabbosInfoPanel.style.display = 'none'; // Hide info panel
         } catch (error) {
             console.error("Error submitting sponsorship from public form: ", error);
             formMessage.textContent = "Submission failed. Please try again or contact support.";
