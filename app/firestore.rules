@@ -1,0 +1,70 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /configurations/{configId} {
+      // Allow public read for public-display.html to fetch config details
+      allow read: if true;
+      // Allow create if user is authenticated and the userId in the new document matches their uid
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      // Allow update and delete only if user is authenticated and owns the document
+      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+
+    match /sponsorships/{sponsorshipId} {
+      // Allow public to create 'pending' sponsorships.
+      // Allow authenticated admin to create sponsorships linked to their UID (can be 'approved' or 'pending').
+      allow create: if
+          // Case 1: Unauthenticated public form submission
+          (
+            request.auth == null &&
+            request.resource.data.status == 'pending' &&
+            request.resource.data.configOwnerId is string && // Ensures configOwnerId is provided by the form
+            !('reservedByAdmin' in request.resource.data) && // Public cannot set admin-only fields
+            // Validate essential fields for public submission
+            request.resource.data.sponsorName is string &&
+            request.resource.data.occasion is string &&
+            request.resource.data.contactEmail is string &&
+            ( // Sponsorship type specific fields
+              (request.resource.data.sponsorshipType == 'shabbat' &&
+               request.resource.data.shabbatDate is string &&
+               request.resource.data.parsha is string) ||
+              (request.resource.data.sponsorshipType == 'custom' &&
+               request.resource.data.customSponsorableId is string &&
+               request.resource.data.customSponsorableTitle is string)
+            )
+          ) ||
+          // Case 2: Authenticated admin creating a sponsorship
+          (
+            request.auth != null &&
+            request.resource.data.configOwnerId == request.auth.uid &&
+            // Admin can create either shabbat or custom type
+            (request.resource.data.sponsorshipType == 'shabbat' || request.resource.data.sponsorshipType == 'custom')
+            // Admin can set status to 'approved' or 'pending', and can set 'reservedByAdmin'
+          );
+
+      // Allow public read for 'approved' sponsorships (for public-display.js).
+      // Allow authenticated admin to read sponsorships linked to their UID (for admin.js).
+      allow read: if resource.data.status == 'approved' || (request.auth != null && resource.data.configOwnerId == request.auth.uid);
+      // Allow authenticated admin to update or delete sponsorships linked to their UID.
+      allow update, delete: if request.auth != null && resource.data.configOwnerId == request.auth.uid;
+    }
+
+    // Rules for customSponsorables
+    match /customSponsorables/{eventId} {
+      // Allow create if the user is authenticated and the userId in the document matches their uid
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      // Allow public read for display purposes. Admins can still only update/delete their own.
+      allow read: if true;
+      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+        // Rules for the 'people' collection, managed by admins.
+    match /people/{personId} {
+      // Allow create only if the user is authenticated and they are setting themselves as the owner.
+      // This is for admins manually adding people through the admin panel.
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      // Allow read, update, and delete only if the user is authenticated and owns the person document.
+      allow read, update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+  }
+}

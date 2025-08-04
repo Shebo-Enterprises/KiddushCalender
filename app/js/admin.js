@@ -4,6 +4,10 @@ const configurationsListDiv = document.getElementById('configurations-list');
 const createConfigForm = document.getElementById('create-config-form');
 const pendingSponsorshipsListDiv = document.getElementById('pending-sponsorships-list');
 const approvedSponsorshipsListDiv = document.getElementById('approved-sponsorships-list');
+const peopleListDiv = document.getElementById('people-list');
+const peopleSearchInput = document.getElementById('people-search');
+const peopleFilterSelect = document.getElementById('people-filter');
+const addPersonBtn = document.getElementById('add-person-btn');
 const adminReserveKiddushForm = document.getElementById('admin-reserve-kiddush-form');
 const adminShabbosSelect = document.getElementById('admin-shabbos-select');
 const adminSelectedShabbosInfoDiv = document.getElementById('admin-selected-shabbos-info');
@@ -37,9 +41,11 @@ function loadAdminData() {
     loadCustomEvents(); // Load custom sponsorable events
     populateAdminShabbosSelector(); // Populate the Parsha selector for admin reservation
     loadSponsorships();
+    loadPeople(); // Load people management
     populateAdminCustomEventSelector(); // Populate custom events for admin reservation
     resetConfigForm(); // Ensure form is in create mode initially
     initializeSidebarNavigation(); // Initialize sidebar navigation
+    initializePeopleManagement(); // Initialize people management functionality
 }
 
 // Sidebar Navigation Functionality
@@ -611,7 +617,15 @@ async function loadSponsorships() {
         db.collection("sponsorships").where("status", "==", "pending").orderBy("submittedAt", "desc")
             .where("configOwnerId", "==", currentUser.uid)
             .onSnapshot(snapshot => {
-                renderSponsorships(snapshot, pendingSponsorshipsListDiv, true);
+                // Filter out person documents
+                const filteredDocs = snapshot.docs.filter(doc => doc.data().type !== 'person');
+                const filteredSnapshot = {
+                    ...snapshot,
+                    docs: filteredDocs,
+                    empty: filteredDocs.length === 0,
+                    forEach: (callback) => filteredDocs.forEach(callback)
+                };
+                renderSponsorships(filteredSnapshot, pendingSponsorshipsListDiv, true);
             }, error => {
                 console.error("Error fetching pending sponsorships: ", error);
                 pendingSponsorshipsListDiv.innerHTML = '<div class="alert alert-danger">Error loading pending sponsorships.</div>';
@@ -630,7 +644,15 @@ async function loadSponsorships() {
             .orderBy("submittedAt", "desc") // Order by submission time; shabbatDate is not reliable for custom events
             .where("configOwnerId", "==", currentUser.uid)
             .onSnapshot(snapshot => {
-                renderSponsorships(snapshot, approvedSponsorshipsListDiv, false);
+                // Filter out person documents
+                const filteredDocs = snapshot.docs.filter(doc => doc.data().type !== 'person');
+                const filteredSnapshot = {
+                    ...snapshot,
+                    docs: filteredDocs,
+                    empty: filteredDocs.length === 0,
+                    forEach: (callback) => filteredDocs.forEach(callback)
+                };
+                renderSponsorships(filteredSnapshot, approvedSponsorshipsListDiv, false);
             }, error => {
                 console.error("Error fetching approved sponsorships: ", error);
                 approvedSponsorshipsListDiv.innerHTML = '<div class="alert alert-danger">Error loading approved sponsorships.</div>';
@@ -728,6 +750,563 @@ async function deleteSponsorship(sponsorshipId) {
             console.error("Error deleting sponsorship: ", error);
             alert('Error deleting sponsorship.');
         }
+    }
+}
+
+// People Management
+let allPeople = []; // Store all people data for filtering
+let filteredPeople = []; // Store currently filtered people for index references
+let allSponsorships = []; // Store all sponsorships for people aggregation
+
+function initializePeopleManagement() {
+    // Initialize search and filter functionality
+    if (peopleSearchInput) {
+        peopleSearchInput.addEventListener('input', filterAndRenderPeople);
+    }
+    if (peopleFilterSelect) {
+        peopleFilterSelect.addEventListener('change', filterAndRenderPeople);
+    }
+    
+    // Initialize add person button
+    if (addPersonBtn) {
+        addPersonBtn.addEventListener('click', openAddPersonModal);
+    }
+    
+    // Initialize modal event handlers
+    const editPersonBtn = document.getElementById('edit-person-btn');
+    const savePersonBtn = document.getElementById('save-person-btn');
+    const saveNewPersonBtn = document.getElementById('save-new-person-btn');
+    
+    if (editPersonBtn) {
+        editPersonBtn.addEventListener('click', openEditPersonModal);
+    }
+    
+    if (savePersonBtn) {
+        savePersonBtn.addEventListener('click', savePersonChanges);
+    }
+    
+    if (saveNewPersonBtn) {
+        saveNewPersonBtn.addEventListener('click', saveNewPerson);
+    }
+}
+
+async function loadPeople() {
+    if (!peopleListDiv) return;
+    peopleListDiv.innerHTML = '<div class="alert alert-info">Loading people...</div>';
+    
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+        peopleListDiv.innerHTML = '<div class="alert alert-warning">Please login to manage people.</div>';
+        return;
+    }
+
+    try {
+        // Load all sponsorships for this admin user
+        // Remove orderBy to avoid composite index requirement
+        const sponsorshipsSnapshot = await db.collection("sponsorships")
+            .where("configOwnerId", "==", currentUser.uid)
+            .get();
+        
+        allSponsorships = [];
+        sponsorshipsSnapshot.forEach(doc => {
+            const data = doc.data();
+            // Only include actual sponsorships, not person documents
+            if (data.type !== 'person') {
+                allSponsorships.push({ id: doc.id, ...data });
+            }
+        });
+        
+        // Sort sponsorships by submission date (newest first) on client side
+        allSponsorships.sort((a, b) => {
+            if (!a.submittedAt && !b.submittedAt) return 0;
+            if (!a.submittedAt) return 1;
+            if (!b.submittedAt) return -1;
+            return b.submittedAt.toDate() - a.submittedAt.toDate();
+        });
+
+        // Aggregate people from sponsorships
+        const peopleMap = new Map();
+        
+        allSponsorships.forEach(sponsorship => {
+            const email = sponsorship.contactEmail?.toLowerCase().trim();
+            const name = sponsorship.sponsorName?.trim();
+            
+            if (!email && !name) return; // Skip if no identifying information
+            
+            // Use email as primary key, fallback to name if no email
+            const key = email || name.toLowerCase();
+            
+            if (!peopleMap.has(key)) {
+                peopleMap.set(key, {
+                    email: email || '',
+                    name: name || 'Unknown',
+                    phone: '',
+                    notes: '',
+                    sponsorships: [],
+                    totalSponsorships: 0,
+                    pendingSponsorships: 0,
+                    approvedSponsorships: 0,
+                    lastSponsorshipDate: null
+                });
+            }
+            
+            const person = peopleMap.get(key);
+            person.sponsorships.push(sponsorship);
+            person.totalSponsorships++;
+            
+            if (sponsorship.status === 'pending') {
+                person.pendingSponsorships++;
+            } else if (sponsorship.status === 'approved') {
+                person.approvedSponsorships++;
+            }
+            
+            // Update last sponsorship date
+            if (sponsorship.submittedAt) {
+                const sponsorshipDate = sponsorship.submittedAt.toDate();
+                if (!person.lastSponsorshipDate || sponsorshipDate > person.lastSponsorshipDate) {
+                    person.lastSponsorshipDate = sponsorshipDate;
+                }
+            }
+            
+            // Update name if current sponsorship has a name and stored person doesn't
+            if (name && (!person.name || person.name === 'Unknown')) {
+                person.name = name;
+            }
+        });
+
+        // Load manually added people from sponsorships collection (stored with type: 'person')
+        try {
+            const peopleSnapshot = await db.collection("sponsorships")
+                .where("configOwnerId", "==", currentUser.uid)
+                .where("type", "==", "person")
+                .get();
+            
+            peopleSnapshot.forEach(doc => {
+                const personData = doc.data();
+                const key = personData.email?.toLowerCase().trim() || personData.name?.toLowerCase().trim();
+                
+                if (key && peopleMap.has(key)) {
+                    // Update existing person with additional data
+                    const person = peopleMap.get(key);
+                    person.phone = personData.phone || person.phone;
+                    person.notes = personData.notes || person.notes;
+                    person.personDocId = doc.id;
+                    if (personData.email && !person.email) {
+                        person.email = personData.email;
+                    }
+                } else if (key) {
+                    // Add manually created person who has no sponsorships yet
+                    peopleMap.set(key, {
+                        email: personData.email || '',
+                        name: personData.name || 'Unknown',
+                        phone: personData.phone || '',
+                        notes: personData.notes || '',
+                        sponsorships: [],
+                        totalSponsorships: 0,
+                        pendingSponsorships: 0,
+                        approvedSponsorships: 0,
+                        lastSponsorshipDate: null,
+                        personDocId: doc.id,
+                        isManuallyAdded: true
+                    });
+                }
+            });
+        } catch (error) {
+            console.log("People collection doesn't exist yet or error loading:", error);
+        }
+
+        allPeople = Array.from(peopleMap.values());
+        filterAndRenderPeople();
+        
+    } catch (error) {
+        console.error("Error loading people: ", error);
+        peopleListDiv.innerHTML = '<div class="alert alert-danger">Error loading people.</div>';
+    }
+}
+
+function filterAndRenderPeople() {
+    if (!peopleListDiv) return;
+    
+    filteredPeople = [...allPeople];
+    
+    // Apply search filter
+    const searchTerm = peopleSearchInput?.value.toLowerCase().trim() || '';
+    if (searchTerm) {
+        filteredPeople = filteredPeople.filter(person => 
+            person.name.toLowerCase().includes(searchTerm) ||
+            person.email.toLowerCase().includes(searchTerm)
+        );
+    }
+    
+    // Apply status filter
+    const statusFilter = peopleFilterSelect?.value || 'all';
+    if (statusFilter === 'active') {
+        filteredPeople = filteredPeople.filter(person => person.approvedSponsorships > 0);
+    } else if (statusFilter === 'pending') {
+        filteredPeople = filteredPeople.filter(person => person.pendingSponsorships > 0);
+    } else if (statusFilter === 'manual') {
+        filteredPeople = filteredPeople.filter(person => person.isManuallyAdded && person.totalSponsorships === 0);
+    }
+    
+    renderPeopleTable(filteredPeople);
+}
+
+function renderPeopleTable(people) {
+    if (!peopleListDiv) return;
+    
+    if (people.length === 0) {
+        peopleListDiv.innerHTML = '<div class="alert alert-info">No people found matching your criteria.</div>';
+        return;
+    }
+    
+    let html = `
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered people-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Total Sponsorships</th>
+                        <th>Pending</th>
+                        <th>Approved</th>
+                        <th>Last Sponsorship</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+    
+    people.forEach((person, index) => {
+        const lastSponsorshipText = person.lastSponsorshipDate 
+            ? person.lastSponsorshipDate.toLocaleDateString()
+            : 'Never';
+        
+        // Use index instead of name/email to avoid special character issues
+        const personIndex = index;
+            
+        html += `
+            <tr>
+                <td><strong><a href="#" onclick="showPersonDetailsByIndex(${personIndex})" style="text-decoration: none;">${person.name}</a></strong></td>
+                <td>${person.email || '<em class="text-muted">No email</em>'}</td>
+                <td><span class="badge">${person.totalSponsorships}</span></td>
+                <td><span class="badge badge-warning">${person.pendingSponsorships}</span></td>
+                <td><span class="badge badge-success">${person.approvedSponsorships}</span></td>
+                <td>${lastSponsorshipText}</td>
+                <td class="people-actions">
+                    <button class="btn btn-info btn-xs" onclick="showPersonDetailsByIndex(${personIndex})" title="View Details">
+                        <i class="glyphicon glyphicon-eye-open"></i> View
+                    </button>
+                    <button class="btn btn-primary btn-xs" onclick="editPersonByIndex(${personIndex})" title="Edit">
+                        <i class="glyphicon glyphicon-edit"></i> Edit
+                    </button>
+                    <button class="btn btn-danger btn-xs" onclick="deletePersonByIndex(${personIndex})" title="Delete Person">
+                        <i class="glyphicon glyphicon-trash"></i> Delete
+                    </button>
+                </td>
+            </tr>`;
+    });
+    
+    html += `
+                </tbody>
+            </table>
+        </div>`;
+    
+    peopleListDiv.innerHTML = html;
+}
+
+// Helper functions using index to avoid special character issues
+function showPersonDetailsByIndex(index) {
+    const person = filteredPeople[index];
+    if (!person) {
+        alert('Person not found');
+        return;
+    }
+    showPersonDetails(person);
+}
+
+function editPersonByIndex(index) {
+    const person = filteredPeople[index];
+    if (!person) {
+        alert('Person not found');
+        return;
+    }
+    editPerson(person);
+}
+
+function deletePersonByIndex(index) {
+    const person = filteredPeople[index];
+    if (!person) {
+        alert('Person not found');
+        return;
+    }
+    deletePerson(person);
+}
+
+function showPersonDetails(person) {
+    
+    let html = `
+        <div class="row">
+            <div class="col-md-6">
+                <h4>Personal Information</h4>
+                <p><strong>Name:</strong> ${person.name}</p>
+                <p><strong>Email:</strong> ${person.email || '<em class="text-muted">Not provided</em>'}</p>
+                <p><strong>Phone:</strong> ${person.phone || '<em class="text-muted">Not provided</em>'}</p>
+                ${person.notes ? `<p><strong>Notes:</strong> ${person.notes}</p>` : ''}
+            </div>
+            <div class="col-md-6">
+                <h4>Sponsorship Summary</h4>
+                <p><strong>Total Sponsorships:</strong> ${person.totalSponsorships}</p>
+                <p><strong>Approved:</strong> <span class="text-success">${person.approvedSponsorships}</span></p>
+                <p><strong>Pending:</strong> <span class="text-warning">${person.pendingSponsorships}</span></p>
+                <p><strong>Last Sponsorship:</strong> ${person.lastSponsorshipDate ? person.lastSponsorshipDate.toLocaleDateString() : 'Never'}</p>
+            </div>
+        </div>
+        <hr>
+        <h4>Sponsorship History</h4>`;
+    
+    if (person.sponsorships.length === 0) {
+        html += '<p class="text-muted">No sponsorships found.</p>';
+    } else {
+        person.sponsorships.forEach(sponsorship => {
+            let itemTitle = '';
+            if (sponsorship.sponsorshipType === 'custom' && sponsorship.customSponsorableTitle) {
+                itemTitle = `Custom Event: ${sponsorship.customSponsorableTitle}`;
+            } else {
+                itemTitle = `Parsha: ${sponsorship.parsha} (${sponsorship.shabbatDate})`;
+            }
+            
+            const submittedDate = sponsorship.submittedAt ? sponsorship.submittedAt.toDate().toLocaleDateString() : 'Unknown';
+            
+            html += `
+                <div class="sponsorship-history-item ${sponsorship.status}">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h5>${sponsorship.occasion}</h5>
+                            <p><strong>For:</strong> ${itemTitle}</p>
+                            <p><strong>Submitted:</strong> ${submittedDate}</p>
+                        </div>
+                        <div class="col-md-4 text-right">
+                            <span class="label label-${sponsorship.status === 'approved' ? 'success' : sponsorship.status === 'pending' ? 'warning' : 'danger'}">${sponsorship.status.toUpperCase()}</span>
+                        </div>
+                    </div>
+                </div>`;
+        });
+    }
+    
+    document.getElementById('person-detail-content').innerHTML = html;
+    document.getElementById('personDetailModalLabel').textContent = `${person.name} - Details`;
+    
+    // Store current person for editing
+    window.currentPersonForEdit = person;
+    
+    $('#personDetailModal').modal('show');
+}
+
+function editPerson(person) {
+    
+    // Store current person for editing
+    window.currentPersonForEdit = person;
+    
+    // Populate edit form
+    document.getElementById('edit-person-email').value = person.email || '';
+    document.getElementById('edit-person-name').value = person.name || '';
+    document.getElementById('edit-person-email-field').value = person.email || '';
+    document.getElementById('edit-person-phone').value = person.phone || '';
+    document.getElementById('edit-person-notes').value = person.notes || '';
+    
+    document.getElementById('editPersonModalLabel').textContent = `Edit ${person.name}`;
+    
+    $('#editPersonModal').modal('show');
+}
+
+function openEditPersonModal() {
+    if (window.currentPersonForEdit) {
+        $('#personDetailModal').modal('hide');
+        setTimeout(() => {
+            editPerson(window.currentPersonForEdit);
+        }, 300);
+    }
+}
+
+async function savePersonChanges() {
+    if (!window.currentPersonForEdit) {
+        alert('No person selected for editing');
+        return;
+    }
+    
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+        alert('You must be logged in to save changes');
+        return;
+    }
+    
+    const person = window.currentPersonForEdit;
+    const updatedData = {
+        email: document.getElementById('edit-person-email-field').value.trim(),
+        name: document.getElementById('edit-person-name').value.trim(),
+        phone: document.getElementById('edit-person-phone').value.trim(),
+        notes: document.getElementById('edit-person-notes').value.trim(),
+        configOwnerId: currentUser.uid,
+        lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    
+    if (!updatedData.name) {
+        alert('Name is required');
+        return;
+    }
+    
+    try {
+        // Save to sponsorships collection
+        if (person.personDocId) {
+            // Update existing document
+            await db.collection("sponsorships").doc(person.personDocId).update(updatedData);
+        } else {
+            // Create new document
+            const docRef = await db.collection("sponsorships").add({
+                ...updatedData,
+                type: 'person',
+                status: 'manual',
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            person.personDocId = docRef.id;
+        }
+        
+        // Update local data
+        person.name = updatedData.name;
+        person.email = updatedData.email;
+        person.phone = updatedData.phone;
+        person.notes = updatedData.notes;
+        
+        $('#editPersonModal').modal('hide');
+        alert('Person updated successfully!');
+        
+        // Refresh the people list
+        filterAndRenderPeople();
+        
+    } catch (error) {
+        console.error("Error saving person: ", error);
+        alert('Error saving person. Please try again.');
+    }
+}
+
+function openAddPersonModal() {
+    // Clear the form
+    document.getElementById('add-person-name').value = '';
+    document.getElementById('add-person-email').value = '';
+    document.getElementById('add-person-phone').value = '';
+    document.getElementById('add-person-notes').value = '';
+    
+    $('#addPersonModal').modal('show');
+}
+
+async function saveNewPerson() {
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+        alert('You must be logged in to add a person');
+        return;
+    }
+    
+    const name = document.getElementById('add-person-name').value.trim();
+    const email = document.getElementById('add-person-email').value.trim();
+    const phone = document.getElementById('add-person-phone').value.trim();
+    const notes = document.getElementById('add-person-notes').value.trim();
+    
+    if (!name) {
+        alert('Name is required');
+        return;
+    }
+    
+    // Check if person already exists
+    const existingPerson = allPeople.find(p => 
+        (email && p.email && p.email.toLowerCase() === email.toLowerCase()) ||
+        (p.name && p.name.toLowerCase() === name.toLowerCase())
+    );
+    
+    if (existingPerson) {
+        alert('A person with this name or email already exists');
+        return;
+    }
+    
+    const personData = {
+        name,
+        email,
+        phone,
+        notes,
+        configOwnerId: currentUser.uid,
+        userId: currentUser.uid,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        isManuallyAdded: true,
+        type: 'person', // Special type to distinguish from sponsorships
+        status: 'manual' // Use status field like sponsorships
+    };
+    
+    try {
+        // Store in sponsorships collection with special type to reuse existing permissions
+        const docRef = await db.collection("sponsorships").add(personData);
+        
+        // Add to local data
+        const newPerson = {
+            email: email || '',
+            name: name,
+            phone: phone || '',
+            notes: notes || '',
+            sponsorships: [],
+            totalSponsorships: 0,
+            pendingSponsorships: 0,
+            approvedSponsorships: 0,
+            lastSponsorshipDate: null,
+            personDocId: docRef.id,
+            isManuallyAdded: true
+        };
+        
+        allPeople.push(newPerson);
+        
+        $('#addPersonModal').modal('hide');
+        alert('Person added successfully!');
+        
+        // Refresh the people list
+        filterAndRenderPeople();
+        
+    } catch (error) {
+        console.error("Error adding person: ", error);
+        alert('Error adding person. Please try again.');
+    }
+}
+
+async function deletePerson(person) {
+    if (!person.personDocId) {
+        alert('Cannot delete this person - no database record found');
+        return;
+    }
+    
+    const hasSponsorship = person.totalSponsorships > 0;
+    let confirmMessage = `Are you sure you want to delete ${person.name}?`;
+    
+    if (hasSponsorship) {
+        confirmMessage += `\n\nWarning: This person has ${person.totalSponsorships} sponsorship(s). Deleting them will not remove their sponsorships, but you will lose their contact information and notes.`;
+    }
+    
+    if (!confirm(confirmMessage)) {
+        return;
+    }
+    
+    try {
+        // Delete from sponsorships collection
+        await db.collection("sponsorships").doc(person.personDocId).delete();
+        
+        // Remove from local data
+        const index = allPeople.findIndex(p => p.personDocId === person.personDocId);
+        if (index > -1) {
+            allPeople.splice(index, 1);
+        }
+        
+        alert('Person deleted successfully!');
+        
+        // Refresh the people list
+        filterAndRenderPeople();
+        
+    } catch (error) {
+        console.error("Error deleting person: ", error);
+        alert('Error deleting person. Please try again.');
     }
 }
 
