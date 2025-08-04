@@ -351,6 +351,7 @@ async function renderForm(container, configData) {
             <div class="form-group">
                 <label for="contactEmail">Contact Email:</label>
                 <input type="email" class="form-control" id="contactEmail" name="contactEmail" required>
+                    <p class="help-block">If you have sponsored before, please use the same email address to link your sponsorships.</p>
             </div>
             
             <!-- Dynamically generated payment selection -->
