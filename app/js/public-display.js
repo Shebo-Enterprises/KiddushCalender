@@ -603,7 +603,7 @@ async function renderForm(container, configData) {
 
                 if (paymentLink) {
                     // Display a final message and then redirect
-                    formMessage.textContent = "Sponsorship submitted! Redirecting to payment page...";
+                    formMessage.textContent = "CARD PROCESSING LOADING. THIS MAY TAKE A MOMENT.";
                     formMessage.className = 'alert alert-success';
                     formMessage.style.display = 'block';
                     setTimeout(() => {
