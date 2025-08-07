@@ -129,6 +129,23 @@ function generatePaymentDetailsHtml(config) {
     }
     return paymentHtml;
 }
+
+// Helper function to generate HTML for displaying display settings
+function generateDisplaySettingsHtml(config) {
+    if (!config.displaySettings) return '';
+    const { color, font } = config.displaySettings;
+    let html = '<div class="display-settings-details" style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #eee;">';
+    html += '<p style="margin-bottom: 5px;"><small><strong>Display Customization:</strong></small></p>';
+    if (color) {
+        html += `<p style="margin-bottom: 3px; padding-left: 15px;"><small>Primary Color: <span style="display: inline-block; width: 15px; height: 15px; background-color: ${color}; border: 1px solid #ccc; vertical-align: middle; border-radius: 3px;"></span> ${color}</small></p>`;
+    }
+    if (font) {
+        const fontName = font.split(',')[0].replace(/'/g, '');
+        html += `<p style="margin-bottom: 3px; padding-left: 15px;"><small>Font: ${fontName}</small></p>`;
+    }
+    html += '</div>';
+    return html;
+}
 // Configurations Management
 async function loadConfigurations() {
     if (!configurationsListDiv) return;
@@ -149,13 +166,15 @@ async function loadConfigurations() {
                 const config = doc.data();
                 const embedUrl = `${window.location.origin}/app/public-display.html?configId=${doc.id}`;
                 const paymentDisplayHtml = generatePaymentDetailsHtml(config);
+                const displaySettingsHtml = generateDisplaySettingsHtml(config);
                 html += `
                     <div class="panel panel-default config-item">
                         <div class="panel-heading"><h4 class="panel-title">${config.title} (Type: ${config.type})</h4></div>
                         <div class="panel-body">
                             <p><strong>ID:</strong> ${doc.id}</p>
                             <p><strong>Direct Link:</strong> <a href="${embedUrl}" target="_blank" rel="noopener noreferrer">${embedUrl}</a></p>
-                            <p><strong>Embed Code:</strong> <code class="embed-code">&lt;iframe src="${embedUrl}" width="100%" height="600px" style="border:1px solid #ccc;"&gt;&lt;/iframe&gt;</code></p>                            
+                            <p><strong>Embed Code:</strong> <code class="embed-code">&lt;iframe src="${embedUrl}" width="100%" height="600px" style="border:1px solid #ccc;"&gt;&lt;/iframe&gt;</code></p>
+                            ${displaySettingsHtml}
                             ${paymentDisplayHtml}
                             <button class="btn btn-primary btn-xs" onclick='editConfigurationPrep("${doc.id}")'>Edit</button>
                             <button class="btn btn-danger btn-xs" style="margin-left: 5px;" onclick="deleteConfiguration('${doc.id}')">Delete</button>
@@ -194,6 +213,10 @@ function populateConfigFormForEdit(configId, configData) {
     createConfigForm['config-type'].value = configData.type || 'form';
     editingConfigIdInput.value = configId; // Mark as editing
     document.getElementById('config-notification-email').value = configData.notificationEmail || '';
+
+    // Populate display settings
+    document.getElementById('config-color').value = configData.displaySettings?.color || '#007bff';
+    document.getElementById('config-font').value = configData.displaySettings?.font || "'Helvetica Neue', Helvetica, Arial, sans-serif";
 
     // Trigger change on type select to show/hide payment options
     configTypeSelect.dispatchEvent(new Event('change'));
@@ -244,6 +267,10 @@ if (createConfigForm) {
             type,
             userId: currentUser.uid,
             notificationEmail: document.getElementById('config-notification-email').value,
+            displaySettings: {
+                color: document.getElementById('config-color').value,
+                font: document.getElementById('config-font').value,
+            },
             // createdAt will be set only for new docs, or use lastUpdatedAt for updates
         };
 
@@ -302,6 +329,10 @@ function resetConfigForm() {
     if (configCheckDetailsDiv) configCheckDetailsDiv.style.display = 'none';
     if (configPaymentCardEnabled) configPaymentCardEnabled.checked = false;
     if (configCardDetailsDiv) configCardDetailsDiv.style.display = 'none';
+    // Reset display settings
+    if (document.getElementById('config-color')) document.getElementById('config-color').value = '#007bff';
+    if (document.getElementById('config-font')) document.getElementById('config-font').value = "'Helvetica Neue', Helvetica, Arial, sans-serif";
+
     if (createConfigForm) createConfigForm.querySelector('button[type="submit"]').textContent = 'Create Configuration';
     const formHeading = createConfigForm.querySelector('h3');
     if (formHeading) {

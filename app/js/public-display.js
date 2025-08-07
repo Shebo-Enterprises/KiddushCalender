@@ -33,6 +33,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         const configData = configDoc.data();
+        // Apply custom styles from the configuration before rendering anything
+        applyCustomStyles(configData);
 
         if (configData.type === "calendar") {
             await renderCalendar(displayContainer, configData);
@@ -48,6 +50,74 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error("Error loading public display:", error);
     }
 });
+
+/**
+ * Applies custom color and font styles based on the configuration.
+ * @param {object} configData - The configuration data from Firestore.
+ */
+function applyCustomStyles(configData) {
+    const displaySettings = configData.displaySettings;
+    if (!displaySettings) return;
+
+    const { color, font } = displaySettings;
+    let customCss = '';
+
+    if (font) {
+        customCss += `
+            body, .btn, .form-control, .panel-title, .list-group-item-heading, h2, h4 {
+                font-family: ${font};
+            }
+        `;
+    }
+
+    if (color && color !== '#000000') { // Ignore black as it's often a default picker value
+        // Helper function to determine if a color is light or dark
+        const isLightColor = (hex) => {
+            const r = parseInt(hex.slice(1, 3), 16);
+            const g = parseInt(hex.slice(3, 5), 16);
+            const b = parseInt(hex.slice(5, 7), 16);
+            // Formula for perceived brightness
+            return (r * 299 + g * 587 + b * 114) / 1000 > 155;
+        };
+        const btnTextColor = isLightColor(color) ? '#333333' : '#ffffff';
+
+        customCss += `
+            .page-header h2,
+            .list-group-item-heading,
+            .panel-primary .panel-heading .panel-title, /* Make panel titles stand out */
+            a {
+                color: ${color};
+            }
+            .btn-primary,
+            .btn-default,
+            #toggle-view-btn {
+                background-color: ${color};
+                border-color: ${color};
+                color: ${btnTextColor};
+            }
+            .btn-primary:hover,
+            .btn-primary:focus,
+            .btn-default:hover,
+            #toggle-view-btn:hover {
+                background-color: ${color}e6; /* Add some transparency for hover */
+                border-color: ${color}e6;
+                color: ${btnTextColor};
+            }
+            .list-group-item.week-entry, .panel-default {
+                border-left-color: ${color};
+                border-left-width: 4px;
+            }
+            .page-header {
+                border-bottom-color: ${color};
+            }
+        `;
+    }
+
+    const styleElement = document.getElementById('dynamic-styles');
+    if (styleElement) {
+        styleElement.innerHTML = customCss;
+    }
+}
 
 async function renderCalendar(container, configData) {
     const pageTitle = configData.title || "Kiddush Calendar";
