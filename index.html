@@ -1,581 +1,160 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KiddushCalendar - Simplify Your Synagogue's Kiddush Management</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #007bff;
-            --accent-color: #28a745;
-            --background-light: #f8f9fa;
-            --background-alt: #f2f7fb;
-            --text-dark: #333;
-            --text-light: #6c757d;
-        }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>KiddushWare — Sponsor, Track, Celebrate</title>
+  <meta name="description" content="KiddushWare — the easy way to manage Kiddush sponsorships, scheduling, raffles and donor records." />
 
-        /* Basic Reset & Body Styles */
-        body {
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            line-height: 1.6;
-            color: var(--text-dark);
-            background-color: var(--background-light);
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-
-        h1, h2, h3 {
-            font-family: 'Playfair Display', serif;
-            color: var(--primary-color);
-        }
-
-        a {
-            color: var(--secondary-color);
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
-
-        a:hover {
-            color: var(--primary-color);
-        }
-
-        /* Header/Navigation */
-        header {
-            background-color: #ffffff;
-            padding: 20px 0;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 1.8em;
-            font-weight: 700;
-        }
-
-        .button {
-            background-color: var(--secondary-color);
-            color: white;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-weight: 600;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-        }
-
-        .button:hover {
-            background-color: #0056b3;
-            transform: translateY(-2px);
-        }
-
-        /* Hero Section */
-        .hero {
-            background-color: #e9f7ef;
-            padding: 80px 0;
-            border-radius: 12px;
-            margin-top: 40px;
-        }
-
-        .hero-content {
-            display: flex;
-            align-items: center;
-            gap: 40px;
-        }
-
-        .hero-text {
-            flex: 1;
-        }
-
-        .hero-text h1 {
-            font-size: 3.5em;
-            margin-bottom: 15px;
-        }
-
-        .hero-text p {
-            font-size: 1.2em;
-            color: var(--text-light);
-        }
-        
-        .hero-image-container {
-            flex: 1;
-            text-align: center;
-        }
-        
-        .hero-image {
-            width: 100%;
-            max-width: 600px;
-            height: auto;
-            border-radius: 12px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-        }
-        
-        .hero-image + b {
-            display: block;
-            margin-top: 10px;
-            font-size: 0.9em;
-            color: var(--text-light);
-        }
-
-        /* Section Styling */
-        section {
-            padding: 80px 0;
-            margin-top: 40px;
-            background-color: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-
-        .section-title {
-            text-align: center;
-            font-size: 2.8em;
-            margin-bottom: 20px;
-        }
-        
-        .section-subtitle {
-            text-align: center;
-            max-width: 800px;
-            margin: 0 auto 50px auto;
-            font-size: 1.1em;
-            color: var(--text-light);
-        }
-
-        /* Features Section */
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            margin-top: 40px;
-        }
-        
-        .feature-item {
-            background-color: var(--background-light);
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            text-align: center;
-        }
-        
-        .feature-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
-        }
-
-        .feature-item h3 {
-            font-size: 1.5em;
-            margin-bottom: 15px;
-        }
-
-        .feature-item p {
-            color: var(--text-light);
-        }
-
-        /* CTA Simplify Section */
-        .cta-simplify {
-            background-color: #d4edda;
-            padding: 80px 0;
-            text-align: center;
-        }
-
-        .cta-simplify h2 {
-            font-size: 2.8em;
-            color: var(--accent-color);
-            margin-bottom: 20px;
-        }
-
-        .cta-simplify ul {
-            list-style: none;
-            padding: 0;
-            margin: 0 auto 30px auto;
-            max-width: 600px;
-            text-align: left;
-        }
-
-        .cta-simplify ul li {
-            font-size: 1.1em;
-            margin-bottom: 10px;
-            padding-left: 25px;
-            position: relative;
-            color: var(--text-dark);
-        }
-
-        .cta-simplify ul li::before {
-            content: '✓';
-            color: var(--accent-color);
-            font-weight: bold;
-            position: absolute;
-            left: 0;
-        }
-
-        /* Pricing Section */
-        .pricing-plan {
-            background-color: #ffffff;
-            border: 1px solid #eee;
-            border-radius: 12px;
-            padding: 40px;
-            text-align: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-            max-width: 400px;
-            margin: 0 auto;
-        }
-
-        .pricing-plan h3 {
-            font-size: 2em;
-            color: var(--secondary-color);
-            margin-bottom: 10px;
-        }
-
-        .price {
-            font-size: 3.5em;
-            font-weight: 700;
-            color: var(--primary-color);
-            margin-bottom: 15px;
-        }
-
-        .price span {
-            font-size: 0.5em;
-            font-weight: 400;
-            vertical-align: super;
-        }
-
-        .pricing-plan ul {
-            list-style: none;
-            padding: 0;
-            text-align: left;
-            margin-bottom: 30px;
-        }
-
-        .pricing-plan ul li {
-            margin-bottom: 10px;
-            font-size: 1.1em;
-            color: var(--text-dark);
-            padding-left: 25px;
-            position: relative;
-        }
-
-        .pricing-plan ul li::before {
-            content: '✓';
-            color: var(--accent-color);
-            font-weight: bold;
-            position: absolute;
-            left: 0;
-        }
-
-        .cta-button {
-            display: inline-block;
-            background-color: var(--secondary-color);
-            color: white;
-            padding: 15px 30px;
-            border-radius: 8px;
-            font-size: 1.2em;
-            font-weight: 600;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-        }
-
-        .cta-button:hover {
-            background-color: #0056b3;
-            transform: translateY(-2px);
-        }
-
-        /* FAQ Section (Accordion) */
-        .faq-accordion {
-            max-width: 800px;
-            margin: 40px auto;
-        }
-
-        .accordion-item {
-            background-color: var(--background-light);
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-
-        .accordion-title {
-            padding: 20px;
-            font-size: 1.2em;
-            font-weight: 600;
-            cursor: pointer;
-            position: relative;
-            user-select: none;
-            color: var(--primary-color);
-            background-color: #ffffff;
-            transition: background-color 0.3s ease;
-        }
-        
-        .accordion-title:hover {
-            background-color: #f0f2f5;
-        }
-
-        .accordion-title::after {
-            content: '+';
-            position: absolute;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 1.5em;
-            transition: transform 0.3s ease;
-        }
-        
-        .accordion-title.active::after {
-            content: '−';
-        }
-
-        .accordion-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.4s ease-in-out;
-            padding: 0 20px;
-        }
-        
-        .accordion-content p {
-            padding-bottom: 20px;
-            margin: 0;
-            color: var(--text-dark);
-        }
-
-        /* Footer */
-        footer {
-            text-align: center;
-            padding: 40px 20px;
-            background-color: var(--primary-color);
-            color: #f8f9fa;
-            margin-top: 50px;
-            border-radius: 12px 12px 0 0;
-        }
-
-        footer a {
-            color: #cccccc;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .hero-content {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .hero-text h1 {
-                font-size: 2.5em;
-            }
-
-            .section-title {
-                font-size: 2.2em;
-            }
-        }
-    </style>
+  <style>
+    *,*::before,*::after{box-sizing:border-box}
+    html,body{height:100%;margin:0;padding:0;}
+    body{
+      font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: linear-gradient(135deg, #2d6ef3, #5da6ff);
+      color: #fff;
+      overflow-x: hidden;
+    }
+    h1,h2,h3{text-align:center;margin:0.5rem 0;}
+    p{text-align:center;max-width:600px;margin:0.5rem auto;}
+    a.button{
+      display: inline-block;
+      background: #15d2b2;
+      color: white;
+      padding: 14px 28px;
+      border-radius: 8px;
+      font-weight: bold;
+      text-decoration: none;
+      font-size: 1.1rem;
+      transition: background 0.3s ease;
+    }
+    a.button:hover{background: #0fb69a;}
+    canvas{position: fixed;top: 0;left: 0;z-index: -1;}
+    section{padding:4rem 1rem;}
+    .features{
+      display: grid;
+      grid-template-columns: repeat(auto-fit,minmax(250px,1fr));
+      gap: 2rem;
+      max-width: 1000px;
+      margin: auto;
+    }
+    .feature{
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
+      padding: 1.5rem;
+      text-align: center;
+    }
+    .pricing{
+      display: flex;
+      justify-content: center;
+    }
+    .price-card{
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
+      padding: 2rem;
+      text-align: center;
+      max-width: 300px;
+    }
+    .price{
+      font-size: 2.5rem;
+      margin: 1rem 0;
+    }
+    footer{
+      text-align:center;
+      padding: 2rem;
+      background: rgba(0,0,0,0.3);
+    }
+  </style>
 </head>
 <body>
+  <canvas id="bg"></canvas>
 
-    <header>
-        <div class="container">
-            <nav>
-                <div class="logo">KiddushCalendar</div>
-                <div class="nav-links">
-                    <a href="/app" class="button">Login</a>
-                </div>
-            </nav>
-        </div>
-    </header>
+  <section>
+    <h1>KiddushWare</h1>
+    <p>The modern Kiddush sponsor management system. Sponsor, track, and celebrate with ease.</p>
+    <div style="text-align:center; margin-top:1.5rem;">
+      <a href="/app" class="button">Login / Get Started</a>
+    </div>
+  </section>
 
-    <main>
-        <section class="hero">
-            <div class="container">
-                <div class="hero-content">
-                    <div class="hero-text">
-                        <h1>KiddushCalendar: Simplify Your Synagogue's Kiddush Management</h1>
-                        <p>Are you tired of juggling Chabad forms, endless emails, and confusing web tables to manage your synagogue's kiddush sponsorships? KiddushCalendar is here to revolutionize how you organize and track your kiddushim, freeing up valuable time for your staff and volunteers (and making that cholent).</p>
-                    </div>
-                    <div class="hero-image-container">
-                        <img src="image.png" alt="KiddushCalendar Software Interface" class="hero-image" onerror="this.onerror=null;this.src='https://placehold.co/600x400/E9F7EF/2C3E50?text=Image+Not+Found';">
-                        <b>Disclaimer: There are so many more features in this snapshot, but we couldn't fit all!</b>
-                    </div>
-                </div>
-            </div>
-        </section>
+  <section>
+    <h2>Features</h2>
+    <div class="features">
+      <div class="feature">
+        <h3>Easy Sponsorships</h3>
+        <p>Streamline sponsor signups with an intuitive interface.</p>
+      </div>
+      <div class="feature">
+        <h3>Event Tracking</h3>
+        <p>Keep tabs on upcoming Kiddush events with detailed scheduling tools.</p>
+      </div>
+      <div class="feature">
+        <h3>Donor Records</h3>
+        <p>Maintain comprehensive donor history for transparency and recognition.</p>
+      </div>
+    </div>
+  </section>
 
-        <section id="features">
-            <div class="container">
-                <h2 class="section-title">What is KiddushCalendar?</h2>
-                <p class="section-subtitle">KiddushCalendar is an intuitive and powerful software designed specifically for synagogues to streamline the entire kiddush sponsorship and scheduling process. From collecting donations to publishing clear calendars, we've got you covered.</p>
+  <section>
+    <h2>How It Works</h2>
+    <p>1. Create an account. 2. Set up your Kiddush calendar. 3. Invite sponsors. 4. Celebrate together.</p>
+  </section>
 
-                <h2 class="section-title">Key Features</h2>
-                <div class="features-grid">
-                    <div class="feature-item">
-                        <h3>Effortless Form Creation</h3>
-                        <p>Easily create customizable online forms for kiddush sponsorships, including options for dedications, dates, and donation amounts. Say goodbye to manual data entry!</p>
-                    </div>
-                    <div class="feature-item">
-                        <h3>Integrated Sponsorship Tracking</h3>
-                        <p>Keep a clear, organized record of all kiddush sponsorships, including sponsor details, and dedication information, all in one central location.</p>
-                    </div>
-                    <div class="feature-item">
-                        <h3>Dynamic Kiddush Calendars</h3>
-                        <p>Generate and publish beautiful, easy-to-read kiddush calendars directly from your collected data. Your congregants will always know what's happening and when.</p>
-                    </div>
-                    <div class="feature-item">
-                        <h3>Automated Notifications</h3>
-                        <p>Set up automatic email reminders for sponsors and administrators, ensuring no detail is missed.</p>
-                    </div>
-                    <div class="feature-item">
-                        <h3>Easy Integration</h3>
-                        <p>We know your website needs to play nice with KiddushCalendar. That's why we are working on full guides for easy integration.</p>
-                    </div>
-                    <div class="feature-item">
-                        <h3>User-Friendly Interface</h3>
-                        <p>Designed with synagogues in mind, KiddushCalendar is easy to navigate, even for those with limited technical experience.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
+  <section>
+    <h2>Pricing</h2>
+    <div class="pricing">
+      <div class="price-card">
+        <h3>Basic Plan</h3>
+        <div class="price">Free</div>
+        <p>All core features at no cost. Perfect for small communities and shuls.</p>
+      </div>
+    </div>
+  </section>
 
-        <section class="cta-simplify">
-            <div class="container">
-                <h2>Simplify Your Synagogue Life</h2>
-                <ul>
-                    <li>Increase efficiency and reduce administrative burden.</li>
-                    <li>Improve communication with congregants and sponsors.</li>
-                    <li>Ensure accurate record-keeping and financial transparency.</li>
-                    <li>Create a more professional and organized image for your synagogue.</li>
-                </ul>
-            </div>
-        </section>
+  <footer>
+    <p>© 2025 KiddushWare. All rights reserved.</p>
+  </footer>
 
-        <section id="pricing">
-            <div class="container">
-                <h2 class="section-title">Pricing</h2>
-                <p class="section-subtitle">We believe every synagogue, regardless of size, deserves access to tools that simplify their operations. That's why KiddushCalendar offers a straightforward and accessible pricing option:</p>
+  <script>
+    const canvas = document.getElementById('bg');
+    const ctx = canvas.getContext('2d');
+    let width, height;
+    const particles = [];
 
-                <div class="pricing-plan">
-                    <h3>Free</h3>
-                    <div class="price"><span class="currency">$</span>0<span class="currency">/month</span></div>
-                    <ul>
-                        <li>Access to all core features.</li>
-                        <li>Unlimited form creations.</li>
-                        <li>Unlimited kiddush sponsorships.</li>
-                        <li>Unlimited calendar generation.</li>
-                        <li>Standard customer support.</li>
-                        <p style="margin-top: 10px; font-size: 0.9em; color: var(--text-light);"><b>Since we are small, and we lack proper funding, we ask that you do not abuse the software, so other users can have a good experience too.</b></p>
-                    </ul>
-                    <a href="/app" class="cta-button">Get Started Free</a>
-                </div>
-            </div>
-        </section>
+    function resize() {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
+    }
+    window.addEventListener('resize', resize);
+    resize();
 
-        <section id="faq">
-            <div class="container">
-                <h2 class="section-title">Frequently Asked Questions</h2>
-                <div class="faq-accordion">
-                    <div class="accordion-item">
-                        <div class="accordion-title">Is KiddushCalendar really free?</div>
-                        <div class="accordion-content">
-                            <p>Yes! All core features are available for free. We ask users to be respectful so everyone has a good experience.</p>
-                        </div>
-                    </div>
-                    <div class="accordion-item">
-                        <div class="accordion-title">Do I need technical experience to use it?</div>
-                        <div class="accordion-content">
-                            <p>No. KiddushCalendar is designed to be simple and user-friendly, even for non-technical users.</p>
-                        </div>
-                    </div>
-                    <div class="accordion-item">
-                        <div class="accordion-title">Do you guys charge processing fees?</div>
-                        <div class="accordion-content">
-                            <p>No! Never! Credit/Debit card processing takes place on your processing page which you have linked.</p>
-                        </div>
-                    </div>
-                    <div class="accordion-item">
-                        <div class="accordion-title">Is my data secure?</div>
-                        <div class="accordion-content">
-                            <p>We take data privacy seriously. Your information is stored securely and not shared with other parties, such as other users.</p>
-                        </div>
-                    </div>
-                    <div class="accordion-item">
-                        <div class="accordion-title">Can I get help if I’m stuck?</div>
-                        <div class="accordion-content">
-                            <p>Of course! Standard customer support is included for all users.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+    for (let i = 0; i < 100; i++) {
+      particles.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        r: Math.random() * 3 + 1,
+        dx: (Math.random() - 0.5) * 0.5,
+        dy: (Math.random() - 0.5) * 0.5
+      });
+    }
 
-        <section style="text-align: center; margin-top: 0; padding: 60px 0;">
-            <div class="container">
-                <h2 class="section-title">Ready to Get Started?</h2>
-                <p style="font-size: 1.2em; margin-bottom: 40px; color: var(--text-light);">Join the growing number of synagogues who are simplifying their kiddush management with KiddushCalendar.</p>
-                <a href="/app" class="cta-button">Login to KiddushCalendar</a>
-            </div>
-        </section>
-    </main>
-
-    <footer>
-        <div class="container">
-            <p>&copy; 2025 Shebo Enterprises. All rights reserved.</p>
-        </div>
-    </footer>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Function to handle image fallback
-            const handleImageFallback = () => {
-                const heroImage = document.querySelector('.hero-image');
-                if (heroImage) {
-                    heroImage.onerror = function() {
-                        console.error("Failed to load hero image. Using fallback placeholder.");
-                        this.src = "https://placehold.co/600x400/E9F7EF/2C3E50?text=Image+Not+Found";
-                    };
-                }
-            };
-            
-            // Function to handle the FAQ accordion
-            const setupFaqAccordion = () => {
-                const accordionTitles = document.querySelectorAll('.accordion-title');
-                accordionTitles.forEach(title => {
-                    title.addEventListener('click', () => {
-                        const content = title.nextElementSibling;
-                        const isCurrentlyActive = title.classList.contains('active');
-
-                        // Close all other open items
-                        document.querySelectorAll('.accordion-title.active').forEach(activeTitle => {
-                            if (activeTitle !== title) {
-                                activeTitle.classList.remove('active');
-                                activeTitle.nextElementSibling.style.maxHeight = 0;
-                            }
-                        });
-
-                        // Toggle the clicked item
-                        title.classList.toggle('active');
-                        if (isCurrentlyActive) {
-                            content.style.maxHeight = 0;
-                        } else {
-                            content.style.maxHeight = content.scrollHeight + 'px';
-                        }
-                    });
-                });
-            };
-
-            handleImageFallback();
-            setupFaqAccordion();
-        });
-    </script>
+    function draw() {
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = 'rgba(255,255,255,0.7)';
+      for (const p of particles) {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+        p.x += p.dx;
+        p.y += p.dy;
+        if (p.x < 0 || p.x > width) p.dx *= -1;
+        if (p.y < 0 || p.y > height) p.dy *= -1;
+      }
+      requestAnimationFrame(draw);
+    }
+    draw();
+  </script>
 </body>
 </html>
