@@ -610,6 +610,59 @@
         </div>
     </div>
 
+    <!-- Edit Sponsorship Modal -->
+    <div class="modal fade" id="edit-sponsorship-modal" tabindex="-1" role="dialog" aria-labelledby="editSponsorshipModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="editSponsorshipModalLabel">Edit Sponsorship</h4>
+                </div>
+                <div class="modal-body">
+                    <form id="edit-sponsorship-form">
+                        <input type="hidden" id="edit-sponsorship-id">
+                        <div class="form-group">
+                            <label for="edit-sponsor-name">Sponsor's Name:</label>
+                            <input type="text" class="form-control" id="edit-sponsor-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-occasion">Occasion:</label>
+                            <input type="text" class="form-control" id="edit-occasion" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-contact-email">Contact Email:</label>
+                            <input type="email" class="form-control" id="edit-contact-email">
+                        </div>
+                        <div class="form-group">
+                            <label>Sponsorship Type:</label>
+                            <p id="edit-sponsorship-type-display" class="form-control-static"></p>
+                        </div>
+                        <div id="edit-shabbat-details" style="display:none;">
+                            <div class="form-group">
+                                <label for="edit-shabbat-date">Shabbat Date:</label>
+                                <p id="edit-shabbat-date" class="form-control-static"></p>
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-parsha">Parsha:</label>
+                                <p id="edit-parsha" class="form-control-static"></p>
+                            </div>
+                        </div>
+                        <div id="edit-custom-event-details" style="display:none;">
+                            <div class="form-group">
+                                <label for="edit-custom-event-title">Custom Event:</label>
+                                <p id="edit-custom-event-title" class="form-control-static"></p>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="save-sponsorship-btn">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <footer>
         <div class="container text-center">
             <hr>

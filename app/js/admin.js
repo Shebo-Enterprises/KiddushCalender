@@ -741,7 +741,12 @@ function renderSponsorships(snapshot, container, isPending) {
                         <button class="btn btn-warning btn-xs" onclick="updateSponsorshipStatus('${doc.id}', 'rejected')" title="Reject">
                             <i class="glyphicon glyphicon-remove"></i> Reject
                         </button>
-                    ` : `<span class="label label-success">Approved</span>`}
+                    ` : `
+                        <span class="label label-success">Approved</span>
+                        <button class="btn btn-primary btn-xs" onclick="editSponsorship('${doc.id}')" title="Edit" style="margin-left: 5px;">
+                            <i class="glyphicon glyphicon-pencil"></i> Edit
+                        </button>
+                    `}
                     <button class="btn btn-danger btn-xs" onclick="deleteSponsorship('${doc.id}')" title="Delete">
                         <i class="glyphicon glyphicon-trash"></i> Delete
                     </button>
@@ -781,6 +786,96 @@ async function deleteSponsorship(sponsorshipId) {
             console.error("Error deleting sponsorship: ", error);
             alert('Error deleting sponsorship.');
         }
+    }
+}
+
+// Edit Sponsorship Functions
+async function editSponsorship(sponsorshipId) {
+    if (!sponsorshipId) return;
+    
+    try {
+        const docRef = db.collection("sponsorships").doc(sponsorshipId);
+        const docSnap = await docRef.get();
+        
+        if (docSnap.exists) {
+            const sponsorshipData = docSnap.data();
+            populateSponsorshipEditForm(sponsorshipId, sponsorshipData);
+            $('#edit-sponsorship-modal').modal('show');
+        } else {
+            alert("Sponsorship not found.");
+        }
+    } catch (error) {
+        console.error("Error fetching sponsorship for edit:", error);
+        alert("Error loading sponsorship details.");
+    }
+}
+
+function populateSponsorshipEditForm(sponsorshipId, sponsorshipData) {
+    // Set the sponsorship ID in the hidden field
+    document.getElementById('edit-sponsorship-id').value = sponsorshipId;
+    
+    // Populate the form fields with sponsorship data
+    document.getElementById('edit-sponsor-name').value = sponsorshipData.sponsorName || '';
+    document.getElementById('edit-occasion').value = sponsorshipData.occasion || '';
+    document.getElementById('edit-contact-email').value = sponsorshipData.contactEmail || '';
+    
+    // Display sponsorship type
+    const typeDisplay = document.getElementById('edit-sponsorship-type-display');
+    const shabbatDetails = document.getElementById('edit-shabbat-details');
+    const customEventDetails = document.getElementById('edit-custom-event-details');
+    
+    if (sponsorshipData.sponsorshipType === 'shabbat') {
+        typeDisplay.textContent = 'Shabbat Kiddush';
+        shabbatDetails.style.display = 'block';
+        customEventDetails.style.display = 'none';
+        
+        // Populate Shabbat details
+        document.getElementById('edit-shabbat-date').textContent = sponsorshipData.shabbatDate || 'N/A';
+        document.getElementById('edit-parsha').textContent = sponsorshipData.parsha || 'N/A';
+    } else if (sponsorshipData.sponsorshipType === 'custom') {
+        typeDisplay.textContent = 'Custom Event';
+        shabbatDetails.style.display = 'none';
+        customEventDetails.style.display = 'block';
+        
+        // Populate custom event details
+        document.getElementById('edit-custom-event-title').textContent = sponsorshipData.customSponsorableTitle || 'N/A';
+    } else {
+        typeDisplay.textContent = 'Unknown';
+        shabbatDetails.style.display = 'none';
+        customEventDetails.style.display = 'none';
+    }
+}
+
+// Initialize the save button for the edit sponsorship modal
+document.addEventListener('DOMContentLoaded', function() {
+    const saveSponsorshipBtn = document.getElementById('save-sponsorship-btn');
+    if (saveSponsorshipBtn) {
+        saveSponsorshipBtn.addEventListener('click', saveSponsorshipChanges);
+    }
+});
+
+async function saveSponsorshipChanges() {
+    const sponsorshipId = document.getElementById('edit-sponsorship-id').value;
+    if (!sponsorshipId) {
+        alert('Error: Sponsorship ID not found.');
+        return;
+    }
+    
+    const updatedData = {
+        sponsorName: document.getElementById('edit-sponsor-name').value,
+        occasion: document.getElementById('edit-occasion').value,
+        contactEmail: document.getElementById('edit-contact-email').value,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    
+    try {
+        await db.collection("sponsorships").doc(sponsorshipId).update(updatedData);
+        $('#edit-sponsorship-modal').modal('hide');
+        alert('Sponsorship updated successfully.');
+        // Real-time listeners will refresh the lists automatically
+    } catch (error) {
+        console.error("Error updating sponsorship:", error);
+        alert('Error updating sponsorship. Please try again.');
     }
 }
 
