@@ -424,7 +424,6 @@ async function renderForm(container, configData) {
                     <p class="help-block">If you have sponsored before, please use the same email address to link your sponsorships.</p>
             </div>
             
-            <!-- Dynamically generated payment selection -->
             ${paymentSectionHTML}
 
             <button type="submit" class="btn btn-primary">Submit Sponsorship</button>
@@ -602,13 +601,12 @@ async function renderForm(container, configData) {
                 }
 
                 if (paymentLink) {
-                    // Display a final message and then redirect
-                    formMessage.textContent = "CARD PROCESSING LOADING. THIS MAY TAKE A MOMENT.";
+                    // Open the payment link in a new tab immediately
+                    window.open(paymentLink, '_blank');
+                    // Display a final message
+                    formMessage.textContent = "Sponsorship submitted! A new tab has opened for payment.";
                     formMessage.className = 'alert alert-success';
                     formMessage.style.display = 'block';
-                    setTimeout(() => {
-                        window.location.href = paymentLink;
-                    }, 3000); // 3-second delay
                 } else {
                      formMessage.textContent = "Sponsorship submitted! However, the payment link is not configured. Please contact support.";
                      formMessage.className = 'alert alert-warning';

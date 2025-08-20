@@ -738,9 +738,7 @@ function renderSponsorships(snapshot, container, isPending) {
                         <button class="btn btn-success btn-xs" onclick="updateSponsorshipStatus('${doc.id}', 'approved')" title="Approve">
                             <i class="glyphicon glyphicon-ok"></i> Approve
                         </button>
-                        <button class="btn btn-warning btn-xs" onclick="updateSponsorshipStatus('${doc.id}', 'rejected')" title="Reject">
-                            <i class="glyphicon glyphicon-remove"></i> Reject
-                        </button>
+                     
                     ` : `
                         <span class="label label-success">Approved</span>
                         <button class="btn btn-primary btn-xs" onclick="editSponsorship('${doc.id}')" title="Edit" style="margin-left: 5px;">
@@ -763,12 +761,12 @@ function renderSponsorships(snapshot, container, isPending) {
 }
 
 async function updateSponsorshipStatus(sponsorshipId, newStatus) {
-    if (!sponsorshipId || !newStatus) return;
+    if (!sponsorshipId || newStatus !== 'approved') return;
     try {
         await db.collection("sponsorships").doc(sponsorshipId).update({
             status: newStatus
         });
-        alert(`Sponsorship ${newStatus}.`);
+        alert('Sponsorship approved.');
         // Real-time listeners will refresh the lists automatically
     } catch (error) {
         console.error(`Error updating sponsorship ${sponsorshipId} to ${newStatus}: `, error);
