@@ -173,7 +173,7 @@ async function loadConfigurations() {
                         <div class="panel-body">
                             <p><strong>ID:</strong> ${doc.id}</p>
                             <p><strong>Direct Link:</strong> <a href="${embedUrl}" target="_blank" rel="noopener noreferrer">${embedUrl}</a></p>
-                            <p><strong>Embed Code:</strong> <code class="embed-code">&lt;iframe src="${embedUrl}" width="100%" height="600px" style="border:1px solid #ccc;"&gt;&lt;/iframe&gt;</code></p>
+                            <p><strong>Embed Code:</strong> <code class="embed-code">&lt;iframe src="${embedUrl}" width="100%" height="1200px" style="border:0px solid #ccc;"&gt;&lt;/iframe&gt;</code></p>
                             ${displaySettingsHtml}
                             ${paymentDisplayHtml}
                             <button class="btn btn-primary btn-xs" onclick='editConfigurationPrep("${doc.id}")'>Edit</button>
