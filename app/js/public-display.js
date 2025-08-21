@@ -147,9 +147,9 @@ async function renderCalendar(container, configData) {
     const calendarTitleEl = document.getElementById('calendar-title');
     const toggleBtn = document.getElementById('toggle-view-btn');
 
-    // Helper: open modal and preselect the chosen sponsorable in the form
+    // Helper: open modal and preselect the chosen item in the form (neutral IDs)
     async function openSponsorshipModal(preset) {
-        const modalBody = document.getElementById('sponsorshipModalBody');
+        const modalBody = document.getElementById('kModalBody');
         if (!modalBody) return;
         modalBody.innerHTML = '<p>Loading form...</p>';
 
@@ -198,7 +198,7 @@ async function renderCalendar(container, configData) {
         }
         // Show the modal
         if (window.jQuery) {
-            window.jQuery('#sponsorshipModal').modal('show');
+            window.jQuery('#kModal').modal('show');
         }
     }
 
@@ -257,22 +257,20 @@ async function renderCalendar(container, configData) {
                             <p class="list-group-item-text">${item.type === 'shabbat' ? 'Weekend of:' : 'Dates:'} ${item.displayDateInfo}</p>
                             ${descriptionHtml}
                             ${sponsorsHtml}
-                            <p style="margin-top:8px;"><a href="#" class="sponsor-link" data-type="${item.type}" data-id="${item.id}" data-title="${item.title}">Click here to sponsor this Kiddush</a></p>
+                            <p style=\"margin-top:8px;\"><button type=\"button\" class=\"btn btn-primary k-action\" data-type=\"${item.type}\" data-id=\"${item.id}\" data-title=\"${item.title}\">Sponsor this Kiddush</button></p>
                         </div>
                     `;
                 }).join('');
                 entriesContainer.innerHTML = html || '<a href="#" class="list-group-item">No items to display.</a>';
 
-                // Attach sponsor-link handlers after rendering
-                const links = entriesContainer.querySelectorAll('.sponsor-link');
-                links.forEach(link => {
-                    link.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        const type = link.getAttribute('data-type');
-                        const id = link.getAttribute('data-id');
-                        const title = link.getAttribute('data-title');
+                // Attach action handlers after rendering (neutral class)
+                const actions = entriesContainer.querySelectorAll('.k-action');
+                actions.forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const type = btn.getAttribute('data-type');
+                        const id = btn.getAttribute('data-id');
+                        const title = btn.getAttribute('data-title');
                         if (type === 'shabbat') {
-                            // For shabbat, id is shabbatDate and title is parsha
                             openSponsorshipModal({ type: 'shabbat', shabbatDate: id, parsha: title });
                         } else if (type === 'custom') {
                             openSponsorshipModal({ type: 'custom', id, title });
