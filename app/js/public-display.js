@@ -88,6 +88,12 @@ function applyCustomStyles(configData) {
             a {
                 color: ${color};
             }
+            /* Ensure the sponsor link is always visible/legible */
+            .sponsor-link {
+                text-decoration: underline;
+                font-weight: 600;
+                color: ${isLightColor(color) ? '#333333' : color};
+            }
             .btn-primary,
             .btn-default,
             #toggle-view-btn {
