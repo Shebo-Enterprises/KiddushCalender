@@ -141,6 +141,61 @@ async function renderCalendar(container, configData) {
     const calendarTitleEl = document.getElementById('calendar-title');
     const toggleBtn = document.getElementById('toggle-view-btn');
 
+    // Helper: open modal and preselect the chosen sponsorable in the form
+    async function openSponsorshipModal(preset) {
+        const modalBody = document.getElementById('sponsorshipModalBody');
+        if (!modalBody) return;
+        modalBody.innerHTML = '<p>Loading form...</p>';
+
+        // Merge in payment settings from an existing "form" config if current config lacks them
+        let mergedConfig = { ...configData };
+        if (!mergedConfig.paymentSettings || (!mergedConfig.paymentSettings.card && !mergedConfig.paymentSettings.check)) {
+            try {
+                const formCfgSnap = await db.collection("configurations")
+                    .where("userId", "==", configData.userId)
+                    .where("type", "==", "form")
+                    .limit(1)
+                    .get();
+                if (!formCfgSnap.empty) {
+                    const formCfgData = formCfgSnap.docs[0].data();
+                    mergedConfig.paymentSettings = formCfgData.paymentSettings || mergedConfig.paymentSettings;
+                    mergedConfig.notificationEmail = formCfgData.notificationEmail || mergedConfig.notificationEmail;
+                }
+            } catch (e) {
+                console.warn('Could not fetch payment settings from form config:', e);
+            }
+        }
+
+        // Render the form inside the modal body using the merged config (ensures payment options appear)
+        await renderForm(modalBody, mergedConfig);
+
+        // Preselect the item in the dropdown and trigger change to populate hidden fields
+        const shabbosSelect = document.getElementById('shabbos-select');
+        if (shabbosSelect && preset) {
+            if (preset.type === 'shabbat') {
+                // Try exact match (date + parsha), fallback to date-only
+                const exactValue = `shabbat|${preset.shabbatDate}|${preset.parsha}`;
+                let option = Array.from(shabbosSelect.options).find(o => o.value === exactValue);
+                if (!option) option = Array.from(shabbosSelect.options).find(o => o.value.startsWith(`shabbat|${preset.shabbatDate}|`));
+                if (option) {
+                    shabbosSelect.value = option.value;
+                    shabbosSelect.dispatchEvent(new Event('change'));
+                }
+            } else if (preset.type === 'custom') {
+                // Value starts with custom|<id>|
+                const option = Array.from(shabbosSelect.options).find(o => o.value.startsWith(`custom|${preset.id}|`));
+                if (option) {
+                    shabbosSelect.value = option.value;
+                    shabbosSelect.dispatchEvent(new Event('change'));
+                }
+            }
+        }
+        // Show the modal
+        if (window.jQuery) {
+            window.jQuery('#sponsorshipModal').modal('show');
+        }
+    }
+
     // 2. Function to display UPCOMING events (adapted from original logic)
     const displayUpcoming = async () => {
         if (unsubscribeSponsorshipsListener) unsubscribeSponsorshipsListener(); // Detach previous listener
@@ -196,10 +251,28 @@ async function renderCalendar(container, configData) {
                             <p class="list-group-item-text">${item.type === 'shabbat' ? 'Weekend of:' : 'Dates:'} ${item.displayDateInfo}</p>
                             ${descriptionHtml}
                             ${sponsorsHtml}
+                            <p style="margin-top:8px;"><a href="#" class="sponsor-link" data-type="${item.type}" data-id="${item.id}" data-title="${item.title}">Click here to sponsor this Kiddush</a></p>
                         </div>
                     `;
                 }).join('');
                 entriesContainer.innerHTML = html || '<a href="#" class="list-group-item">No items to display.</a>';
+
+                // Attach sponsor-link handlers after rendering
+                const links = entriesContainer.querySelectorAll('.sponsor-link');
+                links.forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const type = link.getAttribute('data-type');
+                        const id = link.getAttribute('data-id');
+                        const title = link.getAttribute('data-title');
+                        if (type === 'shabbat') {
+                            // For shabbat, id is shabbatDate and title is parsha
+                            openSponsorshipModal({ type: 'shabbat', shabbatDate: id, parsha: title });
+                        } else if (type === 'custom') {
+                            openSponsorshipModal({ type: 'custom', id, title });
+                        }
+                    });
+                });
             }, error => {
                 console.error("Error fetching sponsorships:", error);
                 entriesContainer.innerHTML = '<a href="#" class="list-group-item list-group-item-danger">Error loading sponsorships.</a>';
@@ -426,7 +499,7 @@ async function renderForm(container, configData) {
             
             ${paymentSectionHTML}
 
-            <button type="submit" class="btn btn-primary">Submit Sponsorship</button>
+            <button type="submit" class="btn btn-primary">Continue to payment</button>
         </form>
         <div id="form-message" class="alert" style="margin-top: 15px; display: none;"></div>
         ${checkInstructionsHTML}
