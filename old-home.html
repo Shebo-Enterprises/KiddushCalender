@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>KiddushWare — Sponsor, Track, Celebrate</title>
+  <meta name="description" content="KiddushWare — the easy way to manage Kiddush sponsorships, scheduling, raffles and donor records." />
+
+  <style>
+    *,*::before,*::after{box-sizing:border-box}
+    html,body{height:100%;margin:0;padding:0;}
+    body{
+      font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: linear-gradient(135deg, #2d6ef3, #5da6ff);
+      color: #fff;
+      overflow-x: hidden;
+    }
+    h1,h2,h3{text-align:center;margin:0.5rem 0;}
+    p{text-align:center;max-width:600px;margin:0.5rem auto;}
+    a.button{
+      display: inline-block;
+      background: #15d2b2;
+      color: white;
+      padding: 14px 28px;
+      border-radius: 8px;
+      font-weight: bold;
+      text-decoration: none;
+      font-size: 1.1rem;
+      transition: background 0.3s ease;
+    }
+    a.button:hover{background: #0fb69a;}
+    canvas{position: fixed;top: 0;left: 0;z-index: -1;}
+    section{padding:4rem 1rem;}
+    .features{
+      display: grid;
+      grid-template-columns: repeat(auto-fit,minmax(250px,1fr));
+      gap: 2rem;
+      max-width: 1000px;
+      margin: auto;
+    }
+    .feature{
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
+      padding: 1.5rem;
+      text-align: center;
+    }
+    .pricing{
+      display: flex;
+      justify-content: center;
+    }
+    .price-card{
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
+      padding: 2rem;
+      text-align: center;
+      max-width: 300px;
+    }
+    .price{
+      font-size: 2.5rem;
+      margin: 1rem 0;
+    }
+    footer{
+      text-align:center;
+      padding: 2rem;
+      background: rgba(0,0,0,0.3);
+    }
+  </style>
+</head>
+<body>
+  <canvas id="bg"></canvas>
+
+  <section>
+    <h1>KiddushWare</h1>
+    <p>The modern Kiddush sponsor management system. Sponsor, track, and celebrate with ease.</p>
+    <div style="text-align:center; margin-top:1.5rem;">
+      <a href="/app" class="button">Login / Get Started</a>
+    </div>
+  </section>
+
+  <section>
+    <h2>Features</h2>
+    <div class="features">
+      <div class="feature">
+        <h3>Easy Sponsorships</h3>
+        <p>Streamline sponsor signups with an intuitive interface.</p>
+      </div>
+      <div class="feature">
+        <h3>Event Tracking</h3>
+        <p>Keep tabs on upcoming Kiddush events with detailed scheduling tools.</p>
+      </div>
+      <div class="feature">
+        <h3>Donor Records</h3>
+        <p>Maintain comprehensive donor history for transparency and recognition.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>How It Works</h2>
+    <p>1. Create an account. 2. Set up your Kiddush calendar. 3. Invite sponsors. 4. Celebrate together.</p>
+  </section>
+
+  <section>
+    <h2>Pricing</h2>
+    <div class="pricing">
+      <div class="price-card">
+        <h3>Basic Plan</h3>
+        <div class="price">Free</div>
+        <p>All core features at no cost. Perfect for small communities and shuls.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>© 2025 KiddushWare. All rights reserved.</p>
+  </footer>
+
+  <script>
+    const canvas = document.getElementById('bg');
+    const ctx = canvas.getContext('2d');
+    let width, height;
+    const particles = [];
+
+    function resize() {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    for (let i = 0; i < 100; i++) {
+      particles.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        r: Math.random() * 3 + 1,
+        dx: (Math.random() - 0.5) * 0.5,
+        dy: (Math.random() - 0.5) * 0.5
+      });
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = 'rgba(255,255,255,0.7)';
+      for (const p of particles) {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+        p.x += p.dx;
+        p.y += p.dy;
+        if (p.x < 0 || p.x > width) p.dx *= -1;
+        if (p.y < 0 || p.y > height) p.dy *= -1;
+      }
+      requestAnimationFrame(draw);
+    }
+    draw();
+  </script>
+</body>
+</html>
