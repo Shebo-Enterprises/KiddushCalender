@@ -14,6 +14,7 @@ service cloud.firestore {
     match /sponsorships/{sponsorshipId} {
       // Allow public to create 'pending' sponsorships.
       // Allow authenticated admin to create sponsorships linked to their UID (can be 'approved' or 'pending').
+      // Allow authenticated admin to create 'person' records.
       allow create: if
           // Case 1: Unauthenticated public form submission
           (
@@ -41,6 +42,13 @@ service cloud.firestore {
             // Admin can create either shabbat or custom type
             (request.resource.data.sponsorshipType == 'shabbat' || request.resource.data.sponsorshipType == 'custom')
             // Admin can set status to 'approved' or 'pending', and can set 'reservedByAdmin'
+          ) ||
+          // Case 3: Authenticated admin creating a person record
+          (
+            request.auth != null &&
+            request.resource.data.configOwnerId == request.auth.uid &&
+            request.resource.data.type == 'person' &&
+            request.resource.data.status == 'manual'
           );
 
       // Allow public read for 'approved' sponsorships (for public-display.js).
@@ -57,14 +65,6 @@ service cloud.firestore {
       // Allow public read for display purposes. Admins can still only update/delete their own.
       allow read: if true;
       allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
-    }
-        // Rules for the 'people' collection, managed by admins.
-    match /people/{personId} {
-      // Allow create only if the user is authenticated and they are setting themselves as the owner.
-      // This is for admins manually adding people through the admin panel.
-      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
-      // Allow read, update, and delete only if the user is authenticated and owns the person document.
-      allow read, update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
     }
   }
 }

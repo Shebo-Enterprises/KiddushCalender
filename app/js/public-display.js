@@ -440,6 +440,9 @@ async function renderForm(container, configData) {
                 <div id="check-amount-info-half" style="display:none;">
                      <p>For a half (co-sponsored) sponsorship, the amount is: <strong>$${paymentSettings.check.halfAmount}</strong>.</p>
                 </div>
+                <div id="check-amount-info-custom" style="display:none;">
+                    <!-- This will be populated dynamically -->
+                </div>
                 <p>You can mail or drop off the check at the office.</p>
                 <hr>
                 <p class="text-success"><strong>Your sponsorship has been submitted for review. Please complete payment to finalize.</strong></p>
@@ -700,6 +703,10 @@ async function renderForm(container, configData) {
                     paymentLink = configData.paymentSettings?.card?.fullKiddushLink;
                 } else if (selectedKiddushType === 'half') {
                     paymentLink = configData.paymentSettings?.card?.halfKiddushLink;
+                } else if (pricingOptionDetails) {
+                    // For custom pricing options, we don't have a specific link.
+                    // Fallback to the 'full' link as a sensible default destination.
+                    paymentLink = configData.paymentSettings?.card?.fullKiddushLink;
                 }
 
                 if (paymentLink) {
@@ -720,8 +727,18 @@ async function renderForm(container, configData) {
                     checkInfoPanel.style.display = 'block';
                     const fullAmountInfo = document.getElementById('check-amount-info-full');
                     const halfAmountInfo = document.getElementById('check-amount-info-half');
+                    const customAmountInfo = document.getElementById('check-amount-info-custom');
+
                     if(fullAmountInfo) fullAmountInfo.style.display = selectedKiddushType === 'full' ? 'block' : 'none';
                     if(halfAmountInfo) halfAmountInfo.style.display = selectedKiddushType === 'half' ? 'block' : 'none';
+                    if(customAmountInfo) {
+                        if (pricingOptionDetails) {
+                            customAmountInfo.innerHTML = `<p>For your selected sponsorship of <strong>${pricingOptionDetails.name}</strong>, the amount is: <strong>$${pricingOptionDetails.amount}</strong>.</p>`;
+                            customAmountInfo.style.display = 'block';
+                        } else {
+                            customAmountInfo.style.display = 'none';
+                        }
+                    }
                 }
             } else {
                 // Fallback for no payment options configured
