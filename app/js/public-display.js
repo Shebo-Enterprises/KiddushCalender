@@ -351,6 +351,34 @@ async function renderForm(container, configData) {
     // Fetch all Shabbosim for the year for the dropdown
     const allYearShabbosim = await getShabbosimForYear(); // from parsha-service.js
     // Fetch active custom sponsorable events for this config's owner
+    const allPricingOptions = await getAllPricingOptions(configData.userId);
+    const pricingOptionsMap = new Map(allPricingOptions.map(opt => [opt.id, opt]));
+
+    // This function will generate the sponsorship type options based on the selected event
+    function generateSponsorshipOptionsHTML(item) {
+        let optionsHTML = '';
+        if (item.type === 'custom' && item.pricingOptionIds && item.pricingOptionIds.length > 0) {
+            item.pricingOptionIds.forEach(optionId => {
+                const pricingOption = pricingOptionsMap.get(optionId);
+                if (pricingOption) {
+                    optionsHTML += `
+                        <label class="radio">
+                            <input type="radio" name="kiddushType" value="${pricingOption.id}" required> 
+                            ${pricingOption.name} - $${pricingOption.amount}
+                            ${pricingOption.description ? `<br><small class="text-muted">${pricingOption.description}</small>` : ''}
+                        </label>
+                    `;
+                }
+            });
+            return optionsHTML;
+        }
+        // Fallback to old logic for Shabbos sponsorships or custom events without specific pricing
+        if (hasCardFull || hasCheckFull) optionsHTML += `<label class="radio-inline"><input type="radio" name="kiddushType" value="full" required> Full Sponsorship</label>`;
+        if (hasCardHalf || hasCheckHalf) optionsHTML += `<label class="radio-inline"><input type="radio" name="kiddushType" value="half" required> Half Sponsorship</label>`;
+        return optionsHTML;
+    }
+
+
     const activeCustomEvents = await getActiveCustomSponsorables(configData.userId); // New helper function
 
     const { paymentSettings } = configData;
@@ -358,22 +386,6 @@ async function renderForm(container, configData) {
     const hasCardHalf = paymentSettings?.card?.enabled && paymentSettings?.card?.halfKiddushPrice && paymentSettings?.card?.halfKiddushLink;
     const hasCheckFull = paymentSettings?.check?.enabled && paymentSettings?.check?.fullAmount;
     const hasCheckHalf = paymentSettings?.check?.enabled && paymentSettings?.check?.halfAmount;
-
-    let sponsorshipTypeOptionsHTML = '';
-    if (hasCardFull || hasCheckFull) {
-        sponsorshipTypeOptionsHTML += `
-            <label class="radio-inline">
-                <input type="radio" name="kiddushType" id="kiddushTypeFull" value="full" required> Full Sponsorship
-            </label>
-        `;
-    }
-    if (hasCardHalf || hasCheckHalf) {
-        sponsorshipTypeOptionsHTML += `
-            <label class="radio-inline">
-                <input type="radio" name="kiddushType" id="kiddushTypeHalf" value="half" required> Half Sponsorship
-            </label>
-        `;
-    }
 
     let paymentMethodOptionsHTML = '';
     const canPayByCard = paymentSettings?.card?.enabled && (paymentSettings?.card?.fullKiddushLink || paymentSettings?.card?.halfKiddushLink);
@@ -392,14 +404,14 @@ async function renderForm(container, configData) {
             </label>`;
     }
 
-    const hasAnyPaymentOptions = sponsorshipTypeOptionsHTML && paymentMethodOptionsHTML;
+    const hasAnyPaymentOptions = (hasCardFull || hasCheckFull || hasCardHalf || hasCheckHalf) && paymentMethodOptionsHTML;
 
     let paymentSectionHTML = '';
     if (hasAnyPaymentOptions) {
         paymentSectionHTML = `
-            <div class="form-group">
+            <div class="form-group" id="sponsorship-type-container">
                 <label>Sponsorship Type:</label>
-                <div>${sponsorshipTypeOptionsHTML}</div>
+                <div id="sponsorship-type-options"></div>
             </div>
             <div class="form-group">
                 <label>Payment Method:</label>
@@ -516,6 +528,7 @@ async function renderForm(container, configData) {
     const formCustomEventIdInput = document.getElementById('formCustomEventId');
     const formCustomEventTitleInput = document.getElementById('formCustomEventTitle');
     const selectedShabbosInfoDiv = document.getElementById('selected-shabbos-info');
+    const sponsorshipTypeOptionsDiv = document.getElementById('sponsorship-type-options');
     const selectedShabbosInfoPanel = document.getElementById('selected-shabbos-info-panel');
 
 
@@ -527,6 +540,7 @@ async function renderForm(container, configData) {
         formParshaInput.value = '';
         formCustomEventIdInput.value = '';
         formCustomEventTitleInput.value = '';
+        if (sponsorshipTypeOptionsDiv) sponsorshipTypeOptionsDiv.innerHTML = ''; // Clear pricing options
 
         if (selectedValue) {
             const parts = selectedValue.split('|');
@@ -539,6 +553,7 @@ async function renderForm(container, configData) {
                 formParshaInput.value = selectedParsha;
                 const shabbatDetail = await getShabbatInfoForDate(new Date(selectedDate + "T00:00:00Z"));
                 selectedShabbosInfoDiv.innerHTML = `<p><strong>Parsha:</strong> ${selectedParsha}</p><p><strong>Weekend of:</strong> ${shabbatDetail.weekendOf}</p>`;
+                if (sponsorshipTypeOptionsDiv) sponsorshipTypeOptionsDiv.innerHTML = generateSponsorshipOptionsHTML({ type: 'shabbat' });
                 selectedShabbosInfoPanel.style.display = 'block';
             } else if (type === 'custom') {
                 const [_, eventId, eventTitle] = parts;
@@ -549,6 +564,7 @@ async function renderForm(container, configData) {
                     const startDateStr = new Date(eventDetail.startDate + "T00:00:00Z").toLocaleDateString();
                     const endDateStr = new Date(eventDetail.endDate + "T00:00:00Z").toLocaleDateString();
                     selectedShabbosInfoDiv.innerHTML = `<p><strong>Event:</strong> ${eventTitle}</p><p><strong>Dates:</strong> ${startDateStr} - ${endDateStr}</p>${eventDetail.description ? `<p><strong>Description:</strong> ${eventDetail.description}</p>` : ''}`;
+                    if (sponsorshipTypeOptionsDiv) sponsorshipTypeOptionsDiv.innerHTML = generateSponsorshipOptionsHTML(eventDetail);
                 } else {
                     selectedShabbosInfoDiv.innerHTML = `<p><strong>Event:</strong> ${eventTitle}</p><p>Details not found.</p>`;
                 }
@@ -589,6 +605,14 @@ async function renderForm(container, configData) {
         const selectedKiddushType = sponsorshipForm.kiddushType ? sponsorshipForm.kiddushType.value : null;
         const selectedPaymentMethod = sponsorshipForm.paymentMethod ? sponsorshipForm.paymentMethod.value : null;
 
+        // Handle new pricing options
+        let kiddushTypeForDB = selectedKiddushType;
+        let pricingOptionDetails = null;
+        if (sponsorshipType === 'custom' && selectedKiddushType && !['full', 'half'].includes(selectedKiddushType)) {
+            pricingOptionDetails = pricingOptionsMap.get(selectedKiddushType);
+            if (pricingOptionDetails) kiddushTypeForDB = pricingOptionDetails.name; // Store name for readability
+        }
+
         let emailSubjectDetails = "";
         let paymentLink = '';
 
@@ -604,7 +628,8 @@ async function renderForm(container, configData) {
                 configOwnerId: configData.userId, 
                 formTitle: configData.title || "Kiddush Sponsorship Form",
                 paymentMethod: selectedPaymentMethod,
-                kiddushType: selectedKiddushType
+                kiddushType: kiddushTypeForDB, // e.g., "Full Sponsorship" or "Co-Sponsorship"
+                pricingOptionId: pricingOptionDetails ? selectedKiddushType : null, // The ID
             };
 
             if (sponsorshipType === 'shabbat') {
@@ -642,7 +667,7 @@ async function renderForm(container, configData) {
                 formDataForEmail.append('Occasion', sponsorshipData.occasion);
                 formDataForEmail.append('Contact Email', sponsorshipData.contactEmail);
                 formDataForEmail.append('Payment Method', sponsorshipData.paymentMethod);
-                formDataForEmail.append('Kiddush Type', sponsorshipData.kiddushType);
+                formDataForEmail.append('Kiddush Type', `${sponsorshipData.kiddushType}${pricingOptionDetails ? ` ($${pricingOptionDetails.amount})` : ''}`);
                 formDataForEmail.append('Status', 'Pending Review');
                 if (sponsorshipType === 'shabbat') {
                     formDataForEmail.append('Item Sponsored', `Parsha: ${sponsorshipData.parsha} (Date: ${sponsorshipData.shabbatDate})`);
@@ -713,6 +738,19 @@ async function renderForm(container, configData) {
             formMessage.className = 'alert alert-danger';
         }
     });
+}
+
+// Helper function to fetch all pricing options for a user
+async function getAllPricingOptions(userId) {
+    const pricingOptions = [];
+    if (!userId) return pricingOptions;
+    try {
+        const snapshot = await db.collection("pricingOptions")
+            .where("userId", "==", userId)
+            .get();
+        snapshot.forEach(doc => pricingOptions.push({ id: doc.id, ...doc.data() }));
+    } catch (error) { console.error("Error fetching all pricing options:", error); }
+    return pricingOptions;
 }
 
 // Helper function to fetch active custom sponsorable events for a user

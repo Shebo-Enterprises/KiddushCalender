@@ -231,6 +231,9 @@
                             <li><a href="#" class="nav-link" data-section="people-management">
                                 <i class="glyphicon glyphicon-user"></i> People
                             </a></li>
+                            <li><a href="#" class="nav-link" data-section="pricing-management">
+                                <i class="glyphicon glyphicon-usd"></i> Pricing
+                            </a></li>
                             <li><a href="#" class="nav-link" data-section="support-section">
                                 <i class="glyphicon glyphicon-question-sign"></i> Support
                             </a></li>
@@ -357,6 +360,10 @@
                             <div class="form-group">
                                 <label for="custom-event-description">Description (Optional):</label>
                                 <textarea class="form-control" id="custom-event-description" name="custom-event-description" rows="3"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Available Pricing Options for this Event:</label>
+                                <div id="custom-event-pricing-options-list" class="well well-sm" style="max-height: 200px; overflow-y: auto;"></div>
                             </div>
                             <div class="row">
                                 <div class="col-md-6">
@@ -486,6 +493,34 @@
                                 <div id="people-list">
                                     <!-- People table will be loaded here -->
                                 </div>
+                            </div>
+                        </div>
+
+                        <!-- Section for Creating/Editing Pricing Options -->
+                        <div class="panel panel-info admin-section" id="pricing-management">
+                            <div class="panel-heading"><h2 class="panel-title">Manage Pricing Options</h2></div>
+                            <div class="panel-body">
+                                <form id="create-pricing-option-form">
+                                    <h3>Create New Pricing Option</h3>
+                                    <input type="hidden" id="editing-pricing-option-id">
+                                    <div class="form-group">
+                                        <label for="pricing-option-name">Option Name:</label>
+                                        <input type="text" class="form-control" id="pricing-option-name" placeholder="e.g., Full Sponsorship, Co-Sponsorship" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="pricing-option-amount">Amount ($):</label>
+                                        <input type="number" class="form-control" id="pricing-option-amount" placeholder="e.g., 180" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="pricing-option-description">Description (Optional):</label>
+                                        <textarea class="form-control" id="pricing-option-description" rows="2" placeholder="e.g., Covers the full cost of the weekly kiddush."></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-success">Create Pricing Option</button>
+                                    <button type="button" class="btn btn-default" onclick="resetPricingOptionForm()">Cancel Edit</button>
+                                </form>
+                                <hr>
+                                <h3>Existing Pricing Options</h3>
+                                <div id="pricing-options-list"></div>
                             </div>
                         </div>
 
