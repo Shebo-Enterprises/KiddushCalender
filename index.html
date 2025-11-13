@@ -1,24 +1,317 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KiddushWare</title>
+  <title>KiddushWare — Sponsor, Track, Celebrate</title>
+  <meta name="description" content="The modern, all-in-one platform to effortlessly manage Kiddush sponsorships, scheduling, and donor engagement for your community.">
+  
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
   <style>
-    body, html {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      overflow: hidden;
+    /* Custom Styles */
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #0a0a0a; /* A slightly darker gray-900 */
     }
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
+
+    /* Background Grid Pattern */
+    .background-grid {
+      background-image: linear-gradient(to right, rgba(128, 128, 128, 0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(128, 128, 128, 0.04) 1px, transparent 1px);
+      background-size: 14px 24px;
+    }
+
+    /* Blurred background shape */
+    .blur-shape {
+      filter: blur(100px);
+    }
+
+    /* Custom button styles to mimic shadcn */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 0.5rem;
+      font-weight: 500;
+      transition: all 0.2s ease-in-out;
+      padding: 0.625rem 1rem; /* size-lg: py-2.5 px-4 */
+      font-size: 1rem; /* size-lg: text-base */
+    }
+    .btn-lg {
+        padding: 0.75rem 1.5rem;
+        font-size: 1.125rem;
+    }
+    .btn-primary {
+      background-color: #f9fafb; /* gray-50 */
+      color: #0a0a0a;
+    }
+    .btn-primary:hover {
+      background-color: #f9fafb/90;
+    }
+    .btn-outline {
+      border: 1px solid #404040; /* neutral-700 */
+      background-color: transparent;
+      color: #f9fafb;
+    }
+    .btn-outline:hover {
+      background-color: #262626; /* neutral-800 */
+    }
+
+    /* Scroll-reveal animation */
+    .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+      transition-delay: var(--delay, 0s);
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
     }
   </style>
 </head>
-<body>
-  <iframe src="https://other-result-040654.framer.app/" allowfullscreen></iframe>
+<body class="bg-gray-900 text-white antialiased">
+
+  <!-- Background Gradient & Grid -->
+  <div class="absolute inset-0 -z-10 h-full w-full background-grid">
+    <div class="absolute left-0 right-0 top-0 -z-10 m-auto h-[310px] w-[310px] rounded-full bg-blue-600 opacity-20 blur-shape"></div>
+  </div>
+
+  <!-- Header -->
+  <header class="sticky top-0 z-50 backdrop-blur-lg border-b border-white/5">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <div class="text-2xl font-bold tracking-tighter">
+          KiddushWare
+        </div>
+        <nav class="hidden md:flex items-center space-x-8">
+          <a href="#features" class="text-gray-300 hover:text-white transition-colors">Features</a>
+          <a href="#pricing" class="text-gray-300 hover:text-white transition-colors">Pricing</a>
+          <a href="#how-it-works" class="text-gray-300 hover:text-white transition-colors">How It Works</a>
+        </nav>
+        <a href="/app" class="btn btn-primary group hidden sm:inline-flex">
+          Login / Get Started
+          <i data-lucide="arrow-right" class="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1"></i>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero Section -->
+    <section class="py-24 sm:py-32 text-center">
+      <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="reveal visible">
+          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tighter bg-clip-text text-transparent bg-gradient-to-b from-white to-gray-400">
+            Sponsor, Track, Celebrate.
+          </h1>
+          <p class="mt-6 max-w-2xl mx-auto text-lg text-gray-300">
+            The modern, all-in-one platform to effortlessly manage Kiddush sponsorships, scheduling, and donor engagement for your community.
+          </p>
+          <div class="mt-10 flex justify-center gap-4">
+            <a href="/app" class="btn btn-primary btn-lg group">
+              Start for Free
+              <i data-lucide="arrow-right" class="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1"></i>
+            </a>
+            <a href="#features" class="btn btn-outline btn-lg">Learn More</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-24 sm:py-32 bg-white/5">
+      <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center reveal">
+          <h2 class="text-3xl sm:text-4xl font-bold tracking-tighter">Why KiddushWare?</h2>
+          <p class="mt-4 max-w-2xl mx-auto text-gray-400">
+            Everything you need to streamline your sponsorship process and connect with your community.
+          </p>
+        </div>
+
+        <div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
+          <!-- Feature Card 1 -->
+          <div class="reveal h-full text-center bg-white/5 backdrop-blur-sm border border-white/10 hover:border-white/20 transition-all duration-300 transform hover:-translate-y-1 rounded-xl p-8" style="--delay: 0.1s;">
+            <div class="mx-auto bg-blue-500/10 text-blue-400 w-16 h-16 rounded-full flex items-center justify-center mb-4">
+              <i data-lucide="calendar" class="w-7 h-7"></i>
+            </div>
+            <h3 class="text-xl font-bold text-white">Effortless Scheduling</h3>
+            <p class="mt-2 text-gray-400">Manage your entire Kiddush calendar with a simple, intuitive interface. View upcoming events, available slots, and past sponsorships at a glance.</p>
+          </div>
+          <!-- Feature Card 2 -->
+          <div class="reveal h-full text-center bg-white/5 backdrop-blur-sm border border-white/10 hover:border-white/20 transition-all duration-300 transform hover:-translate-y-1 rounded-xl p-8" style="--delay: 0.2s;">
+            <div class="mx-auto bg-blue-500/10 text-blue-400 w-16 h-16 rounded-full flex items-center justify-center mb-4">
+              <i data-lucide="gift" class="w-7 h-7"></i>
+            </div>
+            <h3 class="text-xl font-bold text-white">Seamless Sponsorships</h3>
+            <p class="mt-2 text-gray-400">Provide a beautiful, modern form for members to sponsor a Kiddush. Accept payments, gather details, and approve submissions with ease.</p>
+          </div>
+          <!-- Feature Card 3 -->
+          <div class="reveal h-full text-center bg-white/5 backdrop-blur-sm border border-white/10 hover:border-white/20 transition-all duration-300 transform hover:-translate-y-1 rounded-xl p-8" style="--delay: 0.3s;">
+            <div class="mx-auto bg-blue-500/10 text-blue-400 w-16 h-16 rounded-full flex items-center justify-center mb-4">
+              <i data-lucide="users" class="w-7 h-7"></i>
+            </div>
+            <h3 class="text-xl font-bold text-white">Engage Your Donors</h3>
+            <p class="mt-2 text-gray-400">Keep a complete history of sponsorships. Recognize your donors and build stronger community relationships with detailed records.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="py-24 sm:py-32">
+      <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center reveal">
+          <h2 class="text-3xl sm:text-4xl font-bold tracking-tighter">Get Started in Minutes</h2>
+          <p class="mt-4 max-w-2xl mx-auto text-gray-400">
+            Four simple steps to a streamlined sponsorship system.
+          </p>
+        </div>
+
+        <div class="mt-16 max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
+          <!-- Step 1 -->
+          <div class="text-center reveal" style="--delay: 0.1s;">
+            <div class="flex items-center justify-center w-16 h-16 mx-auto mb-4 font-bold text-2xl border-2 border-blue-500 text-blue-400 rounded-full">1</div>
+            <h3 class="font-semibold text-lg text-white">Create Account</h3>
+            <p class="mt-1 text-gray-400">Sign up for free. No credit card required.</p>
+          </div>
+          <!-- Step 2 -->
+          <div class="text-center reveal" style="--delay: 0.2s;">
+            <div class="flex items-center justify-center w-16 h-16 mx-auto mb-4 font-bold text-2xl border-2 border-blue-500 text-blue-400 rounded-full">2</div>
+            <h3 class="font-semibold text-lg text-white">Set Up Calendar</h3>
+            <p class="mt-1 text-gray-400">Create your first sponsorship calendar or form.</p>
+          </div>
+          <!-- Step 3 -->
+          <div class="text-center reveal" style="--delay: 0.3s;">
+            <div class="flex items-center justify-center w-16 h-16 mx-auto mb-4 font-bold text-2xl border-2 border-blue-500 text-blue-400 rounded-full">3</div>
+            <h3 class="font-semibold text-lg text-white">Share Your Link</h3>
+            <p class="mt-1 text-gray-400">Embed the calendar on your site or share the link.</p>
+          </div>
+          <!-- Step 4 -->
+          <div class="text-center reveal" style="--delay: 0.4s;">
+            <div class="flex items-center justify-center w-16 h-16 mx-auto mb-4 font-bold text-2xl border-2 border-blue-500 text-blue-400 rounded-full">4</div>
+            <h3 class="font-semibold text-lg text-white">Celebrate!</h3>
+            <p class="mt-1 text-gray-400">Watch the sponsorships roll in and celebrate together.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="py-24 sm:py-32 bg-white/5">
+      <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center reveal">
+          <h2 class="text-3xl sm:text-4xl font-bold tracking-tighter">Simple, Transparent Pricing</h2>
+          <p class="mt-4 max-w-2xl mx-auto text-gray-400">
+            All the core features you need, completely free.
+          </p>
+        </div>
+
+        <div class="mt-16 flex justify-center reveal">
+          <div class="w-full max-w-md bg-gray-900/50 backdrop-blur-sm border-blue-500 border-2 shadow-2xl shadow-blue-500/10 rounded-xl">
+            <div class="p-8 text-center">
+              <h3 class="text-2xl font-bold text-white">Community Plan</h3>
+              <p class="text-5xl font-extrabold tracking-tight mt-4">Free</p>
+              <p class="text-gray-400">Forever.</p>
+            </div>
+            <div class="p-8 pt-0 space-y-4">
+              <ul class="space-y-3 text-gray-300">
+                <li class="flex items-center">
+                  <i data-lucide="check-circle" class="h-5 w-5 text-green-400 mr-3"></i>
+                  <span>Unlimited Sponsorships</span>
+                </li>
+                <li class="flex items-center">
+                  <i data-lucide="check-circle" class="h-5 w-5 text-green-400 mr-3"></i>
+                  <span>Customizable Forms & Calendars</span>
+                </li>
+                <li class="flex items-center">
+                  <i data-lucide="check-circle" class="h-5 w-5 text-green-400 mr-3"></i>
+                  <span>Sponsorship Management Dashboard</span>
+                </li>
+                <li class="flex items-center">
+                  <i data-lucide="check-circle" class="h-5 w-5 text-green-400 mr-3"></i>
+                  <span>Donor & People Tracking</span>
+                </li>
+                <li class="flex items-center">
+                  <i data-lucide="check-circle" class="h-5 w-5 text-green-400 mr-3"></i>
+                  <span>Email Notifications</span>
+                </li>
+              </ul>
+              <a href="/app" class="btn btn-primary w-full mt-6 group !py-3">
+                Get Started Now
+                <i data-lucide="arrow-right" class="inline-block ml-2 h-4 w-4 transition-transform group-hover:translate-x-1"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="py-24 sm:py-32">
+      <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div class="reveal">
+          <h2 class="text-3xl sm:text-4xl font-bold tracking-tighter">
+            Ready to Modernize Your Kiddush Program?
+          </h2>
+          <p class="mt-4 max-w-xl mx-auto text-gray-400">
+            Join dozens of communities simplifying their workflow and celebrating together.
+          </p>
+          <div class="mt-8">
+            <a href="/app" class="btn btn-primary btn-lg group">
+              Create Your Free Account
+              <i data-lucide="arrow-right" class="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-white/10">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center text-gray-500">
+      <p>&copy; <span id="year"></span> KiddushWare. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    // Set current year in footer
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Scroll Reveal Animation
+    document.addEventListener('DOMContentLoaded', () => {
+      const revealElements = document.querySelectorAll('.reveal');
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            // Optional: unobserve after revealing to save resources
+            // observer.unobserve(entry.target);
+          }
+        });
+      }, {
+        threshold: 0.1 // Trigger when 10% of the element is visible
+      });
+
+      revealElements.forEach(el => {
+        observer.observe(el);
+      });
+    });
+  </script>
+
 </body>
 </html>
