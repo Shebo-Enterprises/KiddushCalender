@@ -18,12 +18,6 @@ const adminReserveMessage = document.getElementById('admin-reserve-message'); //
 const createCustomEventForm = document.getElementById('create-custom-event-form');
 const customEventsListDiv = document.getElementById('custom-events-list');
 const editingCustomEventIdInput = document.getElementById('editing-custom-event-id');
-const customEventPricingOptionsListDiv = document.getElementById('custom-event-pricing-options-list');
-
-// New elements for Pricing Options
-const createPricingOptionForm = document.getElementById('create-pricing-option-form');
-const pricingOptionsListDiv = document.getElementById('pricing-options-list');
-const editingPricingOptionIdInput = document.getElementById('editing-pricing-option-id');
 
 const adminReserveTypeSelect = document.getElementById('admin-reserve-type-select');
 const adminShabbosSelectContainer = document.getElementById('admin-shabbos-select-container');
@@ -45,7 +39,6 @@ const editingConfigIdInput = document.getElementById('editing-config-id');
 function loadAdminData() {
     loadConfigurations();
     loadCustomEvents(); // Load custom sponsorable events
-    loadPricingOptions(); // Load pricing options
     populateAdminShabbosSelector(); // Populate the Parsha selector for admin reservation
     loadSponsorships();
     loadPeople(); // Load people management
@@ -386,10 +379,6 @@ if (createCustomEventForm) {
         const endDate = createCustomEventForm['custom-event-end-date'].value;
         const editingId = editingCustomEventIdInput.value;
 
-        // Get selected pricing options
-        const selectedPricingOptions = Array.from(document.querySelectorAll('#custom-event-pricing-options-list input[type="checkbox"]:checked'))
-            .map(checkbox => checkbox.value);
-
 
         if (!title || !startDate || !endDate) {
             alert("Please provide a title, start date, and end date for the custom event.");
@@ -406,11 +395,10 @@ if (createCustomEventForm) {
             startDate,
             endDate,
             userId: currentUser.uid,
-            pricingOptionIds: selectedPricingOptions
         };
 
         try {
-            if (editingId) {
+            if (editingId) { // This block is for updating an existing event
                 eventData.lastUpdatedAt = firebase.firestore.FieldValue.serverTimestamp();
                 await db.collection("customSponsorables").doc(editingId).update(eventData);
                 alert("Custom event updated successfully!");
@@ -432,8 +420,7 @@ if (createCustomEventForm) {
 function resetCustomEventForm() {
     if (createCustomEventForm) createCustomEventForm.reset();
     if (editingCustomEventIdInput) editingCustomEventIdInput.value = '';
-    const formHeading = createCustomEventForm.querySelector('h3'); // Assuming h3 for heading
-    if (customEventPricingOptionsListDiv) customEventPricingOptionsListDiv.innerHTML = '<p class="text-muted">Loading pricing options...</p>';
+    const formHeading = createCustomEventForm.querySelector('h4'); // Assuming h4 for heading
     if (formHeading) formHeading.textContent = 'Create New Custom Event';
     createCustomEventForm.querySelector('button[type="submit"]').textContent = 'Create Event';
 }
@@ -455,17 +442,12 @@ async function loadCustomEvents() {
         } else {
             snapshot.forEach(doc => {
                 const event = doc.data();
-                const pricingDetails = event.pricingOptionIds && event.pricingOptionIds.length > 0
-                    ? `<p><small><strong>Pricing Options:</strong> ${event.pricingOptionIds.length} selected</small></p>`
-                    : `<p><small><em>No specific pricing options attached.</em></small></p>`;
-
                 html += `
                     <div class="panel panel-default custom-event-item">
                         <div class="panel-heading"><h4 class="panel-title">${event.title}</h4></div>
                         <div class="panel-body">
                             <p><strong>Dates:</strong> ${new Date(event.startDate + "T00:00:00Z").toLocaleDateString()} - ${new Date(event.endDate + "T00:00:00Z").toLocaleDateString()}</p>
                             ${event.description ? `<p><strong>Description:</strong> ${event.description}</p>` : ''}
-                            ${pricingDetails}
                             <button class="btn btn-primary btn-xs" onclick='editCustomEventPrep("${doc.id}")'>Edit</button>
                             <button class="btn btn-danger btn-xs" style="margin-left: 5px;" onclick="deleteCustomEvent('${doc.id}')">Delete</button>
                         </div>
@@ -488,8 +470,7 @@ async function editCustomEventPrep(eventId) {
         createCustomEventForm['custom-event-start-date'].value = data.startDate;
         createCustomEventForm['custom-event-end-date'].value = data.endDate;
         editingCustomEventIdInput.value = eventId;
-        populatePricingOptionsForEventForm(data.pricingOptionIds || []);
-        createCustomEventForm.querySelector('h3').textContent = `Edit Custom Event: ${data.title}`;
+        createCustomEventForm.querySelector('h4').textContent = `Edit Custom Event: ${data.title}`;
         createCustomEventForm.querySelector('button[type="submit"]').textContent = 'Update Event';
         createCustomEventForm.scrollIntoView({ behavior: 'smooth' });
     }
@@ -506,149 +487,6 @@ async function deleteCustomEvent(eventId) {
             console.error("Error deleting custom event:", error);
             alert("Error deleting custom event.");
         }
-    }
-}
-
-// Pricing Options Management
-if (createPricingOptionForm) {
-    createPricingOptionForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const currentUser = auth.currentUser;
-        if (!currentUser) {
-            alert("You must be logged in.");
-            return;
-        }
-
-        const name = createPricingOptionForm['pricing-option-name'].value;
-        const amount = createPricingOptionForm['pricing-option-amount'].value;
-        const description = createPricingOptionForm['pricing-option-description'].value;
-        const editingId = editingPricingOptionIdInput.value;
-
-        const pricingData = {
-            name,
-            amount: parseFloat(amount),
-            description,
-            userId: currentUser.uid,
-        };
-
-        try {
-            if (editingId) {
-                pricingData.lastUpdatedAt = firebase.firestore.FieldValue.serverTimestamp();
-                await db.collection("pricingOptions").doc(editingId).update(pricingData);
-                alert("Pricing option updated successfully!");
-            } else {
-                pricingData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-                await db.collection("pricingOptions").add(pricingData);
-                alert("Pricing option created successfully!");
-            }
-            resetPricingOptionForm();
-            loadPricingOptions();
-        } catch (error) {
-            console.error("Error saving pricing option:", error);
-            alert("Error saving pricing option.");
-        }
-    });
-}
-
-function resetPricingOptionForm() {
-    if (createPricingOptionForm) createPricingOptionForm.reset();
-    if (editingPricingOptionIdInput) editingPricingOptionIdInput.value = '';
-    const formHeading = createPricingOptionForm.querySelector('h3');
-    if (formHeading) formHeading.textContent = 'Create New Pricing Option';
-    createPricingOptionForm.querySelector('button[type="submit"]').textContent = 'Create Pricing Option';
-}
-
-async function loadPricingOptions() {
-    if (!pricingOptionsListDiv) return;
-    pricingOptionsListDiv.innerHTML = '<div class="text-center">Loading pricing options...</div>';
-    const currentUser = auth.currentUser;
-    if (!currentUser) {
-        pricingOptionsListDiv.innerHTML = '<div class="alert alert-warning">Please login to see pricing options.</div>';
-        return;
-    }
-
-    try {
-        const snapshot = await db.collection("pricingOptions").where("userId", "==", currentUser.uid).orderBy("name").get();
-        let html = '';
-        if (snapshot.empty) {
-            html = '<div class="alert alert-info">No pricing options found. Create one above to use with custom events.</div>';
-        } else {
-            snapshot.forEach(doc => {
-                const option = doc.data();
-                html += `
-                    <div class="panel panel-default">
-                        <div class="panel-body">
-                            <strong>${option.name}</strong> - $${option.amount}
-                            ${option.description ? `<p class="text-muted" style="margin-bottom:0;"><small>${option.description}</small></p>` : ''}
-                            <div style="margin-top: 10px;">
-                                <button class="btn btn-primary btn-xs" onclick='editPricingOptionPrep("${doc.id}")'>Edit</button>
-                                <button class="btn btn-danger btn-xs" style="margin-left: 5px;" onclick="deletePricingOption('${doc.id}')">Delete</button>
-                            </div>
-                        </div>
-                    </div>`;
-            });
-        }
-        pricingOptionsListDiv.innerHTML = html;
-        // After loading, populate the checkboxes in the custom event form
-        populatePricingOptionsForEventForm();
-    } catch (error) {
-        console.error("Error loading pricing options: ", error);
-        pricingOptionsListDiv.innerHTML = '<div class="alert alert-danger">Error loading pricing options.</div>';
-    }
-}
-
-async function editPricingOptionPrep(optionId) {
-    const docSnap = await db.collection("pricingOptions").doc(optionId).get();
-    if (docSnap.exists) {
-        const data = docSnap.data();
-        createPricingOptionForm['pricing-option-name'].value = data.name;
-        createPricingOptionForm['pricing-option-amount'].value = data.amount;
-        createPricingOptionForm['pricing-option-description'].value = data.description || '';
-        editingPricingOptionIdInput.value = optionId;
-        createPricingOptionForm.querySelector('h3').textContent = `Edit Pricing Option: ${data.name}`;
-        createPricingOptionForm.querySelector('button[type="submit"]').textContent = 'Update Option';
-        createPricingOptionForm.scrollIntoView({ behavior: 'smooth' });
-    }
-}
-
-async function deletePricingOption(optionId) {
-    if (confirm("Are you sure you want to delete this pricing option? It will be removed from any events it's attached to.")) {
-        try {
-            await db.collection("pricingOptions").doc(optionId).delete();
-            alert("Pricing option deleted.");
-            loadPricingOptions();
-            // You might want to also find and remove this ID from all customSponsorables, but for now, the app will just ignore missing IDs.
-        } catch (error) {
-            console.error("Error deleting pricing option:", error);
-            alert("Error deleting pricing option.");
-        }
-    }
-}
-
-async function populatePricingOptionsForEventForm(selectedIds = []) {
-    if (!customEventPricingOptionsListDiv) return;
-    const currentUser = auth.currentUser;
-    if (!currentUser) return;
-
-    try {
-        const snapshot = await db.collection("pricingOptions").where("userId", "==", currentUser.uid).orderBy("name").get();
-        if (snapshot.empty) {
-            customEventPricingOptionsListDiv.innerHTML = '<p class="text-muted">No pricing options created yet. Go to the "Pricing" section to add some.</p>';
-            return;
-        }
-        let checkboxesHtml = '';
-        snapshot.forEach(doc => {
-            const option = doc.data();
-            const isChecked = selectedIds.includes(doc.id) ? 'checked' : '';
-            checkboxesHtml += `
-                <div class="checkbox">
-                    <label><input type="checkbox" value="${doc.id}" ${isChecked}> ${option.name} ($${option.amount})</label>
-                </div>`;
-        });
-        customEventPricingOptionsListDiv.innerHTML = checkboxesHtml;
-    } catch (error) {
-        console.error("Error populating pricing options for event form:", error);
-        customEventPricingOptionsListDiv.innerHTML = '<p class="text-danger">Could not load pricing options.</p>';
     }
 }
 
