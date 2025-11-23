@@ -379,7 +379,6 @@ if (createCustomEventForm) {
         const endDate = createCustomEventForm['custom-event-end-date'].value;
         const editingId = editingCustomEventIdInput.value;
 
-
         if (!title || !startDate || !endDate) {
             alert("Please provide a title, start date, and end date for the custom event.");
             return;
@@ -398,7 +397,7 @@ if (createCustomEventForm) {
         };
 
         try {
-            if (editingId) { // This block is for updating an existing event
+            if (editingId) {
                 eventData.lastUpdatedAt = firebase.firestore.FieldValue.serverTimestamp();
                 await db.collection("customSponsorables").doc(editingId).update(eventData);
                 alert("Custom event updated successfully!");
@@ -420,7 +419,7 @@ if (createCustomEventForm) {
 function resetCustomEventForm() {
     if (createCustomEventForm) createCustomEventForm.reset();
     if (editingCustomEventIdInput) editingCustomEventIdInput.value = '';
-    const formHeading = createCustomEventForm.querySelector('h4'); // Assuming h4 for heading
+    const formHeading = createCustomEventForm.querySelector('h3'); // Assuming h3 for heading
     if (formHeading) formHeading.textContent = 'Create New Custom Event';
     createCustomEventForm.querySelector('button[type="submit"]').textContent = 'Create Event';
 }
@@ -470,7 +469,7 @@ async function editCustomEventPrep(eventId) {
         createCustomEventForm['custom-event-start-date'].value = data.startDate;
         createCustomEventForm['custom-event-end-date'].value = data.endDate;
         editingCustomEventIdInput.value = eventId;
-        createCustomEventForm.querySelector('h4').textContent = `Edit Custom Event: ${data.title}`;
+        createCustomEventForm.querySelector('h3').textContent = `Edit Custom Event: ${data.title}`;
         createCustomEventForm.querySelector('button[type="submit"]').textContent = 'Update Event';
         createCustomEventForm.scrollIntoView({ behavior: 'smooth' });
     }
