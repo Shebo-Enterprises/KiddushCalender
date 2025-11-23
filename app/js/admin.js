@@ -52,18 +52,18 @@ function loadAdminData() {
 function initializeSidebarNavigation() {
     const navLinks = document.querySelectorAll('.nav-link');
     const sections = document.querySelectorAll('.admin-section');
-    
+
     navLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
+        link.addEventListener('click', function (e) {
             e.preventDefault();
-            
+
             // Remove active class from all links and sections
             navLinks.forEach(l => l.classList.remove('active'));
             sections.forEach(s => s.classList.remove('active'));
-            
+
             // Add active class to clicked link
             this.classList.add('active');
-            
+
             // Show corresponding section
             const sectionId = this.getAttribute('data-section');
             const targetSection = document.getElementById(sectionId);
@@ -75,7 +75,7 @@ function initializeSidebarNavigation() {
 }
 
 if (configTypeSelect) {
-    configTypeSelect.addEventListener('change', function() {
+    configTypeSelect.addEventListener('change', function () {
         if (this.value === 'form') {
             formPaymentOptionsDiv.style.display = 'block';
         } else {
@@ -83,16 +83,16 @@ if (configTypeSelect) {
         }
     });
 }
-if(configPaymentCheckEnabled){
-    configPaymentCheckEnabled.addEventListener('change', function() {
+if (configPaymentCheckEnabled) {
+    configPaymentCheckEnabled.addEventListener('change', function () {
         const displayStyle = this.checked ? 'block' : 'none';
-        if(configCheckDetailsDiv) configCheckDetailsDiv.style.display = displayStyle;
-        if(configCheckAmountsDiv) configCheckAmountsDiv.style.display = displayStyle;
+        if (configCheckDetailsDiv) configCheckDetailsDiv.style.display = displayStyle;
+        if (configCheckAmountsDiv) configCheckAmountsDiv.style.display = displayStyle;
 
     });
 }
-if(configPaymentCardEnabled){
-    configPaymentCardEnabled.addEventListener('change', function() {
+if (configPaymentCardEnabled) {
+    configPaymentCardEnabled.addEventListener('change', function () {
         configCardDetailsDiv.style.display = this.checked ? 'block' : 'none';
     });
 }
@@ -529,7 +529,7 @@ async function populateAdminCustomEventSelector() {
         let optionsHtml = '<option value="">Select a Custom Event</option>';
         snapshot.forEach(doc => {
             const event = doc.data();
-            optionsHtml += `<option value="${doc.id}|${event.title}">${event.title} (${new Date(event.startDate+"T00:00:00Z").toLocaleDateString()} - ${new Date(event.endDate+"T00:00:00Z").toLocaleDateString()})</option>`;
+            optionsHtml += `<option value="${doc.id}|${event.title}">${event.title} (${new Date(event.startDate + "T00:00:00Z").toLocaleDateString()} - ${new Date(event.endDate + "T00:00:00Z").toLocaleDateString()})</option>`;
         });
         adminCustomEventSelect.innerHTML = optionsHtml || '<option value="">No active custom events found</option>';
     } catch (error) {
@@ -539,7 +539,7 @@ async function populateAdminCustomEventSelector() {
 }
 
 if (adminShabbosSelect) {
-    adminShabbosSelect.addEventListener('change', async function() {
+    adminShabbosSelect.addEventListener('change', async function () {
         const selectedValue = this.value;
         if (selectedValue && adminSelectedShabbosInfoDiv && adminSelectedShabbosInfoPanel) {
             const [selectedDate, selectedParsha] = selectedValue.split('|');
@@ -553,16 +553,16 @@ if (adminShabbosSelect) {
 }
 
 if (adminReserveTypeSelect) {
-    adminReserveTypeSelect.addEventListener('change', function() {
+    adminReserveTypeSelect.addEventListener('change', function () {
         if (this.value === 'shabbat') {
-            if(adminShabbosSelectContainer) adminShabbosSelectContainer.style.display = 'block';
-            if(adminCustomEventSelectContainer) adminCustomEventSelectContainer.style.display = 'none';
+            if (adminShabbosSelectContainer) adminShabbosSelectContainer.style.display = 'block';
+            if (adminCustomEventSelectContainer) adminCustomEventSelectContainer.style.display = 'none';
         } else if (this.value === 'custom') {
-            if(adminShabbosSelectContainer) adminShabbosSelectContainer.style.display = 'none';
-            if(adminCustomEventSelectContainer) adminCustomEventSelectContainer.style.display = 'block';
+            if (adminShabbosSelectContainer) adminShabbosSelectContainer.style.display = 'none';
+            if (adminCustomEventSelectContainer) adminCustomEventSelectContainer.style.display = 'block';
         } else {
-            if(adminShabbosSelectContainer) adminShabbosSelectContainer.style.display = 'none';
-            if(adminCustomEventSelectContainer) adminCustomEventSelectContainer.style.display = 'none';
+            if (adminShabbosSelectContainer) adminShabbosSelectContainer.style.display = 'none';
+            if (adminCustomEventSelectContainer) adminCustomEventSelectContainer.style.display = 'none';
         }
     });
     // Trigger change for initial state
@@ -572,11 +572,11 @@ if (adminReserveTypeSelect) {
 if (adminReserveKiddushForm) {
     adminReserveKiddushForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        if(adminReserveMessage) adminReserveMessage.textContent = 'Reserving...';
+        if (adminReserveMessage) adminReserveMessage.textContent = 'Reserving...';
 
         const currentUser = auth.currentUser;
         if (!currentUser) {
-            if(adminReserveMessage) adminReserveMessage.textContent = "Error: You must be logged in.";
+            if (adminReserveMessage) adminReserveMessage.textContent = "Error: You must be logged in.";
             return;
         }
 
@@ -596,7 +596,7 @@ if (adminReserveKiddushForm) {
         if (reserveType === 'shabbat') {
             const selectedShabbosValue = adminShabbosSelect.value;
             if (!selectedShabbosValue) {
-                if(adminReserveMessage) adminReserveMessage.textContent = "Error: Please select a Parsha/Shabbos.";
+                if (adminReserveMessage) adminReserveMessage.textContent = "Error: Please select a Parsha/Shabbos.";
                 return;
             }
             const [shabbatDate, parsha] = selectedShabbosValue.split('|');
@@ -606,7 +606,7 @@ if (adminReserveKiddushForm) {
         } else if (reserveType === 'custom') {
             const selectedCustomEventValue = adminCustomEventSelect.value;
             if (!selectedCustomEventValue) {
-                if(adminReserveMessage) adminReserveMessage.textContent = "Error: Please select a Custom Event.";
+                if (adminReserveMessage) adminReserveMessage.textContent = "Error: Please select a Custom Event.";
                 return;
             }
             const [customEventId, customEventTitle] = selectedCustomEventValue.split('|');
@@ -614,23 +614,23 @@ if (adminReserveKiddushForm) {
             sponsorshipDetails.customSponsorableTitle = customEventTitle; // For context
             sponsorshipDetails.sponsorshipType = "custom";
         } else {
-            if(adminReserveMessage) adminReserveMessage.textContent = "Error: Please select a reservation type.";
+            if (adminReserveMessage) adminReserveMessage.textContent = "Error: Please select a reservation type.";
             return;
         }
 
         try {
             await db.collection("sponsorships").add(sponsorshipDetails);
-            if(adminReserveMessage) adminReserveMessage.textContent = "Kiddush/Event reserved successfully!";
+            if (adminReserveMessage) adminReserveMessage.textContent = "Kiddush/Event reserved successfully!";
             adminReserveKiddushForm.reset();
-            if(adminSelectedShabbosInfoPanel) adminSelectedShabbosInfoPanel.style.display = 'none';
+            if (adminSelectedShabbosInfoPanel) adminSelectedShabbosInfoPanel.style.display = 'none';
             // Reset custom event selector and info panel if you add one
-            if(adminCustomEventSelect) adminCustomEventSelect.value = '';
-            if(adminReserveTypeSelect) adminReserveTypeSelect.value = ''; // Reset type selector
+            if (adminCustomEventSelect) adminCustomEventSelect.value = '';
+            if (adminReserveTypeSelect) adminReserveTypeSelect.value = ''; // Reset type selector
             adminReserveTypeSelect.dispatchEvent(new Event('change')); // Trigger hide/show
             // loadSponsorships(); // Sponsorships list will update via onSnapshot
         } catch (error) {
             console.error("Error reserving Kiddush by admin:", error);
-            if(adminReserveMessage) adminReserveMessage.textContent = "Error reserving. Please try again.";
+            if (adminReserveMessage) adminReserveMessage.textContent = "Error reserving. Please try again.";
         }
     });
 }
@@ -645,11 +645,29 @@ async function loadSponsorships() {
             if (approvedSponsorshipsListDiv) approvedSponsorshipsListDiv.innerHTML = '<div class="alert alert-warning">Please login to manage sponsorships.</div>';
             return;
         }
-        db.collection("sponsorships").where("status", "==", "pending").orderBy("submittedAt", "desc")
+        db.collection("sponsorships")
             .where("configOwnerId", "==", currentUser.uid)
+            .where("status", "==", "pending")
+            .orderBy("submittedAt", "desc")
             .onSnapshot(snapshot => {
+                console.log('[PENDING] Total docs received:', snapshot.docs.length);
+                console.log('[PENDING] Current user UID:', currentUser.uid);
+                snapshot.docs.forEach((doc, index) => {
+                    const data = doc.data();
+                    console.log(`[PENDING] Doc ${index}:`, {
+                        id: doc.id,
+                        configOwnerId: data.configOwnerId,
+                        status: data.status,
+                        type: data.type,
+                        sponsorshipType: data.sponsorshipType,
+                        sponsorName: data.sponsorName
+                    });
+                });
+
                 // Filter out person documents
                 const filteredDocs = snapshot.docs.filter(doc => doc.data().type !== 'person');
+                console.log('[PENDING] Filtered docs count:', filteredDocs.length);
+
                 const filteredSnapshot = {
                     ...snapshot,
                     docs: filteredDocs,
@@ -671,9 +689,10 @@ async function loadSponsorships() {
             approvedSponsorshipsListDiv.innerHTML = '<div class="alert alert-warning">Please login to manage sponsorships.</div>';
             return;
         }
-        db.collection("sponsorships").where("status", "==", "approved")
-            .orderBy("submittedAt", "desc") // Order by submission time; shabbatDate is not reliable for custom events
+        db.collection("sponsorships")
             .where("configOwnerId", "==", currentUser.uid)
+            .where("status", "==", "approved")
+            .orderBy("submittedAt", "desc") // Order by submission time; shabbatDate is not reliable for custom events
             .onSnapshot(snapshot => {
                 // Filter out person documents
                 const filteredDocs = snapshot.docs.filter(doc => doc.data().type !== 'person');
@@ -692,13 +711,18 @@ async function loadSponsorships() {
 }
 
 function renderSponsorships(snapshot, container, isPending) {
+    console.log(`[RENDER] Called for ${isPending ? 'PENDING' : 'APPROVED'} sponsorships`);
+    console.log('[RENDER] Container exists:', !!container);
+    console.log('[RENDER] Snapshot empty:', snapshot.empty);
+    console.log('[RENDER] Docs count:', snapshot.docs?.length || 0);
+
     if (!container) return;
-    
+
     if (snapshot.empty) {
         container.innerHTML = `<div class="alert alert-info">No ${isPending ? 'pending' : 'approved'} sponsorships found.</div>`;
         return;
     }
-    
+
     let html = `
         <div class="table-responsive">
             <table class="table table-striped table-bordered sponsorship-table">
@@ -714,17 +738,31 @@ function renderSponsorships(snapshot, container, isPending) {
                     </tr>
                 </thead>
                 <tbody>`;
-    
+
+
     snapshot.forEach(doc => {
         const s = doc.data();
+        console.log('[RENDER] Processing doc:', doc.id, s);
+
         let itemTitle = '';
         if (s.sponsorshipType === 'custom' && s.customSponsorableTitle) {
             itemTitle = `Custom Event: ${s.customSponsorableTitle}`;
         } else {
             itemTitle = `Parsha: ${s.parsha}<br><small class="text-muted">Shabbat: ${s.shabbatDate}</small>`;
         }
-        const submittedDate = s.submittedAt ? s.submittedAt.toDate().toLocaleDateString() : 'N/A';
-        
+
+        // Handle submittedAt - it could be a Firestore Timestamp or a string
+        let submittedDate = 'N/A';
+        if (s.submittedAt) {
+            if (typeof s.submittedAt.toDate === 'function') {
+                // It's a Firestore Timestamp
+                submittedDate = s.submittedAt.toDate().toLocaleDateString();
+            } else if (typeof s.submittedAt === 'string') {
+                // It's an ISO string
+                submittedDate = new Date(s.submittedAt).toLocaleDateString();
+            }
+        }
+
         html += `
             <tr>
                 <td><strong>${s.sponsorName}</strong></td>
@@ -751,13 +789,16 @@ function renderSponsorships(snapshot, container, isPending) {
                 </td>
             </tr>`;
     });
-    
+
     html += `
                 </tbody>
             </table>
         </div>`;
-    
+
+    console.log('[RENDER] Generated HTML length:', html.length);
+    console.log('[RENDER] About to set innerHTML on container:', container.id);
     container.innerHTML = html;
+    console.log('[RENDER] innerHTML set successfully');
 }
 
 async function updateSponsorshipStatus(sponsorshipId, newStatus) {
@@ -779,7 +820,7 @@ async function deleteSponsorship(sponsorshipId) {
         try {
             await db.collection("sponsorships").doc(sponsorshipId).delete();
             alert('Sponsorship deleted.');
-             // Real-time listeners will refresh the lists automatically
+            // Real-time listeners will refresh the lists automatically
         } catch (error) {
             console.error("Error deleting sponsorship: ", error);
             alert('Error deleting sponsorship.');
@@ -790,11 +831,11 @@ async function deleteSponsorship(sponsorshipId) {
 // Edit Sponsorship Functions
 async function editSponsorship(sponsorshipId) {
     if (!sponsorshipId) return;
-    
+
     try {
         const docRef = db.collection("sponsorships").doc(sponsorshipId);
         const docSnap = await docRef.get();
-        
+
         if (docSnap.exists) {
             const sponsorshipData = docSnap.data();
             populateSponsorshipEditForm(sponsorshipId, sponsorshipData);
@@ -811,22 +852,22 @@ async function editSponsorship(sponsorshipId) {
 function populateSponsorshipEditForm(sponsorshipId, sponsorshipData) {
     // Set the sponsorship ID in the hidden field
     document.getElementById('edit-sponsorship-id').value = sponsorshipId;
-    
+
     // Populate the form fields with sponsorship data
     document.getElementById('edit-sponsor-name').value = sponsorshipData.sponsorName || '';
     document.getElementById('edit-occasion').value = sponsorshipData.occasion || '';
     document.getElementById('edit-contact-email').value = sponsorshipData.contactEmail || '';
-    
+
     // Display sponsorship type
     const typeDisplay = document.getElementById('edit-sponsorship-type-display');
     const shabbatDetails = document.getElementById('edit-shabbat-details');
     const customEventDetails = document.getElementById('edit-custom-event-details');
-    
+
     if (sponsorshipData.sponsorshipType === 'shabbat') {
         typeDisplay.textContent = 'Shabbat Kiddush';
         shabbatDetails.style.display = 'block';
         customEventDetails.style.display = 'none';
-        
+
         // Populate Shabbat details
         document.getElementById('edit-shabbat-date').textContent = sponsorshipData.shabbatDate || 'N/A';
         document.getElementById('edit-parsha').textContent = sponsorshipData.parsha || 'N/A';
@@ -834,7 +875,7 @@ function populateSponsorshipEditForm(sponsorshipId, sponsorshipData) {
         typeDisplay.textContent = 'Custom Event';
         shabbatDetails.style.display = 'none';
         customEventDetails.style.display = 'block';
-        
+
         // Populate custom event details
         document.getElementById('edit-custom-event-title').textContent = sponsorshipData.customSponsorableTitle || 'N/A';
     } else {
@@ -845,7 +886,7 @@ function populateSponsorshipEditForm(sponsorshipId, sponsorshipData) {
 }
 
 // Initialize the save button for the edit sponsorship modal
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const saveSponsorshipBtn = document.getElementById('save-sponsorship-btn');
     if (saveSponsorshipBtn) {
         saveSponsorshipBtn.addEventListener('click', saveSponsorshipChanges);
@@ -858,14 +899,14 @@ async function saveSponsorshipChanges() {
         alert('Error: Sponsorship ID not found.');
         return;
     }
-    
+
     const updatedData = {
         sponsorName: document.getElementById('edit-sponsor-name').value,
         occasion: document.getElementById('edit-occasion').value,
         contactEmail: document.getElementById('edit-contact-email').value,
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     };
-    
+
     try {
         await db.collection("sponsorships").doc(sponsorshipId).update(updatedData);
         $('#edit-sponsorship-modal').modal('hide');
@@ -890,25 +931,25 @@ function initializePeopleManagement() {
     if (peopleFilterSelect) {
         peopleFilterSelect.addEventListener('change', filterAndRenderPeople);
     }
-    
+
     // Initialize add person button
     if (addPersonBtn) {
         addPersonBtn.addEventListener('click', openAddPersonModal);
     }
-    
+
     // Initialize modal event handlers
     const editPersonBtn = document.getElementById('edit-person-btn');
     const savePersonBtn = document.getElementById('save-person-btn');
     const saveNewPersonBtn = document.getElementById('save-new-person-btn');
-    
+
     if (editPersonBtn) {
         editPersonBtn.addEventListener('click', openEditPersonModal);
     }
-    
+
     if (savePersonBtn) {
         savePersonBtn.addEventListener('click', savePersonChanges);
     }
-    
+
     if (saveNewPersonBtn) {
         saveNewPersonBtn.addEventListener('click', saveNewPerson);
     }
@@ -917,7 +958,7 @@ function initializePeopleManagement() {
 async function loadPeople() {
     if (!peopleListDiv) return;
     peopleListDiv.innerHTML = '<div class="alert alert-info">Loading people...</div>';
-    
+
     const currentUser = auth.currentUser;
     if (!currentUser) {
         peopleListDiv.innerHTML = '<div class="alert alert-warning">Please login to manage people.</div>';
@@ -930,7 +971,7 @@ async function loadPeople() {
         const sponsorshipsSnapshot = await db.collection("sponsorships")
             .where("configOwnerId", "==", currentUser.uid)
             .get();
-        
+
         allSponsorships = [];
         sponsorshipsSnapshot.forEach(doc => {
             const data = doc.data();
@@ -939,7 +980,7 @@ async function loadPeople() {
                 allSponsorships.push({ id: doc.id, ...data });
             }
         });
-        
+
         // Sort sponsorships by submission date (newest first) on client side
         allSponsorships.sort((a, b) => {
             if (!a.submittedAt && !b.submittedAt) return 0;
@@ -950,16 +991,16 @@ async function loadPeople() {
 
         // Aggregate people from sponsorships
         const peopleMap = new Map();
-        
+
         allSponsorships.forEach(sponsorship => {
             const email = sponsorship.contactEmail?.toLowerCase().trim();
             const name = sponsorship.sponsorName?.trim();
-            
+
             if (!email && !name) return; // Skip if no identifying information
-            
+
             // Use email as primary key, fallback to name if no email
             const key = email || name.toLowerCase();
-            
+
             if (!peopleMap.has(key)) {
                 peopleMap.set(key, {
                     email: email || '',
@@ -973,17 +1014,17 @@ async function loadPeople() {
                     lastSponsorshipDate: null
                 });
             }
-            
+
             const person = peopleMap.get(key);
             person.sponsorships.push(sponsorship);
             person.totalSponsorships++;
-            
+
             if (sponsorship.status === 'pending') {
                 person.pendingSponsorships++;
             } else if (sponsorship.status === 'approved') {
                 person.approvedSponsorships++;
             }
-            
+
             // Update last sponsorship date
             if (sponsorship.submittedAt) {
                 const sponsorshipDate = sponsorship.submittedAt.toDate();
@@ -991,7 +1032,7 @@ async function loadPeople() {
                     person.lastSponsorshipDate = sponsorshipDate;
                 }
             }
-            
+
             // Update name if current sponsorship has a name and stored person doesn't
             if (name && (!person.name || person.name === 'Unknown')) {
                 person.name = name;
@@ -1004,11 +1045,11 @@ async function loadPeople() {
                 .where("configOwnerId", "==", currentUser.uid)
                 .where("type", "==", "person")
                 .get();
-            
+
             peopleSnapshot.forEach(doc => {
                 const personData = doc.data();
                 const key = personData.email?.toLowerCase().trim() || personData.name?.toLowerCase().trim();
-                
+
                 if (key && peopleMap.has(key)) {
                     // Update existing person with additional data
                     const person = peopleMap.get(key);
@@ -1041,7 +1082,7 @@ async function loadPeople() {
 
         allPeople = Array.from(peopleMap.values());
         filterAndRenderPeople();
-        
+
     } catch (error) {
         console.error("Error loading people: ", error);
         peopleListDiv.innerHTML = '<div class="alert alert-danger">Error loading people.</div>';
@@ -1050,18 +1091,18 @@ async function loadPeople() {
 
 function filterAndRenderPeople() {
     if (!peopleListDiv) return;
-    
+
     filteredPeople = [...allPeople];
-    
+
     // Apply search filter
     const searchTerm = peopleSearchInput?.value.toLowerCase().trim() || '';
     if (searchTerm) {
-        filteredPeople = filteredPeople.filter(person => 
+        filteredPeople = filteredPeople.filter(person =>
             person.name.toLowerCase().includes(searchTerm) ||
             person.email.toLowerCase().includes(searchTerm)
         );
     }
-    
+
     // Apply status filter
     const statusFilter = peopleFilterSelect?.value || 'all';
     if (statusFilter === 'active') {
@@ -1071,18 +1112,18 @@ function filterAndRenderPeople() {
     } else if (statusFilter === 'manual') {
         filteredPeople = filteredPeople.filter(person => person.isManuallyAdded && person.totalSponsorships === 0);
     }
-    
+
     renderPeopleTable(filteredPeople);
 }
 
 function renderPeopleTable(people) {
     if (!peopleListDiv) return;
-    
+
     if (people.length === 0) {
         peopleListDiv.innerHTML = '<div class="alert alert-info">No people found matching your criteria.</div>';
         return;
     }
-    
+
     let html = `
         <div class="table-responsive">
             <table class="table table-striped table-bordered people-table">
@@ -1098,15 +1139,15 @@ function renderPeopleTable(people) {
                     </tr>
                 </thead>
                 <tbody>`;
-    
+
     people.forEach((person, index) => {
-        const lastSponsorshipText = person.lastSponsorshipDate 
+        const lastSponsorshipText = person.lastSponsorshipDate
             ? person.lastSponsorshipDate.toLocaleDateString()
             : 'Never';
-        
+
         // Use index instead of name/email to avoid special character issues
         const personIndex = index;
-            
+
         html += `
             <tr>
                 <td><strong><a href="#" onclick="showPersonDetailsByIndex(${personIndex})" style="text-decoration: none;">${person.name}</a></strong></td>
@@ -1128,12 +1169,12 @@ function renderPeopleTable(people) {
                 </td>
             </tr>`;
     });
-    
+
     html += `
                 </tbody>
             </table>
         </div>`;
-    
+
     peopleListDiv.innerHTML = html;
 }
 
@@ -1166,7 +1207,7 @@ function deletePersonByIndex(index) {
 }
 
 function showPersonDetails(person) {
-    
+
     let html = `
         <div class="row">
             <div class="col-md-6">
@@ -1186,7 +1227,7 @@ function showPersonDetails(person) {
         </div>
         <hr>
         <h4>Sponsorship History</h4>`;
-    
+
     if (person.sponsorships.length === 0) {
         html += '<p class="text-muted">No sponsorships found.</p>';
     } else {
@@ -1197,9 +1238,9 @@ function showPersonDetails(person) {
             } else {
                 itemTitle = `Parsha: ${sponsorship.parsha} (${sponsorship.shabbatDate})`;
             }
-            
+
             const submittedDate = sponsorship.submittedAt ? sponsorship.submittedAt.toDate().toLocaleDateString() : 'Unknown';
-            
+
             html += `
                 <div class="sponsorship-history-item ${sponsorship.status}">
                     <div class="row">
@@ -1215,30 +1256,30 @@ function showPersonDetails(person) {
                 </div>`;
         });
     }
-    
+
     document.getElementById('person-detail-content').innerHTML = html;
     document.getElementById('personDetailModalLabel').textContent = `${person.name} - Details`;
-    
+
     // Store current person for editing
     window.currentPersonForEdit = person;
-    
+
     $('#personDetailModal').modal('show');
 }
 
 function editPerson(person) {
-    
+
     // Store current person for editing
     window.currentPersonForEdit = person;
-    
+
     // Populate edit form
     document.getElementById('edit-person-email').value = person.email || '';
     document.getElementById('edit-person-name').value = person.name || '';
     document.getElementById('edit-person-email-field').value = person.email || '';
     document.getElementById('edit-person-phone').value = person.phone || '';
     document.getElementById('edit-person-notes').value = person.notes || '';
-    
+
     document.getElementById('editPersonModalLabel').textContent = `Edit ${person.name}`;
-    
+
     $('#editPersonModal').modal('show');
 }
 
@@ -1256,13 +1297,13 @@ async function savePersonChanges() {
         alert('No person selected for editing');
         return;
     }
-    
+
     const currentUser = auth.currentUser;
     if (!currentUser) {
         alert('You must be logged in to save changes');
         return;
     }
-    
+
     const person = window.currentPersonForEdit;
     const updatedData = {
         email: document.getElementById('edit-person-email-field').value.trim(),
@@ -1272,12 +1313,12 @@ async function savePersonChanges() {
         configOwnerId: currentUser.uid,
         lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
     };
-    
+
     if (!updatedData.name) {
         alert('Name is required');
         return;
     }
-    
+
     try {
         // Save to sponsorships collection
         if (person.personDocId) {
@@ -1293,19 +1334,19 @@ async function savePersonChanges() {
             });
             person.personDocId = docRef.id;
         }
-        
+
         // Update local data
         person.name = updatedData.name;
         person.email = updatedData.email;
         person.phone = updatedData.phone;
         person.notes = updatedData.notes;
-        
+
         $('#editPersonModal').modal('hide');
         alert('Person updated successfully!');
-        
+
         // Refresh the people list
         filterAndRenderPeople();
-        
+
     } catch (error) {
         console.error("Error saving person: ", error);
         alert('Error saving person. Please try again.');
@@ -1318,7 +1359,7 @@ function openAddPersonModal() {
     document.getElementById('add-person-email').value = '';
     document.getElementById('add-person-phone').value = '';
     document.getElementById('add-person-notes').value = '';
-    
+
     $('#addPersonModal').modal('show');
 }
 
@@ -1328,28 +1369,28 @@ async function saveNewPerson() {
         alert('You must be logged in to add a person');
         return;
     }
-    
+
     const name = document.getElementById('add-person-name').value.trim();
     const email = document.getElementById('add-person-email').value.trim();
     const phone = document.getElementById('add-person-phone').value.trim();
     const notes = document.getElementById('add-person-notes').value.trim();
-    
+
     if (!name) {
         alert('Name is required');
         return;
     }
-    
+
     // Check if person already exists
-    const existingPerson = allPeople.find(p => 
+    const existingPerson = allPeople.find(p =>
         (email && p.email && p.email.toLowerCase() === email.toLowerCase()) ||
         (p.name && p.name.toLowerCase() === name.toLowerCase())
     );
-    
+
     if (existingPerson) {
         alert('A person with this name or email already exists');
         return;
     }
-    
+
     const personData = {
         name,
         email,
@@ -1362,11 +1403,11 @@ async function saveNewPerson() {
         type: 'person', // Special type to distinguish from sponsorships
         status: 'manual' // Use status field like sponsorships
     };
-    
+
     try {
         // Store in sponsorships collection with special type to reuse existing permissions
         const docRef = await db.collection("sponsorships").add(personData);
-        
+
         // Add to local data
         const newPerson = {
             email: email || '',
@@ -1381,15 +1422,15 @@ async function saveNewPerson() {
             personDocId: docRef.id,
             isManuallyAdded: true
         };
-        
+
         allPeople.push(newPerson);
-        
+
         $('#addPersonModal').modal('hide');
         alert('Person added successfully!');
-        
+
         // Refresh the people list
         filterAndRenderPeople();
-        
+
     } catch (error) {
         console.error("Error adding person: ", error);
         alert('Error adding person. Please try again.');
@@ -1401,33 +1442,33 @@ async function deletePerson(person) {
         alert('Cannot delete this person - no database record found');
         return;
     }
-    
+
     const hasSponsorship = person.totalSponsorships > 0;
     let confirmMessage = `Are you sure you want to delete ${person.name}?`;
-    
+
     if (hasSponsorship) {
         confirmMessage += `\n\nWarning: This person has ${person.totalSponsorships} sponsorship(s). Deleting them will not remove their sponsorships, but you will lose their contact information and notes.`;
     }
-    
+
     if (!confirm(confirmMessage)) {
         return;
     }
-    
+
     try {
         // Delete from sponsorships collection
         await db.collection("sponsorships").doc(person.personDocId).delete();
-        
+
         // Remove from local data
         const index = allPeople.findIndex(p => p.personDocId === person.personDocId);
         if (index > -1) {
             allPeople.splice(index, 1);
         }
-        
+
         alert('Person deleted successfully!');
-        
+
         // Refresh the people list
         filterAndRenderPeople();
-        
+
     } catch (error) {
         console.error("Error deleting person: ", error);
         alert('Error deleting person. Please try again.');
