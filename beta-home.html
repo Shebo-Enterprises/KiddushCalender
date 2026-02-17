@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kiddushware | Sponsor Management Simplified</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --apple-bg: #ffffff;
+            --apple-text: #1d1d1f;
+            --apple-blue: #0066cc;
+            --apple-gray: #f5f5f7;
+            --apple-link: #06c;
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--apple-bg);
+            color: var(--apple-text);
+            overflow-x: hidden;
+            letter-spacing: -0.022em;
+        }
+        /* Navigation - Apple Glass Effect */
+        .nav-apple {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: saturate(180%) blur(20px);
+            border-bottom: 1px solid rgba(0,0,0,0.08);
+        }
+        /* Typography - Apple Cinematic Titles */
+        .hero-title {
+            font-size: clamp(3.5rem, 9vw, 5rem);
+            font-weight: 700;
+            line-height: 1.05;
+            letter-spacing: -0.015em;
+        }
+        /* Button - Signature Apple Pill */
+        .apple-button {
+            background: var(--apple-blue);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 980px;
+            font-size: 17px;
+            font-weight: 400;
+            display: inline-block;
+            transition: background 0.2s ease;
+        }
+        .apple-button:hover {
+            background: #0071e3;
+        }
+        /* Links - Interactive blue chevron style */
+        .link-blue {
+            color: var(--apple-link);
+            font-size: 21px;
+            font-weight: 400;
+        }
+        .link-blue:after {
+            content: " >";
+            font-family: system-ui;
+        }
+        .link-blue:hover {
+            text-decoration: underline;
+        }
+        .section-gray {
+            background-color: var(--apple-gray);
+        }
+        /* Hardware Frame - Premium Device Finish */
+        .hardware-frame {
+            background: #111;
+            border-radius: 44px;
+            padding: 14px;
+            box-shadow: 0 50px 100px -20px rgba(0,0,0,0.3);
+            border: 1px solid #333;
+        }
+        .badge-soon {
+            color: #bf4800;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        .footer-text {
+            color: #6e6e73;
+            font-size: 12px;
+            line-height: 1.33337;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Global Nav -->
+    <nav class="fixed w-full z-50 nav-apple">
+        <div class="max-w-[1024px] mx-auto px-6 h-12 flex items-center justify-between text-[12px] font-normal">
+            <div class="flex items-center gap-10">
+                <a href="#" class="text-[18px] font-semibold tracking-tight">Kiddushware</a>
+                <div class="hidden md:flex gap-8 text-[#1d1d1f]/80">
+                    <a href="#features" class="hover:text-black transition-colors">Integrations</a>
+                    <a href="#management" class="hover:text-black transition-colors">Management</a>
+                    <a href="#pricing" class="hover:text-black transition-colors">Pricing</a>
+                </div>
+            </div>
+            <div class="flex items-center gap-6">
+                <a href="/app" class="text-[#1d1d1f]/80 hover:text-black font-medium">Log In</a>
+                <a href="/app" class="apple-button !py-1.5 !px-3.5 !text-[11px] font-semibold tracking-tight">Get Started</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="pt-48 pb-20 px-6 text-center">
+        <div class="max-w-4xl mx-auto">
+            <h1 class="hero-title mb-6">Your community. <br>Beautifully organized.</h1>
+            <h2 class="text-2xl md:text-3xl font-medium mb-12 text-[#1d1d1f] tracking-tight">Professional sponsor management for every Shul.</h2>
+            <div class="flex flex-col sm:flex-row justify-center gap-10 items-center">
+                <a href="/app" class="apple-button">Start for free</a>
+                <a href="#features" class="link-blue">Learn how it works</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Product Visual - Premium Hardware Mockup -->
+    <section class="max-w-6xl mx-auto px-6 mb-32">
+        <div class="hardware-frame">
+            <div class="bg-white rounded-[32px] aspect-[16/9] flex flex-col items-center justify-center p-12 overflow-hidden relative">
+                <div class="w-full h-full bg-[#fcfcfc] flex items-center justify-center">
+                     <div class="text-center w-full max-w-2xl">
+                         <div class="flex justify-between items-center mb-10 border-b border-slate-100 pb-6">
+                             <h3 class="text-2xl font-semibold tracking-tight text-slate-900">Sponsorship Hub</h3>
+                             <span class="text-xs font-bold uppercase tracking-widest text-blue-600 px-3 py-1 bg-blue-50 rounded-full">System Online</span>
+                         </div>
+                         <div class="grid grid-cols-2 gap-6">
+                             <div class="h-40 bg-white border border-slate-200 rounded-2xl shadow-sm flex items-center justify-center text-slate-400 text-[11px] uppercase font-bold tracking-widest">Sponsorship Form</div>
+                             <div class="h-40 bg-white border border-slate-200 rounded-2xl shadow-sm flex items-center justify-center text-slate-400 text-[11px] uppercase font-bold tracking-widest">Payment Gateway</div>
+                         </div>
+                         <div class="mt-8 p-6 bg-slate-50 rounded-2xl text-left border border-slate-100">
+                             <div class="w-24 h-2.5 bg-blue-500 rounded-full mb-4"></div>
+                             <div class="w-full h-2 bg-slate-200 rounded-full mb-3"></div>
+                             <div class="w-5/6 h-2 bg-slate-200 rounded-full"></div>
+                         </div>
+                     </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Integrations - The "Modern Workspace" look -->
+    <section id="features" class="section-gray py-32 px-6">
+        <div class="max-w-[1024px] mx-auto flex flex-col md:flex-row items-center gap-24">
+            <div class="md:w-1/2">
+                <h2 class="text-5xl font-semibold tracking-tight mb-8">Works with <br> what you use.</h2>
+                <p class="text-2xl text-[#6e6e73] leading-snug mb-10 font-medium">
+                    Whether you use ChabadOne, Wix, Squarespace, or custom HTML code, Kiddushware integrates seamlessly into your existing site.
+                </p>
+                <div class="flex flex-wrap gap-3">
+                    <span class="px-5 py-2.5 bg-white rounded-full text-[12px] font-semibold border border-slate-200 shadow-sm">ChabadOne</span>
+                    <span class="px-5 py-2.5 bg-white rounded-full text-[12px] font-semibold border border-slate-200 shadow-sm">Wix</span>
+                    <span class="px-5 py-2.5 bg-white rounded-full text-[12px] font-semibold border border-slate-200 shadow-sm">Squarespace</span>
+                    <span class="px-5 py-2.5 bg-white rounded-full text-[12px] font-semibold border border-slate-200 shadow-sm">Custom Code</span>
+                </div>
+            </div>
+            <div class="md:w-1/2 w-full">
+                <div class="bg-white p-12 rounded-[2.5rem] border border-stone-200 aspect-square flex flex-col justify-center shadow-sm">
+                    <div class="space-y-8">
+                        <div class="flex items-center gap-5">
+                            <div class="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center text-white font-bold text-2xl shadow-lg shadow-blue-500/20">K</div>
+                            <div class="h-3 w-32 bg-slate-100 rounded-full"></div>
+                        </div>
+                        <div class="h-[2px] w-full bg-slate-50"></div>
+                        <div class="space-y-4">
+                            <div class="h-2.5 w-full bg-slate-50 rounded-full"></div>
+                            <div class="h-2.5 w-full bg-slate-50 rounded-full"></div>
+                            <div class="h-2.5 w-2/3 bg-slate-50 rounded-full"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Management - Detailed Feature Grid -->
+    <section id="management" class="py-32 px-6 bg-white">
+        <div class="max-w-[1024px] mx-auto">
+            <div class="text-center mb-24">
+                <h2 class="text-5xl font-semibold tracking-tight mb-8">Sponsor management.</h2>
+                <p class="text-2xl text-[#6e6e73] max-w-3xl mx-auto leading-snug font-medium">
+                    From historical tracking to advanced payment options, manage every detail of your community's celebrations from one central hub.
+                </p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-20">
+                <div class="flex flex-col">
+                    <h3 class="text-[21px] font-semibold mb-4 tracking-tight text-slate-900">Sponsorship Forms</h3>
+                    <p class="text-[#6e6e73] text-[17px] leading-relaxed">High-conversion forms designed specifically for Kiddush and event bookings.</p>
+                </div>
+                <div class="flex flex-col">
+                    <h3 class="text-[21px] font-semibold mb-4 tracking-tight text-slate-900">Full History</h3>
+                    <p class="text-[#6e6e73] text-[17px] leading-relaxed">Archive every dedication. Never lose track of a past sponsor or important date.</p>
+                </div>
+                <div class="flex flex-col">
+                    <h3 class="text-[21px] font-semibold mb-4 tracking-tight text-slate-900">Smart Payments</h3>
+                    <p class="text-[#6e6e73] text-[17px] leading-relaxed">Integrated payment options that make it simple for members to support the Shul.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Coming Soon - High Contrast Dark Mode Section -->
+    <section class="py-32 px-6 bg-[#000000] text-white overflow-hidden">
+        <div class="max-w-[1024px] mx-auto flex flex-col md:flex-row items-center gap-24">
+            <div class="md:w-1/2">
+                <span class="badge-soon mb-8 inline-block">Future Release</span>
+                <h2 class="text-5xl font-semibold tracking-tight mb-8 leading-tight">The future of <br> Shul displays.</h2>
+                <p class="text-2xl text-[#a1a1a6] leading-snug font-medium">
+                    A revolutionary way to showcase sponsors in your lobby. Dynamic, high-fidelity, and fully automated.
+                </p>
+            </div>
+            <div class="md:w-1/2 w-full aspect-square bg-[#1c1c1e] rounded-[3rem] flex items-center justify-center border border-white/5 shadow-2xl">
+                <div class="text-white/5 text-[160px] font-black italic select-none tracking-tighter">4K</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing - Simplified Card -->
+    <section id="pricing" class="section-gray py-40 px-6">
+        <div class="max-w-[1024px] mx-auto text-center">
+            <h2 class="text-5xl font-semibold tracking-tight mb-20">Simple. Free.</h2>
+            <div class="max-w-md mx-auto bg-white p-14 rounded-[3rem] border border-stone-200 shadow-xl shadow-stone-200/50">
+                <h3 class="text-2xl font-semibold mb-3 text-slate-900 tracking-tight">Kiddushware Basic</h3>
+                <p class="text-[#6e6e73] text-[17px] mb-8">Built for growing Shuls.</p>
+                <div class="text-[80px] font-bold mb-10 text-slate-900 tracking-tighter">$0</div>
+                <hr class="w-full mb-12 border-stone-100">
+                <ul class="text-left space-y-6 text-[15px] font-medium mb-14 max-w-[220px] mx-auto text-slate-800">
+                    <li class="flex items-center gap-4"><span class="text-blue-600 font-bold text-lg">✓</span> Website Integration</li>
+                    <li class="flex items-center gap-4"><span class="text-blue-600 font-bold text-lg">✓</span> ChabadOne Support</li>
+                    <li class="flex items-center gap-4"><span class="text-blue-600 font-bold text-lg">✓</span> Sponsor Management</li>
+                    <li class="flex items-center gap-4"><span class="text-blue-600 font-bold text-lg">✓</span> Payment Integration</li>
+                </ul>
+                <a href="/app" class="apple-button w-full block py-4 text-[19px] font-medium shadow-md">Get Started</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="section-gray pt-20 pb-24 px-6 border-t border-stone-200">
+        <div class="max-w-[1024px] mx-auto">
+            <div class="footer-text border-b border-stone-300 pb-10 mb-10 space-y-4">
+                <p>1. Integration requires the ability to embed custom code/widgets in your website provider. Compatibility includes ChabadOne, Wix, Squarespace, and more.</p>
+                <p>2. Display features are currently in development. Release dates and hardware requirements are subject to change.</p>
+            </div>
+            <div class="flex flex-col md:flex-row justify-between footer-text font-medium">
+                <div class="flex gap-8 mb-6 md:mb-0">
+                    <span>Copyright © 2026 Kiddushware. All rights reserved.</span>
+                </div>
+                <div class="flex gap-6">
+                    <a href="#" class="hover:text-black hover:underline transition-colors">Privacy Policy</a>
+                    <span class="text-stone-300">|</span>
+                    <a href="#" class="hover:text-black hover:underline transition-colors">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>
