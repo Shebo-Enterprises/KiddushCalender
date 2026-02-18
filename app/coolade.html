@@ -21,117 +21,69 @@
             color: var(--apple-black);
             -webkit-font-smoothing: antialiased;
             margin: 0;
+            overflow-x: hidden;
         }
 
-        /* Global Nav (Top Black Bar) */
+        /* Navigations */
         .global-nav {
             background: var(--apple-dark-nav);
             backdrop-filter: saturate(180%) blur(20px);
             -webkit-backdrop-filter: saturate(180%) blur(20px);
-            height: 44px;
-            width: 100%;
-            position: fixed;
-            top: 0;
-            z-index: 9999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            height: 44px; width: 100%; position: fixed; top: 0; z-index: 9999;
+            display: flex; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        /* Product Nav (White Sticky Bar) */
         .product-nav {
             background: var(--apple-light-nav);
             backdrop-filter: saturate(180%) blur(20px);
             -webkit-backdrop-filter: saturate(180%) blur(20px);
-            height: 52px;
-            width: 100%;
-            position: fixed;
-            top: 44px;
-            z-index: 9998;
+            height: 52px; width: 100%; position: fixed; top: 44px; z-index: 9998;
             border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-            display: flex;
-            align-items: center;
+            display: flex; align-items: center;
         }
 
-        .container-apple {
-            width: 100%;
-            max-width: 980px;
-            margin: 0 auto;
-            padding: 0 22px;
-        }
+        .container-apple { width: 100%; max-width: 980px; margin: 0 auto; padding: 0 22px; }
 
-        /* Hero Text Styles */
-        .hero-heading {
-            font-size: 56px;
-            line-height: 1.07;
-            font-weight: 700;
-            letter-spacing: -0.005em;
-            text-align: center;
-            margin-top: 140px;
-            margin-bottom: 20px;
+        /* UI Elements */
+        .apple-card {
+            background: #f5f5f7; border-radius: 18px; padding: 30px;
+            transition: all 0.3s ease; position: relative; overflow: hidden;
         }
-
-        .hero-subheading {
-            font-size: 28px;
-            line-height: 1.1;
-            font-weight: 500;
-            text-align: center;
-            color: #86868b;
-            margin-bottom: 60px;
-        }
-
-        /* Apple Grid Style */
-        .apple-grid-card {
-            background: #f5f5f7;
-            border-radius: 28px;
-            padding: 40px;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            min-height: 400px;
-        }
-
-        .apple-grid-card:hover {
-            transform: scale(1.02);
-            background: #efeff1;
-        }
-
-        /* Buttons like the "Buy" button on apple.com */
-        .apple-btn-buy {
-            background: var(--apple-blue);
-            color: white;
-            padding: 4px 11px;
-            border-radius: 980px;
-            font-size: 12px;
-            font-weight: 400;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
-
-        .apple-btn-buy:hover { opacity: 0.8; }
 
         .apple-input {
-            background: #ffffff;
-            border: 1px solid #d2d2d7;
-            border-radius: 12px;
-            padding: 12px 16px;
-            font-size: 17px;
-            width: 100%;
-            outline: none;
-            transition: border-color 0.2s;
+            background: #ffffff; border: 1px solid #d2d2d7; border-radius: 12px;
+            padding: 12px 16px; font-size: 16px; width: 100%; outline: none;
+        }
+        .apple-input:focus { border-color: var(--apple-blue); box-shadow: 0 0 0 4px rgba(0,113,227,0.1); }
+
+        .apple-btn-primary {
+            background: var(--apple-blue); color: white; padding: 12px 24px;
+            border-radius: 980px; font-weight: 500; cursor: pointer; transition: opacity 0.2s;
+        }
+        .apple-btn-secondary {
+            background: #e8e8ed; color: var(--apple-black); padding: 12px 24px;
+            border-radius: 980px; font-weight: 500; cursor: pointer;
         }
 
-        .hidden { display: none !important; }
+        .tab-link {
+            color: #86868b; font-size: 12px; transition: color 0.2s; cursor: pointer;
+        }
+        .tab-link.active { color: var(--apple-black); font-weight: 600; }
 
-        @keyframes reveal {
+        .hidden { display: none !important; }
+        
+        /* Animations */
+        @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .reveal { animation: reveal 0.8s ease-out forwards; }
+        .reveal { animation: fadeInUp 0.6s ease-out forwards; }
+
+        /* Support Banner */
+        .support-banner {
+            background: #0071e3; color: white; text-align: center;
+            padding: 8px 0; font-size: 13px; font-weight: 500;
+        }
     </style>
 </head>
 <body>
@@ -140,150 +92,240 @@
     <nav class="global-nav">
         <div class="container-apple flex justify-between items-center text-[rgba(255,255,255,0.8)] text-xs">
             <div class="flex items-center gap-8">
-                <span class="text-white font-semibold cursor-pointer">KiddushWare</span>
-                <a href="#" class="hover:text-white">Admin Portal</a>
-                <a href="#" class="hover:text-white">API Reference</a>
-                <a href="#" class="hover:text-white">Support</a>
+                <span class="text-white font-semibold">KiddushWare</span>
+                <a href="https://kiddushware.tawk.help/" target="_blank" class="hover:text-white">Knowledge Base</a>
+                <a href="#" class="hover:text-white">API</a>
             </div>
-            <div id="nav-user-info" class="hidden">
-                <span id="nav-user-email" class="mr-4"></span>
+            <div id="nav-user-info" class="hidden flex items-center gap-4">
+                <span id="nav-user-email"></span>
                 <button onclick="logout()" class="hover:text-white">Sign Out</button>
             </div>
         </div>
     </nav>
 
-    <!-- Product Navigation (Sticky) -->
+    <!-- Product Sub-Nav -->
     <nav class="product-nav">
         <div class="container-apple flex justify-between items-center">
-            <h1 class="text-xl font-semibold tracking-tight">Management</h1>
-            <div class="flex items-center gap-6">
-                <div class="flex gap-4 text-xs font-normal">
-                    <button onclick="showTab('dashboard')" class="hover:text-blue-500">Dashboard</button>
-                    <button onclick="showTab('config')" class="hover:text-blue-500">Configurations</button>
-                </div>
-                <button onclick="showModal('add-config-modal')" id="buy-btn-placeholder" class="apple-btn-buy hidden">New Config</button>
+            <h1 class="text-lg font-semibold tracking-tight">Admin Console</h1>
+            <div class="flex items-center gap-6" id="admin-nav-links">
+                <span onclick="showSection('dashboard')" class="tab-link active" data-tab="dashboard">Dashboard</span>
+                <span onclick="showSection('configs')" class="tab-link" data-tab="configs">Configurations</span>
+                <span onclick="showSection('events')" class="tab-link" data-tab="events">Events</span>
+                <span onclick="showSection('reserve')" class="tab-link" data-tab="reserve">Reserve</span>
+                <span onclick="showSection('sponsorships')" class="tab-link" data-tab="sponsorships">Sponsorships</span>
+                <button onclick="showSection('configs'); showModal('config-modal');" class="bg-[#0071e3] text-white text-[11px] px-3 py-1 rounded-full">New Config</button>
             </div>
         </div>
     </nav>
 
     <!-- AUTH VIEW -->
-    <section id="auth-view" class="flex flex-col items-center justify-center min-h-screen pt-20">
-        <div class="w-full max-w-[400px] p-6 reveal">
-            <h2 class="text-4xl font-bold text-center mb-8 tracking-tight">Sign in to Admin.</h2>
-            <form id="login-form" class="space-y-4">
-                <input type="email" id="email" class="apple-input" placeholder="Email" required>
-                <input type="password" id="password" class="apple-input" placeholder="Password" required>
-                <button type="submit" class="w-full bg-[#0071e3] text-white rounded-xl py-3 font-semibold mt-4 hover:bg-[#0077ed]">Sign In</button>
+    <section id="auth-view" class="min-h-screen flex flex-col items-center justify-center pt-24 px-6 reveal">
+        <div class="w-full max-w-[380px]">
+            <h2 class="text-4xl font-bold text-center mb-2 tracking-tight">Sign in to Admin.</h2>
+            <p class="text-center text-gray-500 mb-8">Manage your shul's kiddush automation.</p>
+            
+            <form id="login-form" class="space-y-3">
+                <input type="email" id="auth-email" class="apple-input" placeholder="Email" required>
+                <input type="password" id="auth-password" class="apple-input" placeholder="Password" required>
+                <button type="submit" class="w-full apple-btn-primary mt-4">Continue</button>
+                <button type="button" id="google-login" class="w-full apple-btn-secondary flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                    Google
+                </button>
             </form>
-            <p id="auth-error" class="text-red-500 text-sm mt-4 text-center hidden"></p>
+            <p id="auth-error" class="text-red-500 text-sm text-center mt-4 hidden"></p>
         </div>
     </section>
 
     <!-- ADMIN VIEW -->
-    <section id="admin-view" class="hidden">
-        <div class="container-apple pt-32 pb-20">
-            
-            <!-- Dashboard Tab -->
-            <div id="dashboard-tab" class="tab-content reveal">
-                <h2 class="hero-heading">Built for performance.<br>Designed for management.</h2>
-                <p class="hero-subheading">Control your entire infrastructure from one dashboard.</p>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="apple-grid-card">
-                        <div>
-                            <p class="text-sm font-semibold text-blue-600 mb-2">Configurations</p>
-                            <h3 class="text-4xl font-bold tracking-tight">Active Configs</h3>
-                            <p class="text-gray-500 mt-4 text-lg">You currently have <span id="stats-total" class="text-black font-semibold">0</span> items stored in your secure database.</p>
-                        </div>
-                        <div class="text-8xl font-black text-black/5 self-end">DATA</div>
-                    </div>
-                    <div class="apple-grid-card bg-black text-white">
-                        <div>
-                            <p class="text-sm font-semibold text-blue-400 mb-2">Real-time</p>
-                            <h3 class="text-4xl font-bold tracking-tight text-white">System Status</h3>
-                            <p class="text-gray-400 mt-4 text-lg">All systems operational. Global latency: 14ms.</p>
-                        </div>
-                        <div class="text-8xl font-black text-white/5 self-end">SECURE</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Config List Tab -->
-            <div id="config-tab" class="tab-content hidden reveal">
-                <div class="mb-12">
-                    <h2 class="text-5xl font-bold tracking-tight">Your Configs.</h2>
-                    <p class="text-xl text-gray-500 mt-4">Manage and deploy production environment settings.</p>
-                </div>
-
-                <div id="config-list" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <!-- Cards will be injected here -->
-                </div>
-            </div>
+    <main id="admin-view" class="hidden pt-24 pb-20">
+        <div class="support-banner">
+            Knowledge Base/Support: <a href="https://kiddushware.tawk.help/" class="underline decoration-1 underline-offset-2">Click Here</a>
         </div>
-    </section>
 
-    <!-- Apple Style Modal -->
-    <div id="modal-overlay" class="fixed inset-0 bg-white/80 backdrop-blur-xl z-[10000] flex items-center justify-center hidden">
-        <div id="add-config-modal" class="w-full max-w-xl p-10 reveal">
+        <div class="container-apple">
+            
+            <!-- Dashboard -->
+            <section id="section-dashboard" class="section-content mt-16 reveal">
+                <h2 class="text-5xl font-bold tracking-tight text-center mb-12">Performance at a glance.</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="apple-card">
+                        <span class="text-blue-600 text-xs font-bold uppercase tracking-widest">Growth</span>
+                        <h3 class="text-3xl font-bold mt-2">Sponsorships</h3>
+                        <p class="text-gray-500 mt-2">Active database items: <span id="stats-total" class="text-black font-semibold">0</span></p>
+                        <div class="mt-12 text-7xl font-black text-black/5 select-none">DATA</div>
+                    </div>
+                    <div class="apple-card bg-black text-white">
+                        <span class="text-blue-400 text-xs font-bold uppercase tracking-widest">Tutorial</span>
+                        <h3 class="text-3xl font-bold mt-2 text-white">Quick Start</h3>
+                        <p class="text-gray-400 mt-2">Watch the walkthrough to master your dashboard.</p>
+                        <button onclick="showSection('support')" class="mt-8 text-blue-400 font-medium">Watch Video →</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Configurations -->
+            <section id="section-configs" class="section-content hidden mt-12 reveal">
+                <div class="flex justify-between items-end mb-10">
+                    <div>
+                        <h2 class="text-4xl font-bold tracking-tight">Configurations</h2>
+                        <p class="text-gray-500 mt-2 text-lg">Manage your public calendars and forms.</p>
+                    </div>
+                </div>
+                <div id="configs-list" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Config items injected here -->
+                </div>
+            </section>
+
+            <!-- Custom Events -->
+            <section id="section-events" class="section-content hidden mt-12 reveal">
+                <div class="flex flex-col md:flex-row gap-12">
+                    <div class="md:w-1/3">
+                        <h2 class="text-3xl font-bold tracking-tight mb-4">Event Planning</h2>
+                        <p class="text-gray-500 mb-8">Add specialized events like Bar Mitzvahs or communal dinners.</p>
+                        <form id="create-event-form" class="space-y-4">
+                            <input type="text" id="event-title" class="apple-input" placeholder="Event Title" required>
+                            <textarea id="event-desc" class="apple-input h-24" placeholder="Description"></textarea>
+                            <div class="grid grid-cols-2 gap-2">
+                                <input type="date" id="event-start" class="apple-input" required>
+                                <input type="date" id="event-end" class="apple-input" required>
+                            </div>
+                            <button type="submit" class="w-full apple-btn-primary">Create Event</button>
+                        </form>
+                    </div>
+                    <div class="md:w-2/3">
+                        <div id="events-list" class="space-y-4">
+                            <!-- Events injected here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Reserve -->
+            <section id="section-reserve" class="section-content hidden mt-12 reveal">
+                <div class="max-w-2xl mx-auto bg-gray-50 p-10 rounded-[32px]">
+                    <h2 class="text-3xl font-bold tracking-tight mb-8">Internal Reservation</h2>
+                    <form id="reserve-form" class="space-y-4">
+                        <select id="res-type" class="apple-input">
+                            <option value="">Select Reservation Type</option>
+                            <option value="shabbat">Shabbat / Parsha</option>
+                            <option value="custom">Custom Event</option>
+                        </select>
+                        <select id="res-target" class="apple-input hidden">
+                            <!-- Populated based on type -->
+                        </select>
+                        <input type="text" id="res-name" class="apple-input" placeholder="Sponsor's Name" required>
+                        <input type="text" id="res-occasion" class="apple-input" placeholder="Occasion" required>
+                        <input type="email" id="res-email" class="apple-input" placeholder="Contact Email (Optional)">
+                        <button type="submit" class="w-full apple-btn-primary py-4 text-lg">Confirm Reservation</button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Sponsorships -->
+            <section id="section-sponsorships" class="section-content hidden mt-12 reveal">
+                <h2 class="text-4xl font-bold tracking-tight mb-8">Management Queue</h2>
+                <div class="space-y-12">
+                    <div>
+                        <h4 class="text-xs font-bold text-orange-500 uppercase tracking-widest mb-4">Pending Approval</h4>
+                        <div id="pending-list" class="space-y-2"></div>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-green-600 uppercase tracking-widest mb-4">Confirmed</h4>
+                        <div id="approved-list" class="space-y-2"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Support -->
+            <section id="section-support" class="section-content hidden mt-12 reveal">
+                <h2 class="text-4xl font-bold tracking-tight mb-8">Help & Training</h2>
+                <div class="apple-card bg-black p-4 rounded-[24px]">
+                    <div style="padding:56.25% 0 0 0;position:relative;">
+                        <iframe src="https://fast.wistia.net/embed/iframe/dgq1pg5kwp?videoFoam=true" title="Walkthrough" allow="autoplay; fullscreen" allowtransparency="true" frameborder="0" scrolling="no" class="wistia_embed" name="wistia_embed" style="position:absolute;top:0;left:0;width:100%;height:100%;"></iframe>
+                    </div>
+                </div>
+                <div class="mt-12 text-center text-gray-500">
+                    Questions? Email <a href="mailto:support@rebchardle.org" class="text-blue-600">support@rebchardle.org</a>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- Modal Overlay -->
+    <div id="modal-overlay" class="fixed inset-0 bg-white/80 backdrop-blur-2xl z-[10001] flex items-center justify-center hidden">
+        <!-- New Config Modal -->
+        <div id="config-modal" class="w-full max-w-xl p-8 hidden reveal">
             <div class="flex justify-between items-center mb-8">
-                <h3 class="text-3xl font-bold tracking-tight">New Configuration</h3>
-                <button onclick="closeModal()" class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-400 hover:text-black">✕</button>
+                <h3 class="text-3xl font-bold tracking-tight">New Config</h3>
+                <button onclick="closeModal()" class="text-2xl text-gray-400 hover:text-black">✕</button>
             </div>
-            <form id="config-form" class="space-y-6">
-                <div>
-                    <label class="block text-sm font-medium text-gray-500 mb-2">Give your config a descriptive name</label>
-                    <input type="text" id="config-name" class="apple-input" required placeholder="Production Key Set">
+            <form id="config-form" class="space-y-4">
+                <input type="text" id="cfg-title" class="apple-input" placeholder="Configuration Title (e.g. Main Kiddush)" required>
+                <select id="cfg-type" class="apple-input">
+                    <option value="form">Form Style</option>
+                    <option value="calendar">Calendar Style</option>
+                </select>
+                <input type="email" id="cfg-email" class="apple-input" placeholder="Notification Email">
+                
+                <div class="pt-4 border-t border-gray-100">
+                    <p class="text-sm font-semibold mb-3">Card Payments</p>
+                    <div class="grid grid-cols-2 gap-4">
+                        <input type="text" id="cfg-price-full" class="apple-input" placeholder="Full Price ($)">
+                        <input type="url" id="cfg-link-full" class="apple-input" placeholder="Stripe Link (Full)">
+                    </div>
                 </div>
-                <div class="pt-6 flex flex-col gap-3">
-                    <button type="submit" class="w-full bg-[#0071e3] text-white rounded-full py-3 font-semibold">Save to Cloud</button>
-                    <button type="button" onclick="closeModal()" class="w-full text-blue-500 font-medium py-2">Cancel</button>
-                </div>
+
+                <button type="submit" class="w-full apple-btn-primary mt-6">Save Configuration</button>
             </form>
         </div>
     </div>
 
-    <!-- Firebase -->
+    <!-- Firebase & Logic -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
     <script>
-        // Init (Replace with your actual config)
-        const firebaseConfig = { apiKey: "", authDomain: "your-project.firebaseapp.com", projectId: "your-project" };
+        // --- INITIALIZATION ---
+        const firebaseConfig = { apiKey: "", authDomain: "", projectId: "your-project-id" }; // Replace with real config
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        function showTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.getElementById(tabId + '-tab').classList.remove('hidden');
+        // --- NAVIGATION & UI ---
+        function showSection(id) {
+            document.querySelectorAll('.section-content').forEach(s => s.classList.add('hidden'));
+            document.getElementById('section-' + id).classList.remove('hidden');
             
-            if(tabId === 'config') {
-                document.getElementById('buy-btn-placeholder').classList.remove('hidden');
-                loadConfigs();
-            } else {
-                document.getElementById('buy-btn-placeholder').classList.add('hidden');
-            }
+            document.querySelectorAll('.tab-link').forEach(l => {
+                l.classList.toggle('active', l.getAttribute('data-tab') === id);
+            });
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function showModal(id) {
             document.getElementById('modal-overlay').classList.remove('hidden');
+            document.getElementById(id).classList.remove('hidden');
         }
 
         function closeModal() {
             document.getElementById('modal-overlay').classList.add('hidden');
+            document.getElementById('config-modal').classList.add('hidden');
         }
 
-        // Auth
+        // --- AUTHENTICATION ---
         document.getElementById('login-form').onsubmit = async (e) => {
             e.preventDefault();
+            const email = document.getElementById('auth-email').value;
+            const pass = document.getElementById('auth-password').value;
             try {
-                await auth.signInWithEmailAndPassword(document.getElementById('email').value, document.getElementById('password').value);
+                await auth.signInWithEmailAndPassword(email, pass);
             } catch (err) {
-                const errorEl = document.getElementById('auth-error');
-                errorEl.innerText = err.message;
-                errorEl.classList.remove('hidden');
+                const errEl = document.getElementById('auth-error');
+                errEl.innerText = err.message;
+                errEl.classList.remove('hidden');
             }
         };
 
@@ -295,7 +337,7 @@
                 document.getElementById('admin-view').classList.remove('hidden');
                 document.getElementById('nav-user-info').classList.remove('hidden');
                 document.getElementById('nav-user-email').innerText = user.email;
-                loadConfigs();
+                initData();
             } else {
                 document.getElementById('auth-view').classList.remove('hidden');
                 document.getElementById('admin-view').classList.add('hidden');
@@ -303,46 +345,152 @@
             }
         });
 
+        // --- DATA LOGIC ---
+        function initData() {
+            loadConfigs();
+            loadEvents();
+            loadSponsorships();
+        }
+
+        // Configs
         async function loadConfigs() {
-            const list = document.getElementById('config-list');
-            try {
-                const snapshot = await db.collection('configs').get();
-                document.getElementById('stats-total').innerText = snapshot.size;
-                list.innerHTML = '';
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    list.innerHTML += `
-                        <div class="apple-grid-card !min-h-[250px] !p-8 bg-white border border-gray-100 shadow-sm">
-                            <div>
-                                <h4 class="text-xl font-bold">${data.name || 'Config'}</h4>
-                                <p class="text-xs text-gray-400 mt-2 uppercase tracking-widest">Modified: Today</p>
-                            </div>
-                            <div class="flex justify-between items-center mt-6">
-                                <button class="text-blue-500 font-medium text-sm">Open Settings</button>
-                                <button onclick="deleteConfig('${doc.id}')" class="text-gray-300 hover:text-red-500">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                                </button>
-                            </div>
+            const snap = await db.collection('configs').get();
+            document.getElementById('stats-total').innerText = snap.size;
+            const container = document.getElementById('configs-list');
+            container.innerHTML = '';
+            snap.forEach(doc => {
+                const d = doc.data();
+                container.innerHTML += `
+                    <div class="apple-card bg-white border border-gray-100 shadow-sm flex flex-col justify-between">
+                        <div>
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400">${d.type}</span>
+                            <h4 class="text-xl font-bold mt-1">${d.title}</h4>
                         </div>
-                    `;
-                });
-            } catch (e) { console.error(e); }
+                        <div class="mt-8 flex justify-between items-center">
+                            <button class="text-blue-600 text-sm font-medium">Edit Settings</button>
+                            <button onclick="deleteDoc('configs','${doc.id}')" class="text-gray-300 hover:text-red-500">✕</button>
+                        </div>
+                    </div>
+                `;
+            });
         }
 
         document.getElementById('config-form').onsubmit = async (e) => {
             e.preventDefault();
-            await db.collection('configs').add({ name: document.getElementById('config-name').value });
+            const data = {
+                title: document.getElementById('cfg-title').value,
+                type: document.getElementById('cfg-type').value,
+                notificationEmail: document.getElementById('cfg-email').value,
+                priceFull: document.getElementById('cfg-price-full').value,
+                linkFull: document.getElementById('cfg-link-full').value
+            };
+            await db.collection('configs').add(data);
             closeModal();
             loadConfigs();
-            document.getElementById('config-form').reset();
+            e.target.reset();
         };
 
-        async function deleteConfig(id) {
-            if(confirm("Delete this?")) {
-                await db.collection('configs').doc(id).delete();
-                loadConfigs();
+        // Events
+        async function loadEvents() {
+            const snap = await db.collection('customEvents').get();
+            const list = document.getElementById('events-list');
+            list.innerHTML = '';
+            snap.forEach(doc => {
+                const d = doc.data();
+                list.innerHTML += `
+                    <div class="p-6 bg-gray-50 rounded-2xl flex justify-between items-center">
+                        <div>
+                            <p class="font-bold text-lg">${d.title}</p>
+                            <p class="text-sm text-gray-500">${d.startDate} to ${d.endDate}</p>
+                        </div>
+                        <button onclick="deleteDoc('customEvents','${doc.id}')" class="text-gray-300">✕</button>
+                    </div>
+                `;
+            });
+        }
+
+        document.getElementById('create-event-form').onsubmit = async (e) => {
+            e.preventDefault();
+            await db.collection('customEvents').add({
+                title: document.getElementById('event-title').value,
+                description: document.getElementById('event-desc').value,
+                startDate: document.getElementById('event-start').value,
+                endDate: document.getElementById('event-end').value
+            });
+            loadEvents();
+            e.target.reset();
+        };
+
+        // Sponsorships
+        async function loadSponsorships() {
+            const snap = await db.collection('sponsorships').get();
+            const pList = document.getElementById('pending-list');
+            const aList = document.getElementById('approved-list');
+            pList.innerHTML = aList.innerHTML = '';
+
+            snap.forEach(doc => {
+                const d = doc.data();
+                const card = `
+                    <div class="flex items-center justify-between p-4 bg-white border border-gray-100 rounded-xl shadow-sm">
+                        <div>
+                            <p class="font-semibold">${d.sponsorName}</p>
+                            <p class="text-xs text-gray-400">${d.occasion}</p>
+                        </div>
+                        <div class="flex gap-2">
+                            ${d.status === 'pending' ? `<button onclick="updateStatus('${doc.id}', 'approved')" class="text-[10px] bg-blue-100 text-blue-600 px-3 py-1 rounded-full font-bold">APPROVE</button>` : ''}
+                            <button onclick="deleteDoc('sponsorships','${doc.id}')" class="text-gray-300 text-sm">✕</button>
+                        </div>
+                    </div>
+                `;
+                d.status === 'approved' ? aList.innerHTML += card : pList.innerHTML += card;
+            });
+        }
+
+        async function updateStatus(id, status) {
+            await db.collection('sponsorships').doc(id).update({ status });
+            loadSponsorships();
+        }
+
+        async function deleteDoc(col, id) {
+            if(confirm("Permanently delete this item?")) {
+                await db.collection(col).doc(id).delete();
+                initData();
             }
         }
+
+        // Reservation UI Toggle
+        document.getElementById('res-type').onchange = async (e) => {
+            const target = document.getElementById('res-target');
+            target.classList.remove('hidden');
+            target.innerHTML = '<option>Loading...</option>';
+            
+            if(e.target.value === 'shabbat') {
+                // Simplified mock for Shabbat dates
+                target.innerHTML = '<option value="2024-05-18">May 18: Parshat Emor</option><option value="2024-05-25">May 25: Parshat Behar</option>';
+            } else {
+                const snap = await db.collection('customEvents').get();
+                target.innerHTML = '';
+                snap.forEach(doc => target.innerHTML += `<option value="${doc.id}">${doc.data().title}</option>`);
+            }
+        };
+
+        document.getElementById('reserve-form').onsubmit = async (e) => {
+            e.preventDefault();
+            await db.collection('sponsorships').add({
+                sponsorName: document.getElementById('res-name').value,
+                occasion: document.getElementById('res-occasion').value,
+                email: document.getElementById('res-email').value,
+                target: document.getElementById('res-target').value,
+                status: 'approved',
+                type: document.getElementById('res-type').value,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            alert("Reservation confirmed.");
+            showSection('sponsorships');
+            loadSponsorships();
+            e.target.reset();
+        };
+
     </script>
 </body>
 </html>
