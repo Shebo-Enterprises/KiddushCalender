@@ -349,7 +349,7 @@ async function renderCalendar(container, configData) {
 
 async function renderForm(container, configData) {
     // Fetch all Shabbosim for the year for the dropdown
-    const allYearShabbosim = await getShabbosimForYear(); // from parsha-service.js
+    const { future: allYearShabbosim } = await getShabbosimForYear(); // from parsha-service.js, only need future dates
     // Fetch active custom sponsorable events for this config's owner
     const activeCustomEvents = await getActiveCustomSponsorables(configData.userId); // New helper function
 

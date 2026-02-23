@@ -494,24 +494,44 @@ async function populateAdminShabbosSelector() {
     if (!adminShabbosSelect) return;
 
     try {
-        const allYearShabbosim = await getShabbosimForYear(); // From parsha-service.js
+        const { future, past } = await getShabbosimForYear(); // From parsha-service.js
         let shabbosOptionsHTML = '<option value="">Select a Shabbos/Parsha</option>';
-        if (allYearShabbosim.length > 0) {
-            allYearShabbosim.forEach(shabbat => {
+
+        if (future.length > 0) {
+            shabbosOptionsHTML += '<optgroup label="Upcoming Shabbosim">';
+            future.forEach(shabbat => {
                 const dateObj = new Date(shabbat.shabbatDate + "T00:00:00Z");
                 const displayDate = dateObj.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
                 shabbosOptionsHTML += `<option value="${shabbat.shabbatDate}|${shabbat.parsha}">${shabbat.parsha} - ${displayDate}</option>`;
             });
-        } else {
+            shabbosOptionsHTML += '</optgroup>';
+        }
+
+        if (past.length > 0) {
+            shabbosOptionsHTML += '<optgroup label="Past Shabbosim">';
+            past.forEach(shabbat => {
+                const dateObj = new Date(shabbat.shabbatDate + "T00:00:00Z");
+                const displayDate = dateObj.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+                shabbosOptionsHTML += `<option value="${shabbat.shabbatDate}|${shabbat.parsha}">${shabbat.parsha} - ${displayDate}</option>`;
+            });
+            shabbosOptionsHTML += '</optgroup>';
+        }
+
+        if (future.length === 0 && past.length === 0) {
             shabbosOptionsHTML = '<option value="">Could not load Shabbos dates</option>';
         }
         adminShabbosSelect.innerHTML = shabbosOptionsHTML;
+        if ($.fn.selectpicker) {
+            $(adminShabbosSelect).selectpicker('refresh');
+        }
     } catch (error) {
         console.error("Error populating admin Shabbos selector:", error);
         adminShabbosSelect.innerHTML = '<option value="">Error loading dates</option>';
+        if ($.fn.selectpicker) {
+            $(adminShabbosSelect).selectpicker('refresh');
+        }
     }
 }
-
 async function populateAdminCustomEventSelector() {
     if (!adminCustomEventSelect) return;
     adminCustomEventSelect.innerHTML = '<option value="">Loading custom events...</option>';
@@ -532,12 +552,17 @@ async function populateAdminCustomEventSelector() {
             optionsHtml += `<option value="${doc.id}|${event.title}">${event.title} (${new Date(event.startDate + "T00:00:00Z").toLocaleDateString()} - ${new Date(event.endDate + "T00:00:00Z").toLocaleDateString()})</option>`;
         });
         adminCustomEventSelect.innerHTML = optionsHtml || '<option value="">No active custom events found</option>';
+        if ($.fn.selectpicker) {
+            $(adminCustomEventSelect).selectpicker('refresh');
+        }
     } catch (error) {
         console.error("Error populating admin custom event selector:", error);
         adminCustomEventSelect.innerHTML = '<option value="">Error loading events</option>';
+        if ($.fn.selectpicker) {
+            $(adminCustomEventSelect).selectpicker('refresh');
+        }
     }
 }
-
 if (adminShabbosSelect) {
     adminShabbosSelect.addEventListener('change', async function () {
         const selectedValue = this.value;

@@ -6,6 +6,7 @@
     <title>KiddushWare</title>
     <!-- Bootstrap 3 CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.18/css/bootstrap-select.min.css">
     <link rel="stylesheet" href="css/style.css"> <!-- Your general stylesheet -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
@@ -479,7 +480,7 @@
                             <div id="admin-shabbos-select-container" style="display:none;">
                                 <div class="form-group">
                                     <label for="admin-shabbos-select">Select Parsha/Shabbos:</label>
-                                    <select class="form-control" id="admin-shabbos-select">
+                                    <select class="form-control selectpicker" data-live-search="true" id="admin-shabbos-select" data-width="100%">
                                         <!-- Options populated by admin.js -->
                                     </select>
                                 </div>
@@ -492,7 +493,7 @@
                             <div id="admin-custom-event-select-container" style="display:none;">
                                 <div class="form-group">
                                     <label for="admin-custom-event-select">Select Custom Event:</label>
-                                    <select class="form-control" id="admin-custom-event-select">
+                                    <select class="form-control selectpicker" data-live-search="true" id="admin-custom-event-select" data-width="100%">
                                         <!-- Options populated by admin.js -->
                                     </select>
                                 </div>
@@ -767,6 +768,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <!-- Bootstrap 3 JS -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.18/js/bootstrap-select.min.js"></script>
 
     <script src="js/firebase-init.js"></script>
     <script src="js/parsha-service.js"></script> <!-- Add this line -->

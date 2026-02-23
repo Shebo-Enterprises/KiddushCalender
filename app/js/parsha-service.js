@@ -84,9 +84,8 @@ async function getUpcomingShabbosim(numberOfWeeks = 12) {
 async function getShabbosimForYear() {
     const today = new Date();
     const currentYear = today.getFullYear();
-    // Hebcal API can give all events for a year. We'll filter for parshiyot.
-    // Using ?v=1&maj=on&min=on&nx=on&year=now&month=x&ss=on&mf=on&c=on&geo=none&M=on&lg=s&yt=G&cfg=json
-    // A simpler way for just parshiyot for a year:
+    // Fetch previous, current, and next year to get a good range of past and future dates.
+    const hebcalURLPrevYear = `https://www.hebcal.com/hebcal?v=1&cfg=json&maj=on&min=off&mod=off&nx=off&year=${currentYear - 1}&month=x&ss=off&mf=off&c=off&leyning=off&i=off&s=on`;
     const hebcalURL = `https://www.hebcal.com/hebcal?v=1&cfg=json&maj=on&min=off&mod=off&nx=off&year=${currentYear}&month=x&ss=off&mf=off&c=off&leyning=off&i=off&s=on`;
     // And for next year to cover the full Hebrew year cycle
     const hebcalURLNextYear = `https://www.hebcal.com/hebcal?v=1&cfg=json&maj=on&min=off&mod=off&nx=off&year=${currentYear + 1}&month=x&ss=off&mf=off&c=off&leyning=off&i=off&s=on`;
@@ -94,26 +93,35 @@ async function getShabbosimForYear() {
     const allShabbosim = [];
 
     try {
-        for (const url of [hebcalURL, hebcalURLNextYear]) {
-            const response = await fetch(url);
+        // Fetch all three years in parallel
+        const responses = await Promise.all([
+            fetch(hebcalURLPrevYear),
+            fetch(hebcalURL),
+            fetch(hebcalURLNextYear)
+        ]);
+
+        for (const response of responses) {
             if (!response.ok) throw new Error(`Hebcal API error: ${response.statusText}`);
             const data = await response.json();
             data.items?.forEach(item => {
                 if (item.category === "parashat" && item.date && item.title) {
-                    // To get weekendOf, we'd ideally call getShabbatInfoForDate, but that's many API calls.
-                    // For simplicity here, we'll just store date and parsha. The form can format it.
                     allShabbosim.push({ parsha: item.title, shabbatDate: item.date, weekendOf: `Weekend of ${new Date(item.date + "T00:00:00Z").toLocaleDateString()}` });
                 }
             });
         }
     } catch (error) {
         console.error("Error fetching Shabbosim for year:", error);
-        return []; // Return empty on error
+        return { future: [], past: [] }; // Return empty on error
     }
-    // Filter out past Shabbosim and sort
-    const todayStr = today.toISOString().split('T')[0];
-    return allShabbosim
-        .filter(s => s.shabbatDate >= todayStr)
+    // Deduplicate and sort all shabbosim
+    const uniqueShabbosim = allShabbosim
         .sort((a, b) => new Date(a.shabbatDate) - new Date(b.shabbatDate))
         .filter((item, index, self) => index === self.findIndex(t => t.shabbatDate === item.shabbatDate)); // Deduplicate
+
+    // Separate into past and future
+    const todayStr = today.toISOString().split('T')[0];
+    const future = uniqueShabbosim.filter(s => s.shabbatDate >= todayStr);
+    const past = uniqueShabbosim.filter(s => s.shabbatDate < todayStr).sort((a, b) => new Date(b.shabbatDate) - new Date(a.shabbatDate)); // Sort past in descending order
+
+    return { future, past };
 }
