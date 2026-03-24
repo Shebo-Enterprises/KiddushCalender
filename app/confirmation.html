@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sponsorship Confirmation</title>
+    <!-- Bootstrap 3 CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Lato&family=Merriweather&family=Montserrat&family=Open+Sans&family=Roboto&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style id="dynamic-styles"></style>
+    <style>
+        body { background-color: #f4f7f6; }
+        .confirmation-container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: #fff;
+            padding: 30px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+        .panel-heading { font-weight: bold; }
+        dt { width: 120px !important; }
+        dd { margin-left: 140px !important; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="loading-message" class="text-center" style="margin-top: 50px;">
+            <p class="lead"><i class="glyphicon glyphicon-refresh"></i> Loading details...</p>
+        </div>
+        
+        <div id="confirmation-content" class="confirmation-container" style="display:none;">
+            <div class="text-center">
+                <h2 id="page-title">Sponsorship Details</h2>
+                <div class="text-right" style="margin-top: -10px; margin-bottom: 20px;">
+                    <button id="download-invoice-btn" class="btn btn-primary btn-sm">
+                        <i class="glyphicon glyphicon-download-alt"></i> Download Official Invoice
+                    </button>
+                </div>
+                <hr>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="alert" id="status-alert" role="alert">
+                        <strong>Status:</strong> <span id="sponsorship-status"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel panel-default">
+                <div class="panel-heading">Sponsorship Information</div>
+                <div class="panel-body">
+                    <dl class="dl-horizontal">
+                        <dt>Sponsor:</dt> <dd id="detail-name"></dd>
+                        <dt>Occasion:</dt> <dd id="detail-occasion"></dd>
+                        <dt>Event/Date:</dt> <dd id="detail-event"></dd>
+                        <dt>Type:</dt> <dd id="detail-type"></dd>
+                    </dl>
+                </div>
+            </div>
+
+            <div id="payment-section" class="panel panel-info" style="display:none;">
+                <div class="panel-heading">Payment Information</div>
+                <div class="panel-body">
+                    <div id="payment-content"></div>
+                </div>
+            </div>
+            
+            <div class="text-center" style="margin-top: 30px;">
+                <p class="text-muted"><small>Questions? Contact <span id="contact-email-display">us</span>.</small></p>
+            </div>
+        </div>
+
+        <div id="error-message" class="alert alert-danger text-center" style="display:none; margin-top: 50px;"></div>
+    </div>
+
+    <!-- Hidden Invoice Template for PDF Generation -->
+    <div id="invoice-container-hidden" style="position: absolute; left: -9999px; top: 0; width: 800px;">
+        <div id="invoice-element" style="padding: 40px; background: white; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333;">
+            <div style="border-bottom: 2px solid #eee; padding-bottom: 20px; margin-bottom: 30px;">
+                <div style="float: left; max-width: 60%;">
+                    <h2 style="margin: 0; color: #2c3e50; font-size: 24px;" id="inv-org-name">Organization Name</h2>
+                    <p style="margin: 5px 0 0; color: #777; font-size: 14px;" id="inv-org-email">email@example.com</p>
+                </div>
+                <div style="float: right; text-align: right;">
+                    <h3 style="margin: 0; font-weight: 300; color: #7f8c8d; font-size: 20px;">INVOICE / RECEIPT</h3>
+                    <p style="margin: 5px 0 0; font-size: 14px;">Date: <strong id="inv-date">Jan 1, 2024</strong></p>
+                    <p style="margin: 5px 0 0; font-size: 14px;">Invoice #: <strong id="inv-number">12345</strong></p>
+                </div>
+                <div style="clear: both;"></div>
+            </div>
+
+            <div style="margin-bottom: 40px;">
+                <h4 style="border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 10px; color: #555; font-size: 16px;">Bill To:</h4>
+                <p style="margin: 0; font-size: 16px;"><strong id="inv-sponsor-name">Sponsor Name</strong></p>
+                <p style="margin: 5px 0 0; font-size: 14px;" id="inv-sponsor-email">sponsor@example.com</p>
+            </div>
+
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+                <thead>
+                    <tr style="background: #f9f9f9;">
+                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd; color: #555; font-size: 14px;">Description</th>
+                        <th style="padding: 12px; text-align: right; border-bottom: 2px solid #ddd; color: #555; width: 150px; font-size: 14px;">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee; font-size: 14px;" id="inv-description">Kiddush Sponsorship</td>
+                        <td style="padding: 12px; text-align: right; border-bottom: 1px solid #eee; font-size: 14px;" id="inv-amount">$0.00</td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td style="padding: 12px; text-align: right; font-weight: bold; font-size: 14px;">Total:</td>
+                        <td style="padding: 12px; text-align: right; font-weight: bold; font-size: 18px;" id="inv-total">$0.00</td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <div style="margin-top: 50px; text-align: center; color: #777; font-size: 12px;">
+                <p>Thank you for your support!</p>
+                <p id="inv-status-note" style="margin-top: 5px; font-weight: bold;">Status: Pending</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="js/firebase-init.js"></script>
+    <script src="js/confirmation.js"></script>
+</body>
+</html>

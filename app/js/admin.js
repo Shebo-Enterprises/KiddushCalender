@@ -797,6 +797,12 @@ function renderSponsorships(snapshot, container, isPending) {
                 <td>${submittedDate}</td>
                 ${isPending ? '<td><span class="label label-warning">Pending</span></td>' : ''}
                 <td class="sponsorship-actions">
+                    <a href="${window.location.origin}/app/confirmation.html?id=${doc.id}" target="_blank" class="btn btn-default btn-xs" title="Share Confirmation Page">
+                        <i class="glyphicon glyphicon-share"></i> Share
+                    </a>
+                    <a href="${window.location.origin}/app/confirmation.html?id=${doc.id}&mode=invoice" target="_blank" class="btn btn-default btn-xs" style="margin-left: 3px;" title="Download Invoice">
+                        <i class="glyphicon glyphicon-download-alt"></i> Invoice
+                    </a>
                     ${isPending ? `
                         <button class="btn btn-success btn-xs" onclick="updateSponsorshipStatus('${doc.id}', 'approved')" title="Approve">
                             <i class="glyphicon glyphicon-ok"></i> Approve
