@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ShulSign Setup</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <style>
+        body { background: #f4f7f6; font-family: 'Segoe UI', sans-serif; padding: 40px 0; }
+        .settings-container { max-width: 800px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .panel-primary { border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .section-header { margin-top: 20px; padding-bottom: 5px; border-bottom: 1px solid #eee; color: #337ab7; font-weight: bold; text-transform: uppercase; font-size: 11px; }
+        .widget-card { background: #f9f9f9; padding: 10px; border-radius: 4px; margin-bottom: 10px; border: 1px solid #eee; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="settings-container">
+            <h3 style="margin-top:0"><i class="glyphicon glyphicon-edit"></i> Board Designer</h3>
+            <p class="text-muted">Configure your signage layout and branding. Changes are saved locally.</p>
+            
+                <form id="setup-form">
+                    <div class="section-header">1. CORE CONNECTION</div>
+                    <div class="form-group">
+                        <label>KiddushWare Configuration ID:</label>
+                        <input type="text" id="configId" class="form-control" placeholder="e.g. zX8kLp2..." required>
+                    </div>
+                    <div class="form-group">
+                        <label>Zip Code (for Zmanim):</label>
+                        <input type="text" id="zipCode" class="form-control" placeholder="90210" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Display Mode:</label>
+                        <select id="displayMode" class="form-control live-update">
+                            <option value="cycle-all">Cycle All (Sponsorships + Announcements)</option>
+                            <option value="sponsorships-only">Sponsorships Only</option>
+                            <option value="information-only">Announcements Only</option>
+                        </select>
+                    </div>
+
+                    <div class="section-header">2. WIDGET MANAGER</div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="widget-card">
+                                <label><input type="checkbox" id="showClock" checked> Header Clock</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="widget-card">
+                                <label><input type="checkbox" id="showZmanim" checked> Zmanim Panel</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="widget-card">
+                                <label><input type="checkbox" id="showTicker" checked> Bottom Ticker</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="widget-card">
+                                <label>Layout:</label>
+                                <select id="layout" class="form-control input-sm">
+                                    <option value="classic">Zmanim Left</option>
+                                    <option value="flipped">Events Left</option>
+                                    <option value="vertical">Vertical</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-header">3. VISUAL DESIGN & FONTS</div>
+                    <div class="form-group">
+                        <label>Font Family:</label>
+                        <select id="fontFamily" class="form-control">
+                            <option value="">Default (Modern)</option>
+                            <option value="Roboto">Roboto</option>
+                            <option value="Open Sans">Open Sans</option>
+                            <option value="Playfair Display">Playfair (Elegant)</option>
+                            <option value="Montserrat">Montserrat</option>
+                            <option value="Lora">Lora (Serif)</option>
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label>Clock Size:</label>
+                                <input type="number" id="clockSize" class="form-control" value="4" step="0.2">
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label>Zmanim Size:</label>
+                                <input type="number" id="zmanimSize" class="form-control" value="1.8" step="0.1">
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label>Events Size:</label>
+                                <input type="number" id="eventsSize" class="form-control" value="2.5" step="0.1">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-header">4. CUSTOM CONTENT & TEXT</div>
+                    <div class="form-group">
+                        <label>Ticker Text (Bottom):</label>
+                        <input type="text" id="announcementText" class="form-control" placeholder="Welcome to our Shul!">
+                    </div>
+                    <div class="form-group">
+                        <label>Announcement Title (Main Box):</label>
+                        <input type="text" id="customAnnouncementTitle" class="form-control" placeholder="Welcome">
+                    </div>
+                    <div class="form-group">
+                        <label>Announcement Message (Main Box):</label>
+                        <textarea id="customAnnouncementText" class="form-control" rows="2" placeholder="Visit our website to sponsor..."></textarea>
+                    </div>
+
+                    <div class="section-header">5. IMAGES & BRANDING</div>
+                    <div class="form-group">
+                        <label>Main Image URL (Display Center):</label>
+                        <input type="text" id="mainImage" class="form-control" placeholder="https://site.com/logo.png">
+                    </div>
+                    <div class="form-group">
+                        <label>Sidebar Bottom Image URL:</label>
+                        <input type="text" id="sidebarImage" class="form-control" placeholder="https://site.com/sidebar.png">
+                    </div>
+
+                    <div class="section-header">6. COLOR OVERRIDES (OPTIONAL)</div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Background:</label>
+                                <input type="color" id="bgColor" class="form-control" value="#000000">
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Accent:</label>
+                                <input type="color" id="accentColor" class="form-control" value="#f39c12">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <button type="button" onclick="saveSettings(true)" class="btn btn-primary btn-block">
+                                <i class="glyphicon glyphicon-floppy-disk"></i> Save Settings
+                            </button>
+                        </div>
+                        <div class="col-sm-6">
+                            <button type="submit" class="btn btn-success btn-block">
+                                <i class="glyphicon glyphicon-fullscreen"></i> Launch Signage
+                            </button>
+                        </div>
+                    </div>
+                </form>
+        </div>
+    </div>
+
+    <script>
+        function saveSettings(showAlert = false) {
+            const s = {
+                configId: document.getElementById('configId').value,
+                zipCode: document.getElementById('zipCode').value,
+                layout: document.getElementById('layout').value,
+                displayMode: document.getElementById('displayMode').value,
+                fontFamily: document.getElementById('fontFamily').value,
+                clockSize: document.getElementById('clockSize').value,
+                zmanimSize: document.getElementById('zmanimSize').value,
+                eventsSize: document.getElementById('eventsSize').value,
+                bgColor: document.getElementById('bgColor').value,
+                accentColor: document.getElementById('accentColor').value,
+                showClock: document.getElementById('showClock').checked,
+                showZmanim: document.getElementById('showZmanim').checked,
+                showTicker: document.getElementById('showTicker').checked,
+                announcementText: document.getElementById('announcementText').value,
+                customAnnouncementTitle: document.getElementById('customAnnouncementTitle').value,
+                customAnnouncementText: document.getElementById('customAnnouncementText').value,
+                mainImage: document.getElementById('mainImage').value,
+                sidebarImage: document.getElementById('sidebarImage').value
+            };
+            localStorage.setItem('shulsign_settings', JSON.stringify(s));
+            if (showAlert) alert("Settings saved successfully!");
+        }
+
+        document.getElementById('setup-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            saveSettings();
+            window.location.href = 'index.html';
+        });
+
+        // Pre-fill if exists
+        const existing = JSON.parse(localStorage.getItem('shulsign_settings'));
+        if (existing) {
+            document.getElementById('configId').value = existing.configId || '';
+            document.getElementById('zipCode').value = existing.zipCode || '';
+            if(existing.layout) document.getElementById('layout').value = existing.layout;
+            if(existing.displayMode) document.getElementById('displayMode').value = existing.displayMode;
+            if(existing.rotationSpeed) document.getElementById('rotationSpeed').value = existing.rotationSpeed;
+            if(existing.clockSize) document.getElementById('clockSize').value = existing.clockSize;
+            if(existing.zmanimSize) document.getElementById('zmanimSize').value = existing.zmanimSize;
+            if(existing.eventsSize) document.getElementById('eventsSize').value = existing.eventsSize;
+            if(existing.showClock !== undefined) document.getElementById('showClock').checked = existing.showClock;
+            if(existing.showZmanim !== undefined) document.getElementById('showZmanim').checked = existing.showZmanim;
+            if(existing.showTicker !== undefined) document.getElementById('showTicker').checked = existing.showTicker;
+        }
+    </script>
+</body>
+</html>

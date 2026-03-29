@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShulSign - Digital Signage</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="signage.css">
+    <style id="dynamic-design"></style>
+</head>
+<body>
+    <div id="signage-container">
+        <!-- Header with Clock -->
+        <header class="signage-header">
+            <div class="row">
+                <div class="col-xs-8">
+                    <h1 id="shul-name">Loading Synagogue...</h1>
+                </div>
+                <div class="col-xs-4 text-right">
+                    <div id="live-clock">00:00:00</div>
+                    <div id="hebrew-date">...</div>
+                </div>
+            </div>
+        </header>
+
+        <main class="signage-content">
+            <div class="row" id="main-row" style="display: flex;">
+                <!-- Left Column: Zmanim -->
+                <div class="col-xs-4" id="zmanim-col">
+                    <div class="panel panel-default zmanim-panel">
+                        <div class="panel-heading">Zmanim</div>
+                        <div class="panel-body" id="zmanim-list">
+                            <p>Loading times...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Kiddushim & Events -->
+                <div class="col-xs-8" id="events-col">
+                    <div class="panel panel-primary events-panel">
+                        <div class="panel-heading" id="event-type-header">Upcoming Kiddushim</div>
+                        <div class="panel-body" id="event-display">
+                            <div class="loading-spinner">Fetching data from KiddushWare...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="signage-footer">
+            <p id="ticker-text">Welcome to our Shul! Sponsored Kiddushim support our community.</p>
+        </footer>
+    </div>
+
+    <!-- Firebase & App Logic -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="../js/firebase-init.js"></script>
+    <script src="../js/parsha-service.js"></script>
+    <script src="display.js"></script>
+    <script>
+        // Simple auto-refresh every hour to keep Zmanim current
+        setTimeout(() => window.location.reload(), 3600000);
+    </script>
+</body>
+</html>
