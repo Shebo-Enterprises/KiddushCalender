@@ -1,14 +1,18 @@
 document.addEventListener('DOMContentLoaded', async () => {
-    const settings = JSON.parse(localStorage.getItem('shulsign_settings')) || {};
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlConfigId = urlParams.get('configId');
     
-    if (!settings.configId) {
+    const local = JSON.parse(localStorage.getItem('shulsign_settings')) || {};
+    const targetConfigId = urlConfigId || local.configId;
+    
+    if (!targetConfigId) {
         window.location.href = 'setup.html';
         return;
     }
 
     try {
         // 1. Fetch the main configuration from Firestore
-        const configDoc = await db.collection("configurations").doc(settings.configId).get();
+        const configDoc = await db.collection("configurations").doc(targetConfigId).get();
         if (!configDoc.exists) {
             alert("Error: Configuration ID not found. Please check your setup.");
             window.location.href = 'setup.html';
@@ -16,7 +20,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         const configData = configDoc.data();
 
-        // 2. Set the UI name and apply design
+        // 2. Use Cloud-based signage settings
+        const settings = configData.signageSettings || {};
+
+        // 3. Set the UI name and apply design
         document.getElementById('shul-name').textContent = configData.title || "Synagogue Display";
         if (settings.announcementText) {
             document.getElementById('ticker-text').textContent = settings.announcementText;
@@ -25,7 +32,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         applyDesignSettings(settings);
         applyLayout(settings);
 
-        // 3. Initialize background processes
+        // 4. Initialize background processes
         setInterval(updateClock, 1000);
         fetchZmanim(settings.zipCode || '10001');
         

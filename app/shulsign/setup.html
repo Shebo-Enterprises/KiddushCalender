@@ -29,6 +29,10 @@
                         <input type="text" id="zipCode" class="form-control" placeholder="90210" required>
                     </div>
                     <div class="form-group">
+                        <label>Rotation Speed (seconds):</label>
+                        <input type="number" id="rotationSpeed" class="form-control" value="12" min="3">
+                    </div>
+                    <div class="form-group">
                         <label>Display Mode:</label>
                         <select id="displayMode" class="form-control live-update">
                             <option value="cycle-all">Cycle All (Sponsorships + Announcements)</option>
@@ -155,11 +159,23 @@
         </div>
     </div>
 
+    <!-- Firebase & App Logic -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="../js/firebase-init.js"></script>
+
     <script>
-        function saveSettings(showAlert = false) {
+        const urlParams = new URLSearchParams(window.location.search);
+        let currentConfigId = urlParams.get('id');
+
+        async function saveSettings(showAlert = false) {
+            if (!currentConfigId) return;
+
             const s = {
-                configId: document.getElementById('configId').value,
+                configId: currentConfigId,
                 zipCode: document.getElementById('zipCode').value,
+                rotationSpeed: document.getElementById('rotationSpeed').value,
                 layout: document.getElementById('layout').value,
                 displayMode: document.getElementById('displayMode').value,
                 fontFamily: document.getElementById('fontFamily').value,
@@ -177,31 +193,71 @@
                 mainImage: document.getElementById('mainImage').value,
                 sidebarImage: document.getElementById('sidebarImage').value
             };
-            localStorage.setItem('shulsign_settings', JSON.stringify(s));
-            if (showAlert) alert("Settings saved successfully!");
+
+            try {
+                // Save to Firebase
+                await db.collection("configurations").doc(currentConfigId).update({
+                    signageSettings: s,
+                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                // Keep only the ID in localStorage so the board knows which config to pull
+                localStorage.setItem('shulsign_settings', JSON.stringify({ configId: currentConfigId }));
+                
+                if (showAlert) alert("Settings synced to Firebase successfully!");
+                return true;
+            } catch (error) {
+                console.error("Firebase Save Error:", error);
+                alert("Error saving to Firebase: " + error.message);
+                return false;
+            }
         }
 
-        document.getElementById('setup-form').addEventListener('submit', (e) => {
+        document.getElementById('setup-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            saveSettings();
-            window.location.href = 'index.html';
+            const success = await saveSettings();
+            if (success) window.location.href = 'index.html?configId=' + currentConfigId;
         });
 
-        // Pre-fill if exists
-        const existing = JSON.parse(localStorage.getItem('shulsign_settings'));
-        if (existing) {
-            document.getElementById('configId').value = existing.configId || '';
-            document.getElementById('zipCode').value = existing.zipCode || '';
-            if(existing.layout) document.getElementById('layout').value = existing.layout;
-            if(existing.displayMode) document.getElementById('displayMode').value = existing.displayMode;
-            if(existing.rotationSpeed) document.getElementById('rotationSpeed').value = existing.rotationSpeed;
-            if(existing.clockSize) document.getElementById('clockSize').value = existing.clockSize;
-            if(existing.zmanimSize) document.getElementById('zmanimSize').value = existing.zmanimSize;
-            if(existing.eventsSize) document.getElementById('eventsSize').value = existing.eventsSize;
-            if(existing.showClock !== undefined) document.getElementById('showClock').checked = existing.showClock;
-            if(existing.showZmanim !== undefined) document.getElementById('showZmanim').checked = existing.showZmanim;
-            if(existing.showTicker !== undefined) document.getElementById('showTicker').checked = existing.showTicker;
-        }
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) {
+                window.location.href = '../index.html';
+                return;
+            }
+
+            if (currentConfigId) {
+                document.getElementById('configId').value = currentConfigId;
+                try {
+                    const doc = await db.collection("configurations").doc(currentConfigId).get();
+                    if (doc.exists && doc.data().userId !== user.uid) {
+                        alert("Unauthorized access to this configuration.");
+                        window.location.href = '../admin.html';
+                        return;
+                    }
+                    if (doc.exists && doc.data().signageSettings) {
+                        const s = doc.data().signageSettings;
+                        document.getElementById('zipCode').value = s.zipCode || '';
+                        document.getElementById('rotationSpeed').value = s.rotationSpeed || 12;
+                        document.getElementById('layout').value = s.layout || 'classic';
+                        document.getElementById('displayMode').value = s.displayMode || 'cycle-all';
+                        document.getElementById('fontFamily').value = s.fontFamily || '';
+                        document.getElementById('clockSize').value = s.clockSize || 4;
+                        document.getElementById('zmanimSize').value = s.zmanimSize || 1.8;
+                        document.getElementById('eventsSize').value = s.eventsSize || 2.5;
+                        document.getElementById('bgColor').value = s.bgColor || '#000000';
+                        document.getElementById('accentColor').value = s.accentColor || '#f39c12';
+                        document.getElementById('showClock').checked = s.showClock !== false;
+                        document.getElementById('showZmanim').checked = s.showZmanim !== false;
+                        document.getElementById('showTicker').checked = s.showTicker !== false;
+                        document.getElementById('announcementText').value = s.announcementText || '';
+                        document.getElementById('customAnnouncementTitle').value = s.customAnnouncementTitle || '';
+                        document.getElementById('customAnnouncementText').value = s.customAnnouncementText || '';
+                        document.getElementById('mainImage').value = s.mainImage || '';
+                        document.getElementById('sidebarImage').value = s.sidebarImage || '';
+                    }
+                } catch (e) { console.error("Load error", e); }
+            }
+        });
     </script>
 </body>
 </html>

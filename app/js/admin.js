@@ -165,8 +165,22 @@ async function loadConfigurations() {
             snapshot.forEach(doc => {
                 const config = doc.data();
                 const embedUrl = `${window.location.origin}/app/public-display.html?configId=${doc.id}`;
+                const signageDesignerUrl = `${window.location.origin}/app/shulsign/setup.html?id=${doc.id}`;
+                const liveSignageUrl = `${window.location.origin}/app/shulsign/index.html?configId=${doc.id}`;
+                
                 const paymentDisplayHtml = generatePaymentDetailsHtml(config);
                 const displaySettingsHtml = generateDisplaySettingsHtml(config);
+
+                let actionButtons = `<button class="btn btn-primary btn-xs" onclick='editConfigurationPrep("${doc.id}")'>Edit Settings</button>`;
+                
+                // If it's a signage-compatible config or explicitly signage type
+                if (config.type === 'signage' || config.signageSettings) {
+                    actionButtons += `
+                        <a href="${signageDesignerUrl}" class="btn btn-info btn-xs" style="margin-left:5px;">Board Designer</a>
+                        <a href="${liveSignageUrl}" target="_blank" class="btn btn-success btn-xs" style="margin-left:5px;">Launch Board</a>
+                    `;
+                }
+
                 html += `
                     <div class="panel panel-default config-item">
                         <div class="panel-heading"><h4 class="panel-title">${config.title} (Type: ${config.type})</h4></div>
@@ -176,7 +190,7 @@ async function loadConfigurations() {
                             <p><strong>Embed Code:</strong> <code class="embed-code">&lt;iframe src="${embedUrl}" width="100%" height="1200px" style="border:0px solid #ccc;"&gt;&lt;/iframe&gt;</code></p>
                             ${displaySettingsHtml}
                             ${paymentDisplayHtml}
-                            <button class="btn btn-primary btn-xs" onclick='editConfigurationPrep("${doc.id}")'>Edit</button>
+                            <div style="margin-top:10px;">${actionButtons}</div>
                             <button class="btn btn-danger btn-xs" style="margin-left: 5px;" onclick="deleteConfiguration('${doc.id}')">Delete</button>
                         </div>
                     </div>`;
