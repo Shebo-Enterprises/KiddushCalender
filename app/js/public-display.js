@@ -220,7 +220,7 @@ async function renderCalendar(container, configData) {
             }
         });
         customSponsorablesList.forEach(event => {
-            combinedSponsorableItems.push({ id: event.id, type: 'custom', title: event.title, description: event.description, displayDateInfo: `From ${new Date(event.startDate + "T00:00:00Z").toLocaleDateString()} to ${new Date(event.endDate + "T00:00:00Z").toLocaleDateString()}`, startDate: event.startDate });
+            combinedSponsorableItems.push({ id: event.id, type: 'custom', title: event.title, description: event.description, displayDateInfo: `From ${new Date(event.startDate + "T00:00:00Z").toLocaleDateString(undefined, {timeZone: 'UTC'})} to ${new Date(event.endDate + "T00:00:00Z").toLocaleDateString(undefined, {timeZone: 'UTC'})}`, startDate: event.startDate });
         });
         combinedSponsorableItems.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
 
@@ -454,8 +454,8 @@ async function renderForm(container, configData) {
     if (activeCustomEvents.length > 0) {
         sponsorableOptionsHTML += '<optgroup label="Custom Events">';
         activeCustomEvents.forEach(event => {
-            const startDateStr = new Date(event.startDate + "T00:00:00Z").toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-            const endDateStr = new Date(event.endDate + "T00:00:00Z").toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+            const startDateStr = new Date(event.startDate + "T00:00:00Z").toLocaleDateString(undefined, { month: 'short', day: 'numeric', timeZone: 'UTC' });
+            const endDateStr = new Date(event.endDate + "T00:00:00Z").toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
             // Value format: type|eventId|eventTitle
             sponsorableOptionsHTML += `<option value="custom|${event.id}|${event.title}">${event.title} (${startDateStr} - ${endDateStr})</option>`;
         });
@@ -546,8 +546,8 @@ async function renderForm(container, configData) {
                 formCustomEventTitleInput.value = eventTitle;
                 const eventDetail = activeCustomEvents.find(e => e.id === eventId); // activeCustomEvents is in scope from renderForm
                 if (eventDetail) {
-                    const startDateStr = new Date(eventDetail.startDate + "T00:00:00Z").toLocaleDateString();
-                    const endDateStr = new Date(eventDetail.endDate + "T00:00:00Z").toLocaleDateString();
+                    const startDateStr = new Date(eventDetail.startDate + "T00:00:00Z").toLocaleDateString(undefined, {timeZone: 'UTC'});
+                    const endDateStr = new Date(eventDetail.endDate + "T00:00:00Z").toLocaleDateString(undefined, {timeZone: 'UTC'});
                     selectedShabbosInfoDiv.innerHTML = `<p><strong>Event:</strong> ${eventTitle}</p><p><strong>Dates:</strong> ${startDateStr} - ${endDateStr}</p>${eventDetail.description ? `<p><strong>Description:</strong> ${eventDetail.description}</p>` : ''}`;
                 } else {
                     selectedShabbosInfoDiv.innerHTML = `<p><strong>Event:</strong> ${eventTitle}</p><p>Details not found.</p>`;

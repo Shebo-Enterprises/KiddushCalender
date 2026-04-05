@@ -459,7 +459,7 @@ async function loadCustomEvents() {
                     <div class="panel panel-default custom-event-item">
                         <div class="panel-heading"><h4 class="panel-title">${event.title}</h4></div>
                         <div class="panel-body">
-                            <p><strong>Dates:</strong> ${new Date(event.startDate + "T00:00:00Z").toLocaleDateString()} - ${new Date(event.endDate + "T00:00:00Z").toLocaleDateString()}</p>
+                            <p><strong>Dates:</strong> ${new Date(event.startDate + "T00:00:00Z").toLocaleDateString(undefined, {timeZone: 'UTC'})} - ${new Date(event.endDate + "T00:00:00Z").toLocaleDateString(undefined, {timeZone: 'UTC'})}</p>
                             ${event.description ? `<p><strong>Description:</strong> ${event.description}</p>` : ''}
                             <button class="btn btn-primary btn-xs" onclick='editCustomEventPrep("${doc.id}")'>Edit</button>
                             <button class="btn btn-danger btn-xs" style="margin-left: 5px;" onclick="deleteCustomEvent('${doc.id}')">Delete</button>
@@ -563,7 +563,7 @@ async function populateAdminCustomEventSelector() {
         let optionsHtml = '<option value="">Select a Custom Event</option>';
         snapshot.forEach(doc => {
             const event = doc.data();
-            optionsHtml += `<option value="${doc.id}|${event.title}">${event.title} (${new Date(event.startDate + "T00:00:00Z").toLocaleDateString()} - ${new Date(event.endDate + "T00:00:00Z").toLocaleDateString()})</option>`;
+            optionsHtml += `<option value="${doc.id}|${event.title}">${event.title} (${new Date(event.startDate + "T00:00:00Z").toLocaleDateString(undefined, {timeZone: 'UTC'})} - ${new Date(event.endDate + "T00:00:00Z").toLocaleDateString(undefined, {timeZone: 'UTC'})})</option>`;
         });
         adminCustomEventSelect.innerHTML = optionsHtml || '<option value="">No active custom events found</option>';
         if ($.fn.selectpicker) {
