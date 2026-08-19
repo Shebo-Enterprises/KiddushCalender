@@ -165,14 +165,20 @@ async function loadConfigurations() {
             snapshot.forEach(doc => {
                 const config = doc.data();
                 const embedUrl = `${window.location.origin}/app/public-display.html?configId=${doc.id}`;
+                const designPageUrl = `${window.location.origin}/app/design.html?id=${doc.id}`;
                 const signageDesignerUrl = `${window.location.origin}/app/shulsign/setup.html?id=${doc.id}`;
                 const liveSignageUrl = `${window.location.origin}/app/shulsign/index.html?configId=${doc.id}`;
-                
+
                 const paymentDisplayHtml = generatePaymentDetailsHtml(config);
                 const displaySettingsHtml = generateDisplaySettingsHtml(config);
 
                 let actionButtons = `<button class="btn btn-primary btn-xs" onclick='editConfigurationPrep("${doc.id}")'>Edit Settings</button>`;
-                
+
+                // Calendar/form configs can use the page template + custom-content designer
+                if (config.type === 'calendar' || config.type === 'form') {
+                    actionButtons += ` <a href="${designPageUrl}" target="_blank" class="btn btn-default btn-xs" style="margin-left:5px;"><i class="glyphicon glyphicon-picture"></i> Design Page</a>`;
+                }
+
                 // If it's a signage-compatible config or explicitly signage type
                 if (config.type === 'signage' || config.signageSettings) {
                     actionButtons += `

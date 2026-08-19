@@ -194,15 +194,110 @@
             padding: 12px 8px;
         }
         
+        /* Data tables (Sponsorships / People) should use the full width they're given */
+        .table-responsive {
+            width: 100%;
+            border: 1px solid #f0f0f0;
+            border-radius: 6px;
+        }
+        table.sponsorship-table, table.people-table {
+            width: 100%;
+            margin-bottom: 0;
+        }
+        .sponsorship-actions, .people-actions {
+            width: 1%;
+        }
+        table.sponsorship-table th, table.people-table th,
+        table.sponsorship-table td, table.people-table td {
+            word-wrap: break-word;
+        }
+        .table > thead > tr > th {
+            background-color: #fafbfc;
+        }
+        .table-hover > tbody > tr:hover {
+            background-color: #f5f9fc;
+        }
+
+        /* Sub-headings that split a panel into labeled groups (e.g. Pending / Approved) */
+        .list-subsection {
+            margin-bottom: 30px;
+        }
+        .list-subsection:last-child {
+            margin-bottom: 0;
+        }
+        .list-subsection-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin: 0 0 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .list-subsection-title .badge-count {
+            background: #ecf0f1;
+            color: #7f8c8d;
+            border-radius: 12px;
+            padding: 2px 10px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
         /* Action Buttons in Tables */
         .sponsorship-actions, .people-actions {
-            white-space: nowrap;
+            white-space: normal;
+            min-width: 190px;
         }
         .sponsorship-actions .btn, .people-actions .btn {
-            margin-right: 5px;
-            margin-bottom: 2px;
+            margin-right: 4px;
+            margin-bottom: 4px;
             padding: 4px 10px;
             font-size: 12px;
+        }
+
+        /* Status badges used in the People table (not stock Bootstrap classes) */
+        .badge-warning {
+            background-color: #f39c12;
+            color: #fff;
+        }
+        .badge-success {
+            background-color: #2ecc71;
+            color: #fff;
+        }
+
+        /* Existing Configurations list */
+        #configurations-list .config-item {
+            border: 1px solid #eef0f2;
+            transition: box-shadow 0.2s;
+        }
+        #configurations-list .config-item:hover {
+            box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+        }
+        #configurations-list .config-item .panel-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        #configurations-list .config-item .panel-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        #configurations-list .config-item .panel-body > p {
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed #f0f0f0;
+        }
+        #configurations-list .config-item .panel-body > p:last-of-type {
+            border-bottom: none;
+        }
+        #configurations-list .embed-code {
+            display: block;
+            margin-top: 4px;
+            white-space: pre-wrap;
+        }
+        #configurations-list .config-item .btn {
+            margin-top: 4px;
         }
 
         /* Specific Components */
@@ -232,19 +327,76 @@
             border-left-color: #dc3545;
         }
         
+        /* Section intro copy under each panel title */
+        .section-intro {
+            color: #7f8c8d;
+            font-size: 13px;
+            margin: -10px 0 20px;
+        }
+
+        /* Grouped sub-sections within long forms */
+        .form-section {
+            background: #f8f9fa;
+            border: 1px solid #eef0f2;
+            border-radius: 6px;
+            padding: 20px 20px 5px;
+            margin: 0 0 20px;
+        }
+        .form-section-title {
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #7f8c8d;
+            margin: 0 0 15px !important;
+            padding: 0 !important;
+        }
+
+        /* Mobile sidebar toggle */
+        .sidebar-toggle {
+            display: none;
+            position: fixed;
+            top: 12px;
+            left: 12px;
+            z-index: 200;
+            background: #2c3e50;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            width: 42px;
+            height: 42px;
+            font-size: 18px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        .sidebar-backdrop {
+            display: none;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
+            .sidebar-toggle {
+                display: block;
+            }
             .sidebar {
-                width: 100%;
-                position: relative;
-                top: 0;
-                height: auto;
-                margin-bottom: 20px;
+                width: 260px;
+                transform: translateX(-100%);
+                position: fixed;
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .sidebar-backdrop.open {
+                display: block;
+                position: fixed;
+                top: 0; left: 0; right: 0; bottom: 0;
+                background: rgba(0,0,0,0.4);
+                z-index: 99;
             }
             .main-content {
                 margin-left: 0;
                 width: 100%;
-                padding: 15px;
+                padding: 20px 15px 15px;
+                padding-top: 65px;
             }
             .admin-container {
                 flex-direction: column;
@@ -287,11 +439,18 @@
                     </div>
                 </div>
             </section>
+        </main>
+    </div>
 
-            <section id="admin-dashboard" class="hidden">
-                <div class="admin-container">
+    <!-- Admin dashboard lives outside .container so it can use the full viewport width instead of Bootstrap's ~1170px cap -->
+    <section id="admin-dashboard" class="hidden">
+        <button type="button" class="sidebar-toggle" id="sidebar-toggle-btn" aria-label="Toggle menu">
+            <i class="glyphicon glyphicon-menu-hamburger"></i>
+        </button>
+        <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+        <div class="admin-container">
                     <!-- Sidebar Navigation -->
-                    <div class="sidebar">
+                    <div class="sidebar" id="admin-sidebar">
                         <div class="sidebar-header">
                             <p class="lead" style="margin-bottom: 10px;">Welcome, <span id="user-email-display"></span>!</p>
                             <button id="logout-button" class="btn btn-sm btn-default btn-block" style="margin-bottom: 10px;">Logout</button>
@@ -310,7 +469,9 @@
                             <li><a href="#" class="nav-link" data-section="sponsorships-management">
                                 <i class="glyphicon glyphicon-list-alt"></i> Manage Sponsorships
                             </a></li>
-                            
+                            <li><a href="#" class="nav-link" data-section="people-management">
+                                <i class="glyphicon glyphicon-user"></i> People
+                            </a></li>
                             <li><a href="#" class="nav-link" data-section="support-section">
                                 <i class="glyphicon glyphicon-question-sign"></i> Support
                             </a></li>
@@ -324,99 +485,110 @@
                             <div class="panel-body">
                                 <form id="create-config-form" class="form-horizontal">
                                     <h3>Create New Configuration (<a href="https://kiddushware.tawk.help/article/setup-forms-and-calendars">Need help?</a>)</h3>
-                                    <div class="form-group">
-                                        <label for="config-title" class="col-sm-2 control-label">Title:</label>
-                                        <div class="col-sm-10"><input type="text" class="form-control" id="config-title" required></div>
-                                    </div>
-                            <div class="form-group">
-                                <label for="config-type" class="col-sm-2 control-label">Type:</label>
-                                <div class="col-sm-10">
-                                    <select id="config-type" class="form-control">
-                                        <option value="calendar">Calendar</option>
-                                        <option value="form" selected>Form</option> <!-- Default to form for easier editing flow -->
-                                    </select>
-                                </div>
-                            </div>
-                            <!-- Hidden field to store ID of config being edited -->
-                            <input type="hidden" id="editing-config-id" value="">
+                                    <p class="section-intro">A configuration is a calendar or sponsorship form you can embed elsewhere. Fill out the details below, grouped by what they control.</p>
+                                    <!-- Hidden field to store ID of config being edited -->
+                                    <input type="hidden" id="editing-config-id" value="">
 
-                            <!-- Moved Payment Options inside the form -->
-                            <div class="form-group">
-                                <label for="config-notification-email" class="col-sm-2 control-label">Notification Email:</label>
-                                <div class="col-sm-10"><input type="email" class="form-control" id="config-notification-email" placeholder="Email for new sponsorship alerts"></div>
-                            </div>
-                            <div id="form-payment-options" style="display:none; margin-top: 5px; padding-top:0px;">
-                                <h4 class="col-sm-offset-2 col-sm-10" style="margin-bottom: 15px;">Payment Options for this Form</h4>
-                                <!-- Check Payments -->
-                                <div class="form-group">
-                                    <div class="col-sm-offset-2 col-sm-10">
-                                        <div class="checkbox"><label><input type="checkbox" id="config-payment-check-enabled"> Enable Check Payments</label></div>
+                                    <div class="form-section">
+                                        <h4 class="form-section-title">Basic Information</h4>
+                                        <div class="form-group">
+                                            <label for="config-title" class="col-sm-2 control-label">Title:</label>
+                                            <div class="col-sm-10"><input type="text" class="form-control" id="config-title" required></div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="config-type" class="col-sm-2 control-label">Type:</label>
+                                            <div class="col-sm-10">
+                                                <select id="config-type" class="form-control">
+                                                    <option value="calendar">Calendar</option>
+                                                    <option value="form" selected>Form</option> <!-- Default to form for easier editing flow -->
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="config-notification-email" class="col-sm-2 control-label">Notification Email:</label>
+                                            <div class="col-sm-10"><input type="email" class="form-control" id="config-notification-email" placeholder="Email for new sponsorship alerts"></div>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="form-group" id="config-check-details" style="display:none;">
-                                    <label for="config-payment-check-payableTo" class="col-sm-2 control-label">Payable To:</label>
-                                    <div class="col-sm-10"><input type="text" class="form-control" id="config-payment-check-payableTo"></div>
-                                </div>
-                                <div class="form-group" id="config-check-amounts" style="display:none;"> <!-- New wrapper for amounts -->
-                                    <label for="config-payment-check-full-amount" class="col-sm-2 control-label">Full Kiddush Amount:</label>
-                                    <div class="col-sm-4"><input type="text" class="form-control" id="config-payment-check-full-amount" placeholder="e.g., 180"></div>
-                                    <label for="config-payment-check-half-amount" class="col-sm-2 control-label">Half Kiddush Amount:</label>
-                                    <div class="col-sm-4"><input type="text" class="form-control" id="config-payment-check-half-amount" placeholder="e.g., 90"></div>
-                                </div>
-                                <!-- Card Payments -->
-                                <div class="form-group">
-                                    <div class="col-sm-offset-2 col-sm-10">
-                                        <div class="checkbox"><label><input type="checkbox" id="config-payment-card-enabled"> Enable Credit/Debit Card Payments</label></div>
-                                    </div>
-                                </div>
-                                <div id="config-card-details" style="display:none;">
-                                    <div class="form-group">
-                                        <label for="config-payment-card-fullPrice" class="col-sm-2 control-label">Full Kiddush Price:</label>
-                                        <div class="col-sm-4"><input type="text" class="form-control" id="config-payment-card-fullPrice" placeholder="e.g., 180"></div>
-                                        <label for="config-payment-card-fullLink" class="col-sm-2 control-label">Full Kiddush Link:</label>
-                                        <div class="col-sm-4"><input type="url" class="form-control" id="config-payment-card-fullLink" placeholder="https://"></div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="config-payment-card-halfPrice" class="col-sm-2 control-label">Half Kiddush Price:</label>
-                                        <div class="col-sm-4"><input type="text" class="form-control" id="config-payment-card-halfPrice" placeholder="e.g., 90"></div>
-                                        <label for="config-payment-card-halfLink" class="col-sm-2 control-label">Half Kiddush Link:</label>
-                                        <div class="col-sm-4"><input type="url" class="form-control" id="config-payment-card-halfLink" placeholder="https://"></div>
-                                    </div>
-                                </div>
-                                <!-- Placeholder for Misc Payments - can be expanded later -->
-                            </div>
 
-                            <!-- Display Customization -->
-                            <h4 class="col-sm-offset-2 col-sm-10" style="margin-top: 20px; margin-bottom: 15px;">Display Customization</h4>
-                            <div class="form-group">
-                                <label for="config-color" class="col-sm-2 control-label">Primary Color:</label>
-                                <div class="col-sm-4">
-                                    <input type="color" class="form-control" id="config-color" value="#007bff">
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="config-font" class="col-sm-2 control-label">Font:</label>
-                                <div class="col-sm-10">
-                                    <select id="config-font" class="form-control">
-                                        <option value="'Helvetica Neue', Helvetica, Arial, sans-serif">System Default (Sans-Serif)</option>
-                                        <option value="'Times New Roman', Times, serif">System Default (Serif)</option>
-                                        <option value="'Courier New', Courier, monospace">System Default (Monospace)</option>
-                                        <option value="'Roboto', sans-serif">Roboto (Google Font)</option>
-                                        <option value="'Open Sans', sans-serif">Open Sans (Google Font)</option>
-                                        <option value="'Lato', sans-serif">Lato (Google Font)</option>
-                                        <option value="'Montserrat', sans-serif">Montserrat (Google Font)</option>
-                                        <option value="'Merriweather', serif">Merriweather (Google Font)</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <div class="col-sm-offset-2 col-sm-10"><button type="submit" class="btn btn-success">Create Configuration</button></div>
-                            </div>
-                        </form>
+                                    <div id="form-payment-options" style="display:none;">
+                                        <div class="form-section">
+                                            <h4 class="form-section-title">Payment Options for this Form</h4>
+                                            <!-- Check Payments -->
+                                            <div class="form-group">
+                                                <div class="col-sm-offset-2 col-sm-10">
+                                                    <div class="checkbox"><label><input type="checkbox" id="config-payment-check-enabled"> Enable Check Payments</label></div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group" id="config-check-details" style="display:none;">
+                                                <label for="config-payment-check-payableTo" class="col-sm-2 control-label">Payable To:</label>
+                                                <div class="col-sm-10"><input type="text" class="form-control" id="config-payment-check-payableTo"></div>
+                                            </div>
+                                            <div class="form-group" id="config-check-amounts" style="display:none;"> <!-- New wrapper for amounts -->
+                                                <label for="config-payment-check-full-amount" class="col-sm-2 control-label">Full Kiddush Amount:</label>
+                                                <div class="col-sm-4"><input type="text" class="form-control" id="config-payment-check-full-amount" placeholder="e.g., 180"></div>
+                                                <label for="config-payment-check-half-amount" class="col-sm-2 control-label">Half Kiddush Amount:</label>
+                                                <div class="col-sm-4"><input type="text" class="form-control" id="config-payment-check-half-amount" placeholder="e.g., 90"></div>
+                                            </div>
+                                            <!-- Card Payments -->
+                                            <div class="form-group">
+                                                <div class="col-sm-offset-2 col-sm-10">
+                                                    <div class="checkbox"><label><input type="checkbox" id="config-payment-card-enabled"> Enable Credit/Debit Card Payments</label></div>
+                                                </div>
+                                            </div>
+                                            <div id="config-card-details" style="display:none;">
+                                                <div class="form-group">
+                                                    <label for="config-payment-card-fullPrice" class="col-sm-2 control-label">Full Kiddush Price:</label>
+                                                    <div class="col-sm-4"><input type="text" class="form-control" id="config-payment-card-fullPrice" placeholder="e.g., 180"></div>
+                                                    <label for="config-payment-card-fullLink" class="col-sm-2 control-label">Full Kiddush Link:</label>
+                                                    <div class="col-sm-4"><input type="url" class="form-control" id="config-payment-card-fullLink" placeholder="https://"></div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="config-payment-card-halfPrice" class="col-sm-2 control-label">Half Kiddush Price:</label>
+                                                    <div class="col-sm-4"><input type="text" class="form-control" id="config-payment-card-halfPrice" placeholder="e.g., 90"></div>
+                                                    <label for="config-payment-card-halfLink" class="col-sm-2 control-label">Half Kiddush Link:</label>
+                                                    <div class="col-sm-4"><input type="url" class="form-control" id="config-payment-card-halfLink" placeholder="https://"></div>
+                                                </div>
+                                            </div>
+                                            <!-- Placeholder for Misc Payments - can be expanded later -->
+                                        </div>
+                                    </div>
+
+                                    <div class="form-section">
+                                        <h4 class="form-section-title">Display Customization</h4>
+                                        <div class="form-group">
+                                            <label for="config-color" class="col-sm-2 control-label">Primary Color:</label>
+                                            <div class="col-sm-4">
+                                                <input type="color" class="form-control" id="config-color" value="#007bff">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="config-font" class="col-sm-2 control-label">Font:</label>
+                                            <div class="col-sm-10">
+                                                <select id="config-font" class="form-control">
+                                                    <option value="'Helvetica Neue', Helvetica, Arial, sans-serif">System Default (Sans-Serif)</option>
+                                                    <option value="'Times New Roman', Times, serif">System Default (Serif)</option>
+                                                    <option value="'Courier New', Courier, monospace">System Default (Monospace)</option>
+                                                    <option value="'Roboto', sans-serif">Roboto (Google Font)</option>
+                                                    <option value="'Open Sans', sans-serif">Open Sans (Google Font)</option>
+                                                    <option value="'Lato', sans-serif">Lato (Google Font)</option>
+                                                    <option value="'Montserrat', sans-serif">Montserrat (Google Font)</option>
+                                                    <option value="'Merriweather', serif">Merriweather (Google Font)</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="col-sm-offset-2 col-sm-10"><button type="submit" class="btn btn-success">Create Configuration</button></div>
+                                    </div>
+                                </form>
                         <hr>
-                        <div id="configurations-list">
+                        <div id="configurations-list-wrapper">
                             <h3>Existing Configurations</h3>
-                            <!-- Configurations will be listed here -->
+                            <p class="section-intro">Each card below is a live calendar or form &mdash; use its Direct Link or Embed Code to publish it, or Edit Settings to change it.</p>
+                            <div id="configurations-list">
+                                <!-- Configurations will be listed here -->
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -427,6 +599,7 @@
                                 <h3 class="panel-title" id="custom-event-form-title-display">Create/Manage Custom Schedulable Events</h3>
                             </div>
                             <div class="panel-body">
+                        <p class="section-intro">Custom events (dinners, dedications, special occasions) can be sponsored the same way Shabbos/Parsha slots are.</p>
                         <form id="create-custom-event-form">
                             <h4 id="custom-event-form-title">Create New Custom Event</h4> <!-- JS will update this for editing -->
                             <input type="hidden" id="editing-custom-event-id">
@@ -467,50 +640,56 @@
                     <div class="panel-heading"><h2 class="panel-title">Admin: Reserve a Kiddush / Custom Event</h2></div>
                     <div class="panel-body">
                         <form id="admin-reserve-kiddush-form">
-                            <div class="form-group">
-                                <label for="admin-reserve-type-select">Reservation Type:</label>
-                                <select class="form-control" id="admin-reserve-type-select">
-                                    <option value="">-- Select Type --</option>
-                                    <option value="shabbat">Shabbos/Parsha</option>
-                                    <option value="custom">Custom Event</option>
-                                </select>
-                            </div>
-
-                            <!-- Container for Shabbos/Parsha Selection -->
-                            <div id="admin-shabbos-select-container" style="display:none;">
+                            <div class="form-section">
+                                <h4 class="form-section-title">1. What Are You Reserving?</h4>
                                 <div class="form-group">
-                                    <label for="admin-shabbos-select">Select Parsha/Shabbos:</label>
-                                    <select class="form-control selectpicker" data-live-search="true" id="admin-shabbos-select" data-width="100%">
-                                        <!-- Options populated by admin.js -->
+                                    <label for="admin-reserve-type-select">Reservation Type:</label>
+                                    <select class="form-control" id="admin-reserve-type-select">
+                                        <option value="">-- Select Type --</option>
+                                        <option value="shabbat">Shabbos/Parsha</option>
+                                        <option value="custom">Custom Event</option>
                                     </select>
                                 </div>
-                                <div class="panel panel-default" id="admin-selected-shabbos-info-panel" style="display:none;">
-                                    <div class="panel-body" id="admin-selected-shabbos-info"></div>
+
+                                <!-- Container for Shabbos/Parsha Selection -->
+                                <div id="admin-shabbos-select-container" style="display:none;">
+                                    <div class="form-group">
+                                        <label for="admin-shabbos-select">Select Parsha/Shabbos:</label>
+                                        <select class="form-control selectpicker" data-live-search="true" id="admin-shabbos-select" data-width="100%">
+                                            <!-- Options populated by admin.js -->
+                                        </select>
+                                    </div>
+                                    <div class="panel panel-default" id="admin-selected-shabbos-info-panel" style="display:none;">
+                                        <div class="panel-body" id="admin-selected-shabbos-info"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Container for Custom Event Selection -->
+                                <div id="admin-custom-event-select-container" style="display:none;">
+                                    <div class="form-group">
+                                        <label for="admin-custom-event-select">Select Custom Event:</label>
+                                        <select class="form-control selectpicker" data-live-search="true" id="admin-custom-event-select" data-width="100%">
+                                            <!-- Options populated by admin.js -->
+                                        </select>
+                                    </div>
+                                    <!-- Optional: Panel to show selected custom event details can be added here if needed -->
                                 </div>
                             </div>
 
-                            <!-- Container for Custom Event Selection -->
-                            <div id="admin-custom-event-select-container" style="display:none;">
+                            <div class="form-section">
+                                <h4 class="form-section-title">2. Sponsor Details</h4>
                                 <div class="form-group">
-                                    <label for="admin-custom-event-select">Select Custom Event:</label>
-                                    <select class="form-control selectpicker" data-live-search="true" id="admin-custom-event-select" data-width="100%">
-                                        <!-- Options populated by admin.js -->
-                                    </select>
+                                    <label for="admin-sponsor-name">Sponsor's Name:</label>
+                                    <input type="text" class="form-control" id="admin-sponsor-name" required>
                                 </div>
-                                <!-- Optional: Panel to show selected custom event details can be added here if needed -->
-                            </div>
-
-                            <div class="form-group">
-                                <label for="admin-sponsor-name">Sponsor's Name:</label>
-                                <input type="text" class="form-control" id="admin-sponsor-name" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="admin-occasion">Occasion:</label>
-                                <input type="text" class="form-control" id="admin-occasion" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="admin-contact-email">Sponsor's Contact Email (Optional):</label>
-                                <input type="email" class="form-control" id="admin-contact-email">
+                                <div class="form-group">
+                                    <label for="admin-occasion">Occasion:</label>
+                                    <input type="text" class="form-control" id="admin-occasion" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="admin-contact-email">Sponsor's Contact Email (Optional):</label>
+                                    <input type="email" class="form-control" id="admin-contact-email">
+                                </div>
                             </div>
                             <button type="submit" class="btn btn-primary">Reserve Item</button>
                             <p id="admin-reserve-message" class="text-info" style="margin-top:10px;"></p>
@@ -522,14 +701,18 @@
                         <div class="panel panel-warning admin-section" id="sponsorships-management">
                             <div class="panel-heading"><h2 class="panel-title">Manage Sponsorships</h2></div>
                             <div class="panel-body">
-                                <h3>Pending Sponsorships</h3>
-                                <div id="pending-sponsorships-list">
-                                    <!-- Pending sponsorships table will be loaded here -->
+                                <p class="section-intro">Approve incoming requests and keep track of everything that's already confirmed.</p>
+                                <div class="list-subsection">
+                                    <h3 class="list-subsection-title"><i class="glyphicon glyphicon-hourglass"></i> Pending Sponsorships</h3>
+                                    <div id="pending-sponsorships-list">
+                                        <!-- Pending sponsorships table will be loaded here -->
+                                    </div>
                                 </div>
-                                <hr>
-                                <h3>Approved Sponsorships</h3>
-                                <div id="approved-sponsorships-list">
-                                    <!-- Approved sponsorships table will be loaded here -->
+                                <div class="list-subsection">
+                                    <h3 class="list-subsection-title"><i class="glyphicon glyphicon-ok-circle"></i> Approved Sponsorships</h3>
+                                    <div id="approved-sponsorships-list">
+                                        <!-- Approved sponsorships table will be loaded here -->
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -537,6 +720,7 @@
                         <div class="panel panel-info admin-section" id="people-management">
                             <div class="panel-heading"><h2 class="panel-title">People Management</h2></div>
                             <div class="panel-body">
+                                <p class="section-intro">Everyone who has ever sponsored, plus anyone you've added manually, in one searchable list.</p>
                                 <div class="row" style="margin-bottom: 20px;">
                                     <div class="col-md-12">
                                         <button type="button" class="btn btn-success" id="add-person-btn">
@@ -586,9 +770,7 @@
                         </div>
                     </div> <!-- End main-content -->
                 </div> <!-- End admin-container -->
-            </section>
-        </main>
-    </div>
+    </section>
 
     <!-- Person Detail Modal -->
     <div class="modal fade person-detail-modal" id="personDetailModal" tabindex="-1" role="dialog" aria-labelledby="personDetailModalLabel">
@@ -770,9 +952,33 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.18/js/bootstrap-select.min.js"></script>
 
-    <script src="app/js/firebase-init.js"></script>
-    <script src="app/js/parsha-service.js"></script> <!-- Add this line -->
-    <script src="app/js/auth.js"></script>
-    <script src="app/js/admin.js"></script>
+    <script src="js/firebase-init.js"></script>
+    <script src="js/parsha-service.js"></script> <!-- Add this line -->
+    <script src="js/auth.js"></script>
+    <script src="js/admin.js"></script>
+
+    <!-- Mobile sidebar toggle (presentation only, no app logic) -->
+    <script>
+        (function () {
+            var toggleBtn = document.getElementById('sidebar-toggle-btn');
+            var sidebar = document.getElementById('admin-sidebar');
+            var backdrop = document.getElementById('sidebar-backdrop');
+            if (!toggleBtn || !sidebar || !backdrop) return;
+
+            function closeSidebar() {
+                sidebar.classList.remove('open');
+                backdrop.classList.remove('open');
+            }
+
+            toggleBtn.addEventListener('click', function () {
+                sidebar.classList.toggle('open');
+                backdrop.classList.toggle('open');
+            });
+            backdrop.addEventListener('click', closeSidebar);
+            sidebar.querySelectorAll('.nav-link').forEach(function (link) {
+                link.addEventListener('click', closeSidebar);
+            });
+        })();
+    </script>
 </body>
 </html>

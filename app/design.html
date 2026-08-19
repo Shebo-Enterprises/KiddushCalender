@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Design Your Page | KiddushWare</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body {
+            font-family: 'Roboto', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+        }
+        h1, h2, h3, h4, h5, h6 { font-weight: 500; color: #2c3e50; }
+        .hidden { display: none !important; }
+
+        /* Top bar */
+        .designer-topbar {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .designer-topbar a { color: #bdc3c7; }
+        .designer-topbar a:hover { color: #fff; text-decoration: none; }
+        .designer-topbar .config-title-display {
+            font-size: 15px;
+            color: #ecf0f1;
+            margin: 0;
+        }
+        .designer-topbar .config-title-display small { color: #95a5a6; }
+
+        /* Layout: controls on the left, sticky live preview on the right */
+        .designer-body {
+            display: flex;
+            align-items: flex-start;
+            gap: 24px;
+            padding: 24px;
+            max-width: 1500px;
+            margin: 0 auto;
+        }
+        .designer-controls {
+            flex: 1 1 480px;
+            min-width: 0;
+        }
+        .designer-preview-col {
+            flex: 1 1 480px;
+            min-width: 0;
+            position: sticky;
+            top: 24px;
+        }
+
+        .designer-panel {
+            background: #fff;
+            border-radius: 6px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+            padding: 22px 25px;
+            margin-bottom: 20px;
+        }
+        .designer-panel h3 {
+            font-size: 16px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #7f8c8d;
+            margin: 0 0 4px;
+        }
+        .designer-panel .panel-help {
+            color: #95a5a6;
+            font-size: 13px;
+            margin: 0 0 18px;
+        }
+
+        /* Template gallery */
+        .template-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 14px;
+        }
+        .template-card {
+            border: 2px solid #e6e9ec;
+            border-radius: 8px;
+            padding: 14px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            background: #fbfbfc;
+        }
+        .template-card:hover { border-color: #b8c2cc; }
+        .template-card.selected {
+            border-color: #3498db;
+            background: #eef7fd;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.12);
+        }
+        .template-card-preview {
+            height: 70px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            overflow: hidden;
+            border: 1px solid #eee;
+            background: #fff;
+            padding: 8px;
+        }
+        .template-card-name {
+            font-weight: 600;
+            font-size: 14px;
+            color: #2c3e50;
+        }
+        .template-card-desc {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin: 2px 0 0;
+        }
+        .template-card.more-themes-card {
+            border-style: dashed;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #3498db;
+        }
+        .template-card.more-themes-card .template-card-preview {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            color: #b8c2cc;
+            border-style: dashed;
+        }
+        .template-card.more-themes-card .template-card-name { color: #3498db; }
+
+        .selected-theme-note {
+            margin-top: 14px;
+            font-size: 13px;
+            color: #7f8c8d;
+        }
+        .selected-theme-note strong { color: #2c3e50; }
+        .selected-theme-note a { margin-left: 6px; }
+
+        /* Modal theme gallery re-uses .template-gallery / .template-card */
+        #moreThemesModal .template-gallery {
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        }
+        /* Mini mockups for each template, built from CSS only */
+        .mock-line { height: 6px; border-radius: 2px; background: #dfe4e8; margin-bottom: 5px; }
+        .mock-classic .mock-line:first-child { width: 60%; background: #90a4ae; height: 8px; }
+        .mock-cards { display: flex; gap: 5px; height: 100%; }
+        .mock-cards .mock-card { flex: 1; background: #eef2f5; border-radius: 3px; border: 1px solid #dfe4e8; }
+        .mock-minimal .mock-line { background: transparent; border-bottom: 1px solid #e2e6e9; height: 10px; margin-bottom: 6px; }
+        .mock-elegant { text-align: center; }
+        .mock-elegant .mock-line { background: #d9c396; margin: 0 auto 6px; }
+        .mock-elegant .mock-line:first-child { width: 50%; height: 8px; }
+        .mock-elegant .mock-line:nth-child(2) { width: 30%; }
+
+        .mock-dark { background: #12141c; border-radius: 4px; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        .mock-dark .mock-chip { width: 16px; height: 16px; border-radius: 50%; background: #7c5cff; box-shadow: 0 0 8px #7c5cff; }
+        .mock-dark .mock-line { background: #2a2e42; width: 60%; }
+
+        .mock-neubrutalist { background: #fef9e7; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .mock-neubrutalist .mock-block { width: 24px; height: 24px; background: #ffe14d; border: 2px solid #111; box-shadow: 3px 3px 0 #111; }
+        .mock-neubrutalist .mock-block.pink { background: #ff5470; }
+
+        .mock-pastel { background: #f2eefb; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .mock-pastel .mock-chip { width: 26px; height: 26px; border-radius: 50%; background: #f2eefb; box-shadow: 4px 4px 8px #d9d3ea, -4px -4px 8px #ffffff; }
+
+        .mock-glass { background: linear-gradient(135deg, #4b6cb7, #1a1f3d); display: flex; align-items: center; justify-content: center; }
+        .mock-glass .mock-pane { width: 70%; height: 60%; background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.4); border-radius: 6px; }
+
+        .mock-material { background: #fafafa; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .mock-material .mock-chip { width: 30px; height: 22px; background: #fff; border-radius: 3px; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+        .mock-material .mock-chip.accent { background: #6200ee; }
+
+        .mock-sunset { background: linear-gradient(135deg, #ff9966, #ff5e62, #8e44ad); display: flex; align-items: center; justify-content: center; }
+        .mock-sunset .mock-pane { width: 65%; height: 55%; background: #fffdfb; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+
+        .mock-nature { background: #eef3ea; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .mock-nature .mock-chip { width: 28px; height: 22px; background: #fff; border-left: 3px solid #2f6b3a; border-radius: 3px; }
+
+        .mock-bs5 { background: #fff; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .mock-bs5 .mock-chip { width: 30px; height: 20px; background: #0d6efd; border-radius: 4px; }
+
+        .mock-materialize { background: #fafafa; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .mock-materialize .mock-chip { width: 30px; height: 22px; background: #fff; border-radius: 2px; box-shadow: 0 2px 4px rgba(0,0,0,0.25); }
+        .mock-materialize .mock-chip.accent { background: #26a69a; }
+
+        .mock-semantic { background: #fff; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .mock-semantic .mock-chip { width: 30px; height: 20px; background: #2185d0; border-radius: 3px; }
+
+        .mock-tailwind { background: #f9fafb; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .mock-tailwind .mock-chip { width: 30px; height: 20px; background: #fff; border: 1px solid #e5e7eb; border-radius: 6px; }
+        .mock-tailwind .mock-chip.accent { background: #4f46e5; border-color: #4f46e5; }
+
+        /* Bootswatch CDN theme swatches: a background chip + an accent chip */
+        .mock-bw { display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .mock-bw .mock-chip { width: 26px; height: 26px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.08); }
+        .mock-bw-cerulean { background: #fff; } .mock-bw-cerulean .mock-chip.accent { background: #2fa4e7; }
+        .mock-bw-cosmo { background: #fff; } .mock-bw-cosmo .mock-chip.accent { background: #2780e3; }
+        .mock-bw-cyborg { background: #060606; } .mock-bw-cyborg .mock-chip.accent { background: #2a9fd6; }
+        .mock-bw-darkly { background: #222; } .mock-bw-darkly .mock-chip.accent { background: #00bc8c; }
+        .mock-bw-flatly { background: #fff; } .mock-bw-flatly .mock-chip.accent { background: #18bc9c; }
+        .mock-bw-journal { background: #fff; } .mock-bw-journal .mock-chip.accent { background: #eb6864; }
+        .mock-bw-lumen { background: #f8f8f8; } .mock-bw-lumen .mock-chip.accent { background: #158cba; }
+        .mock-bw-paper { background: #fff; } .mock-bw-paper .mock-chip.accent { background: #2196f3; }
+        .mock-bw-readable { background: #fff; } .mock-bw-readable .mock-chip.accent { background: #4582ec; }
+        .mock-bw-sandstone { background: #f8f5f0; } .mock-bw-sandstone .mock-chip.accent { background: #93c54b; }
+        .mock-bw-simplex { background: #fff; } .mock-bw-simplex .mock-chip.accent { background: #d9230f; }
+        .mock-bw-slate { background: #272b30; } .mock-bw-slate .mock-chip.accent { background: #5c6b73; }
+        .mock-bw-spacelab { background: #fff; } .mock-bw-spacelab .mock-chip.accent { background: #446e9b; }
+        .mock-bw-superhero { background: #2b3e50; } .mock-bw-superhero .mock-chip.accent { background: #df691a; }
+        .mock-bw-united { background: #fff; } .mock-bw-united .mock-chip.accent { background: #e95420; }
+        .mock-bw-yeti { background: #fff; } .mock-bw-yeti .mock-chip.accent { background: #008cba; }
+        .mock-bw .mock-chip:not(.accent) { background: rgba(127,127,127,0.15); }
+
+        .theme-group-heading {
+            grid-column: 1 / -1;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #95a5a6;
+            margin: 4px 0 -2px;
+        }
+        .theme-group-heading:first-child { margin-top: 0; }
+
+        /* Checkbox-revealed subsection */
+        .toggle-block { border-top: 1px solid #f0f0f0; margin-top: 16px; padding-top: 16px; }
+        .toggle-block:first-of-type { border-top: none; margin-top: 0; padding-top: 0; }
+        .toggle-fields { margin-top: 12px; padding-left: 24px; }
+
+        .save-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        #save-status { font-size: 13px; }
+
+        /* Preview */
+        .preview-frame-wrapper {
+            background: #fff;
+            border-radius: 6px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+            padding: 12px;
+        }
+        .preview-frame-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .preview-frame-header h3 {
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #7f8c8d;
+            margin: 0;
+        }
+        #preview-frame {
+            width: 100%;
+            height: 720px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+        }
+
+        @media (max-width: 900px) {
+            .designer-body { flex-direction: column; }
+            .designer-preview-col { position: static; width: 100%; }
+            .template-gallery { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="designer-topbar">
+        <div>
+            <p class="config-title-display">Designing: <strong id="config-title-display">&hellip;</strong> <small id="config-type-display"></small></p>
+        </div>
+        <div>
+            <a href="index.html"><i class="glyphicon glyphicon-arrow-left"></i> Back to Admin</a>
+            &nbsp;&middot;&nbsp;
+            <a href="#" id="view-live-link" target="_blank">View Live Page <i class="glyphicon glyphicon-new-window"></i></a>
+        </div>
+    </div>
+
+    <div id="loading-message" class="text-center" style="margin-top: 60px;">
+        <p class="lead"><i class="glyphicon glyphicon-refresh"></i> Loading&hellip;</p>
+    </div>
+
+    <div id="auth-required-message" class="text-center hidden" style="margin-top: 60px;">
+        <p class="lead">Please <a href="index.html">log in to the admin panel</a> first.</p>
+    </div>
+
+    <div id="designer-content" class="designer-body hidden">
+        <!-- Left: controls -->
+        <div class="designer-controls">
+
+            <div class="designer-panel">
+                <h3>Choose a Template</h3>
+                <p class="panel-help">Pick the overall look for this page. You can change this any time.</p>
+                <div class="template-gallery" id="template-gallery">
+                    <div class="template-card" data-template-id="classic">
+                        <div class="template-card-preview mock-classic">
+                            <div class="mock-line"></div>
+                            <div class="mock-line"></div>
+                            <div class="mock-line"></div>
+                        </div>
+                        <div class="template-card-name">Classic</div>
+                        <p class="template-card-desc">The original clean list layout.</p>
+                    </div>
+                    <div class="template-card" data-template-id="cards">
+                        <div class="template-card-preview mock-cards">
+                            <div class="mock-card"></div>
+                            <div class="mock-card"></div>
+                        </div>
+                        <div class="template-card-name">Modern Cards</div>
+                        <p class="template-card-desc">A grid of elevated cards.</p>
+                    </div>
+                    <div class="template-card" data-template-id="bw-paper">
+                        <div class="template-card-preview mock-bw mock-bw-paper"><div class="mock-chip accent"></div></div>
+                        <div class="template-card-name">Material Design</div>
+                        <p class="template-card-desc">Real Bootswatch "Paper" CDN skin.</p>
+                    </div>
+                    <div class="template-card" data-template-id="elegant">
+                        <div class="template-card-preview mock-elegant">
+                            <div class="mock-line"></div>
+                            <div class="mock-line"></div>
+                        </div>
+                        <div class="template-card-name">Elegant</div>
+                        <p class="template-card-desc">Serif type, warm ornamental style.</p>
+                    </div>
+                    <div class="template-card more-themes-card" data-toggle="modal" data-target="#moreThemesModal">
+                        <div class="template-card-preview">
+                            <i class="glyphicon glyphicon-th-large"></i>
+                        </div>
+                        <div class="template-card-name">More Themes&hellip;</div>
+                        <p class="template-card-desc">Dark, Neubrutalist, Glass, Sunset &amp; more</p>
+                    </div>
+                </div>
+                <input type="hidden" id="selected-template-id" value="classic">
+                <p class="selected-theme-note">Currently selected: <strong id="selected-theme-name">Classic</strong>
+                    <a href="#" data-toggle="modal" data-target="#moreThemesModal">Browse all themes</a>
+                </p>
+            </div>
+
+            <div class="designer-panel">
+                <h3>Theme Colors</h3>
+                <p class="panel-help">Every theme has its own default look, but you can override its accent and background colors here.</p>
+                <div class="form-group">
+                    <label for="design-color">Accent Color</label><br>
+                    <input type="color" class="form-control" id="design-color" value="#007bff" style="max-width: 120px; display:inline-block;">
+                    <p class="help-block">Used for buttons, links and highlights in every theme.</p>
+                </div>
+                <div class="form-group">
+                    <label for="design-bg-color">Background Color</label><br>
+                    <input type="color" class="form-control" id="design-bg-color" value="#ffffff" style="max-width: 120px; display:inline-block;">
+                    <button type="button" class="btn btn-default btn-xs" id="reset-bg-color-btn" style="vertical-align: top; margin-top: 6px;">Use theme default</button>
+                    <p class="help-block">Mainly affects the bolder themes (Dark, Neubrutalist, Pastel, Glass, Material, Sunset, Nature). Classic/Cards/Minimal/Elegant stay white, and the CDN library themes (Cerulean, Cyborg, etc.) always keep their own fixed background.</p>
+                </div>
+                <div class="form-group">
+                    <label for="design-font">Font</label>
+                    <select id="design-font" class="form-control">
+                        <option value="'Helvetica Neue', Helvetica, Arial, sans-serif">System Default (Sans-Serif)</option>
+                        <option value="'Times New Roman', Times, serif">System Default (Serif)</option>
+                        <option value="'Courier New', Courier, monospace">System Default (Monospace)</option>
+                        <option value="'Roboto', sans-serif">Roboto (Google Font)</option>
+                        <option value="'Open Sans', sans-serif">Open Sans (Google Font)</option>
+                        <option value="'Lato', sans-serif">Lato (Google Font)</option>
+                        <option value="'Montserrat', sans-serif">Montserrat (Google Font)</option>
+                        <option value="'Merriweather', serif">Merriweather (Google Font)</option>
+                    </select>
+                    <p class="help-block">Themes with their own signature font (Elegant, Material, Neubrutalist, etc.) ignore this and keep their own.</p>
+                </div>
+            </div>
+
+            <div class="designer-panel">
+                <h3>Custom Page Content</h3>
+                <p class="panel-help">Optional blocks you can add to the top and bottom of the page.</p>
+
+                <div class="toggle-block">
+                    <div class="checkbox">
+                        <label><input type="checkbox" id="header-enabled"> <strong>Header Banner</strong> &mdash; a logo image and/or tagline above the title</label>
+                    </div>
+                    <div class="toggle-fields hidden" id="header-fields">
+                        <div class="form-group">
+                            <label for="header-image-url">Logo / Image URL</label>
+                            <input type="url" class="form-control" id="header-image-url" placeholder="https://example.com/logo.png">
+                        </div>
+                        <div class="form-group">
+                            <label for="header-tagline">Tagline</label>
+                            <input type="text" class="form-control" id="header-tagline" placeholder="e.g. Supporting our shul, one Shabbos at a time">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="toggle-block">
+                    <div class="checkbox">
+                        <label><input type="checkbox" id="announcement-enabled"> <strong>Announcement Bar</strong> &mdash; a highlighted message near the top</label>
+                    </div>
+                    <div class="toggle-fields hidden" id="announcement-fields">
+                        <div class="form-group">
+                            <label for="announcement-text">Message</label>
+                            <textarea class="form-control" id="announcement-text" rows="2" placeholder="e.g. Sponsorships for the High Holidays are now open!"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="toggle-block">
+                    <div class="checkbox">
+                        <label><input type="checkbox" id="footer-enabled"> <strong>Footer Message</strong> &mdash; small text at the bottom of the page</label>
+                    </div>
+                    <div class="toggle-fields hidden" id="footer-fields">
+                        <div class="form-group">
+                            <label for="footer-text">Message</label>
+                            <input type="text" class="form-control" id="footer-text" placeholder="e.g. Questions? Contact the office at (555) 555-5555">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="designer-panel save-bar">
+                <button type="button" class="btn btn-success" id="save-design-btn">
+                    <i class="glyphicon glyphicon-ok"></i> Save Changes
+                </button>
+                <span id="save-status"></span>
+            </div>
+        </div>
+
+        <!-- Right: live preview -->
+        <div class="designer-preview-col">
+            <div class="preview-frame-wrapper">
+                <div class="preview-frame-header">
+                    <h3>Live Preview</h3>
+                    <button type="button" class="btn btn-default btn-xs" id="refresh-preview-btn">
+                        <i class="glyphicon glyphicon-refresh"></i> Refresh
+                    </button>
+                </div>
+                <iframe id="preview-frame" title="Live page preview"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- More Themes modal -->
+    <div class="modal fade" id="moreThemesModal" tabindex="-1" role="dialog" aria-labelledby="moreThemesModalLabel">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="moreThemesModalLabel">More Themes</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="template-gallery" id="more-themes-gallery">
+                        <p class="theme-group-heading">Custom Themes</p>
+                        <div class="template-card" data-template-id="minimal">
+                            <div class="template-card-preview mock-minimal">
+                                <div class="mock-line"></div>
+                                <div class="mock-line"></div>
+                                <div class="mock-line"></div>
+                            </div>
+                            <div class="template-card-name">Minimal Clean</div>
+                            <p class="template-card-desc">Flat, airy, no card chrome.</p>
+                        </div>
+                        <div class="template-card" data-template-id="dark">
+                            <div class="template-card-preview mock-dark">
+                                <div class="mock-chip"></div>
+                                <div class="mock-line"></div>
+                            </div>
+                            <div class="template-card-name">Dark Mode</div>
+                            <p class="template-card-desc">Charcoal background, neon-violet glow.</p>
+                        </div>
+                        <div class="template-card" data-template-id="neubrutalist">
+                            <div class="template-card-preview mock-neubrutalist">
+                                <div class="mock-block"></div>
+                                <div class="mock-block pink"></div>
+                            </div>
+                            <div class="template-card-name">Neubrutalist</div>
+                            <p class="template-card-desc">Bold color blocks, thick black borders.</p>
+                        </div>
+                        <div class="template-card" data-template-id="pastel">
+                            <div class="template-card-preview mock-pastel">
+                                <div class="mock-chip"></div>
+                                <div class="mock-chip"></div>
+                            </div>
+                            <div class="template-card-name">Soft Pastel</div>
+                            <p class="template-card-desc">Neumorphic, gentle shadows, rounded.</p>
+                        </div>
+                        <div class="template-card" data-template-id="glass">
+                            <div class="template-card-preview mock-glass">
+                                <div class="mock-pane"></div>
+                            </div>
+                            <div class="template-card-name">Glass</div>
+                            <p class="template-card-desc">Frosted panels over a violet gradient.</p>
+                        </div>
+                        <div class="template-card" data-template-id="sunset">
+                            <div class="template-card-preview mock-sunset">
+                                <div class="mock-pane"></div>
+                            </div>
+                            <div class="template-card-name">Sunset</div>
+                            <p class="template-card-desc">Warm gradient, energetic and bold.</p>
+                        </div>
+                        <div class="template-card" data-template-id="nature">
+                            <div class="template-card-preview mock-nature">
+                                <div class="mock-chip"></div>
+                                <div class="mock-chip"></div>
+                            </div>
+                            <div class="template-card-name">Nature</div>
+                            <p class="template-card-desc">Sage background, forest-green accents.</p>
+                        </div>
+                        <div class="template-card" data-template-id="material">
+                            <div class="template-card-preview mock-material">
+                                <div class="mock-chip"></div>
+                                <div class="mock-chip accent"></div>
+                            </div>
+                            <div class="template-card-name">Material (Hand-crafted)</div>
+                            <p class="template-card-desc">Our own Material-style elevation cards.</p>
+                        </div>
+
+                        <p class="theme-group-heading">Real CDN Frameworks</p>
+                        <p style="grid-column: 1 / -1; margin: -6px 0 4px; font-size: 12px; color: #95a5a6;">
+                            These genuinely load that library from a CDN. Bootstrap 5 restyles our markup natively; Materialize/Semantic/Tailwind use different class systems than Bootstrap, so we layer a matching skin on top using their real color/type tokens so the look actually applies.
+                        </p>
+                        <div class="template-card" data-template-id="bs5">
+                            <div class="template-card-preview mock-bs5"><div class="mock-chip"></div></div>
+                            <div class="template-card-name">Bootstrap 5</div>
+                            <p class="template-card-desc">The new Bootstrap, via CDN.</p>
+                        </div>
+                        <div class="template-card" data-template-id="materialize">
+                            <div class="template-card-preview mock-materialize">
+                                <div class="mock-chip"></div>
+                                <div class="mock-chip accent"></div>
+                            </div>
+                            <div class="template-card-name">Materialize</div>
+                            <p class="template-card-desc">Real Materialize CSS, teal &amp; Roboto.</p>
+                        </div>
+                        <div class="template-card" data-template-id="semantic">
+                            <div class="template-card-preview mock-semantic"><div class="mock-chip"></div></div>
+                            <div class="template-card-name">Semantic UI</div>
+                            <p class="template-card-desc">Real Semantic UI CSS, blue &amp; Lato.</p>
+                        </div>
+                        <div class="template-card" data-template-id="tailwind">
+                            <div class="template-card-preview mock-tailwind">
+                                <div class="mock-chip"></div>
+                                <div class="mock-chip accent"></div>
+                            </div>
+                            <div class="template-card-name">Tailwind</div>
+                            <p class="template-card-desc">Real Tailwind CDN, indigo &amp; Inter.</p>
+                        </div>
+
+                        <p class="theme-group-heading">CDN Library Themes (Bootswatch)</p>
+                        <p style="grid-column: 1 / -1; margin: -6px 0 4px; font-size: 12px; color: #95a5a6;">
+                            These load the real <a href="https://bootswatch.com/3/" target="_blank" rel="noopener">Bootswatch</a> stylesheet from a CDN &mdash; a genuine alternate Bootstrap skin, not a re-creation. Your Accent Color still tints buttons and links on top of it.
+                        </p>
+                        <div class="template-card" data-template-id="bw-cerulean">
+                            <div class="template-card-preview mock-bw mock-bw-cerulean"><div class="mock-chip accent"></div></div>
+                            <div class="template-card-name">Cerulean</div>
+                            <p class="template-card-desc">Crisp sky-blue skin.</p>
+                        </div>
+                        <div class="template-card" data-template-id="bw-cosmo">
+                            <div class="template-card-preview mock-bw mock-bw-cosmo"><div class="mock-chip accent"></div></div>
+                            <div class="template-card-name">Cosmo</div>
+                            <p class="template-card-desc">Flat, bright, modern.</p>
+                        </div>
+                        <div class="template-card" data-template-id="bw-cyborg">
+                            <div class="template-card-preview mock-bw mock-bw-cyborg"><div class="mock-chip accent"></div></div>
+                            <div class="template-card-name">Cyborg</div>
+                            <p class="template-card-desc">Jet-black, high contrast.</p>
+                        </div>
+                        <div class="template-card" data-template-id="bw-darkly">
+                            <div class="template-card-preview mock-bw mock-bw-darkly"><div class="mock-chip accent"></div></div>
+                            <div class="template-card-name">Darkly</div>
+                            <p class="template-card-desc">Flatly's dark sibling.</p>
+                        </div>
+                        <div class="template-card" data-template-id="bw-flatly">
+                            <div class="template-card-preview mock-bw mock-bw-flatly"><div class="mock-chip accent"></div></div>
+                            <div class="template-card-name">Flatly</div>
+                            <p class="template-card-desc">Flat design, navy &amp; teal.</p>
+                        </div>
+                        <div class="template-card" data-template-id="bw-journal">
+                            <div class="template-card-preview mock-bw mock-bw-journal"><div class="mock-chip accent"></div></div>
+                            <div class="template-card-name">Journal</div>
+                            <p class="template-card-desc">Clean editorial look.</p>
+                        </div>
+                        <div class="template-card" data-template-id="bw-lumen">
+                            <div class="template-card-preview mock-bw mock-bw-lumen"><div class="mock-chip accent"></div></div>
+                            <div class="template-card-name">Lumen</div>
+                            <p class="template-card-desc">Light &amp; shadowy accents.</p>
+                        </div>
+                        <div class="template-card" data-template-id="bw-readable">
+                            <div class="template-card-preview mock-bw mock-bw-readable"><div class="mock-chip accent"></div></div>
+                            <div class="template-card-name">Readable</div>
+                            <p class="template-card-desc">Large, legible typography.</p>
+                        </div>
+                        <div class="template-card" data-template-id="bw-sandstone">
+                            <div class="template-card-preview mock-bw mock-bw-sandstone"><div class="mock-chip accent"></div></div>
+                            <div class="template-card-name">Sandstone</div>
+                            <p class="template-card-desc">Warm tan, earthy olive.</p>
+                        </div>
+                        <div class="template-card" data-template-id="bw-simplex">
+                            <div class="template-card-preview mock-bw mock-bw-simplex"><div class="mock-chip accent"></div></div>
+                            <div class="template-card-name">Simplex</div>
+                            <p class="template-card-desc">Bold, minimal, red accent.</p>
+                        </div>
+                        <div class="template-card" data-template-id="bw-slate">
+                            <div class="template-card-preview mock-bw mock-bw-slate"><div class="mock-chip accent"></div></div>
+                            <div class="template-card-name">Slate</div>
+                            <p class="template-card-desc">Cool grey, understated.</p>
+                        </div>
+                        <div class="template-card" data-template-id="bw-spacelab">
+                            <div class="template-card-preview mock-bw mock-bw-spacelab"><div class="mock-chip accent"></div></div>
+                            <div class="template-card-name">Spacelab</div>
+                            <p class="template-card-desc">Clean, professional blue.</p>
+                        </div>
+                        <div class="template-card" data-template-id="bw-superhero">
+                            <div class="template-card-preview mock-bw mock-bw-superhero"><div class="mock-chip accent"></div></div>
+                            <div class="template-card-name">Superhero</div>
+                            <p class="template-card-desc">Navy &amp; punchy orange.</p>
+                        </div>
+                        <div class="template-card" data-template-id="bw-united">
+                            <div class="template-card-preview mock-bw mock-bw-united"><div class="mock-chip accent"></div></div>
+                            <div class="template-card-name">United</div>
+                            <p class="template-card-desc">Ubuntu-inspired orange.</p>
+                        </div>
+                        <div class="template-card" data-template-id="bw-yeti">
+                            <div class="template-card-preview mock-bw mock-bw-yeti"><div class="mock-chip accent"></div></div>
+                            <div class="template-card-name">Yeti</div>
+                            <p class="template-card-desc">Simple, friendly blue.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <!-- jQuery + Bootstrap JS (needed for the More Themes modal) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script src="js/firebase-init.js"></script>
+    <script src="js/design.js"></script>
+</body>
+</html>

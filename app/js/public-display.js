@@ -1,5 +1,95 @@
 // js/public-display.js
 
+// Themes backed by real Bootswatch CDN stylesheets — since Bootswatch is just
+// Bootstrap 3 recompiled with different variables, it restyles the exact same
+// .btn/.panel/.list-group/.form-control markup this page already renders,
+// with no custom CSS needed on our end.
+const BOOTSWATCH_THEMES = [
+    'cerulean', 'cosmo', 'cyborg', 'darkly', 'flatly', 'journal', 'lumen',
+    'paper', 'readable', 'sandstone', 'simplex', 'slate', 'spacelab',
+    'superhero', 'united', 'yeti'
+];
+
+const BOOTSTRAP3_DEFAULT_HREF = 'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css';
+const BOOTSTRAP5_HREF = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css';
+
+// Extra CDN libraries genuinely loaded (not simulated) for the
+// framework-inspired themes. Their class systems (.ui.button, .btn (Materialize's
+// own structure), utility classes) don't target our existing .btn/.panel/
+// .list-group markup, so css/templates.css layers a compatibility skin on
+// top using each library's real design tokens — that's what makes the look
+// actually apply, while this still really fetches the library itself.
+const EXTRA_LIBRARY_CDN = {
+    materialize: { type: 'link', href: 'https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css' },
+    semantic: { type: 'link', href: 'https://cdn.jsdelivr.net/npm/semantic-ui@2.5.0/dist/semantic.min.css' },
+    tailwind: { type: 'script', src: 'https://cdn.tailwindcss.com' }
+};
+
+/**
+ * Applies the right base library for the selected template:
+ *  - "bw-<name>": swaps the base stylesheet to a Bootswatch CDN skin.
+ *  - "bs5": swaps the base stylesheet to real Bootstrap 5.
+ *  - "materialize" / "semantic" / "tailwind": loads that library's real CDN
+ *    asset as an *additional* stylesheet/script (base Bootstrap 3 stays, so
+ *    our markup keeps working; css/templates.css layers the matching skin).
+ *  - anything else: makes sure the base stylesheet is back to Bootstrap 3.
+ * Returns a promise that resolves once loading settles, so rendering can
+ * wait for it and avoid a flash of unstyled/default-styled content.
+ */
+function applyLibraryTheme(templateId) {
+    const bootstrapLink = document.getElementById('bootstrap-css');
+    const waits = [];
+
+    if (bootstrapLink) {
+        const bwName = typeof templateId === 'string' && templateId.startsWith('bw-') ? templateId.slice(3) : null;
+        const isKnownBootswatchTheme = bwName && BOOTSWATCH_THEMES.includes(bwName);
+        const isBs5 = templateId === 'bs5';
+
+        const targetHref = isKnownBootswatchTheme
+            ? `https://cdn.jsdelivr.net/npm/bootswatch@3.4.1/${bwName}/bootstrap.min.css`
+            : isBs5
+                ? BOOTSTRAP5_HREF
+                : BOOTSTRAP3_DEFAULT_HREF;
+
+        if (bootstrapLink.getAttribute('href') !== targetHref) {
+            waits.push(new Promise((resolve) => {
+                // A swapped stylesheet won't match the original integrity hash.
+                bootstrapLink.removeAttribute('integrity');
+                bootstrapLink.removeAttribute('crossorigin');
+                bootstrapLink.addEventListener('load', resolve, { once: true });
+                bootstrapLink.addEventListener('error', resolve, { once: true });
+                bootstrapLink.href = targetHref;
+                setTimeout(resolve, 1500); // Safety net if load/error never fires.
+            }));
+        }
+    }
+
+    // Remove any previously injected extra-library tag before adding a new one
+    // (harmless on a fresh page load, but keeps this function safe to re-call).
+    const existingExtra = document.getElementById('kw-extra-library');
+    if (existingExtra) existingExtra.remove();
+
+    const extraLib = EXTRA_LIBRARY_CDN[templateId];
+    if (extraLib) {
+        waits.push(new Promise((resolve) => {
+            const el = document.createElement(extraLib.type === 'script' ? 'script' : 'link');
+            el.id = 'kw-extra-library';
+            if (extraLib.type === 'script') {
+                el.src = extraLib.src;
+            } else {
+                el.rel = 'stylesheet';
+                el.href = extraLib.href;
+            }
+            el.addEventListener('load', resolve, { once: true });
+            el.addEventListener('error', resolve, { once: true });
+            document.head.appendChild(el);
+            setTimeout(resolve, 1500);
+        }));
+    }
+
+    return Promise.all(waits);
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     const displayContainer = document.getElementById('display-container');
     if (!displayContainer) {
@@ -33,13 +123,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         const configData = configDoc.data();
+        // If a CDN library theme is selected (Bootswatch skin, Bootstrap 5, or an
+        // extra library like Materialize/Semantic/Tailwind), load it first and
+        // wait so there's no flash of default styling.
+        await applyLibraryTheme((configData.templateSettings || {}).templateId);
         // Apply custom styles from the configuration before rendering anything
         applyCustomStyles(configData);
+        // Apply the chosen template + any custom header/announcement/footer content,
+        // then hand off an inner content container for the calendar/form to render into.
+        const contentContainer = applyTemplateChrome(displayContainer, configData);
 
         if (configData.type === "calendar") {
-            await renderCalendar(displayContainer, configData);
+            await renderCalendar(contentContainer, configData);
         } else if (configData.type === "form") {
-            await renderForm(displayContainer, configData);
+            await renderForm(contentContainer, configData);
         } else {
             displayContainer.innerHTML = "<p class='alert alert-danger text-center'>Error: Unknown configuration type.</p>";
             console.error("Unknown configuration type:", configData.type);
@@ -123,6 +220,64 @@ function applyCustomStyles(configData) {
     if (styleElement) {
         styleElement.innerHTML = customCss;
     }
+}
+
+/**
+ * Escapes text before it's inserted into innerHTML (used for admin-supplied
+ * custom content: header tagline, announcement text, footer message).
+ */
+function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+/**
+ * Applies the selected page template as a CSS class and builds any optional
+ * custom content blocks (header banner, announcement bar, footer message)
+ * from configData.templateSettings. Returns the container the calendar/form
+ * renderer should actually render its content into.
+ */
+function applyTemplateChrome(container, configData) {
+    const ts = configData.templateSettings || {};
+    const templateId = ts.templateId || 'classic';
+    container.classList.add(`kw-template-${templateId}`);
+
+    // Themes that define --kw-accent/--kw-bg pick up these overrides automatically;
+    // themes that don't simply ignore them. See css/templates.css for defaults.
+    const accentColor = configData.displaySettings?.color;
+    if (accentColor && accentColor !== '#000000') {
+        container.style.setProperty('--kw-accent', accentColor);
+    }
+    if (ts.bgColor) {
+        container.style.setProperty('--kw-bg', ts.bgColor);
+    }
+
+    let html = '';
+
+    if (ts.headerEnabled && (ts.headerImageUrl || ts.headerTagline)) {
+        html += `<div class="kw-header-banner">`;
+        if (ts.headerImageUrl) {
+            html += `<img src="${escapeHtml(ts.headerImageUrl)}" alt="" class="kw-header-logo">`;
+        }
+        if (ts.headerTagline) {
+            html += `<p class="kw-header-tagline">${escapeHtml(ts.headerTagline)}</p>`;
+        }
+        html += `</div>`;
+    }
+
+    if (ts.announcementEnabled && ts.announcementText) {
+        html += `<div class="kw-announcement-bar">${escapeHtml(ts.announcementText)}</div>`;
+    }
+
+    html += `<div id="kw-content"></div>`;
+
+    if (ts.footerEnabled && ts.footerText) {
+        html += `<div class="kw-footer-message">${escapeHtml(ts.footerText)}</div>`;
+    }
+
+    container.innerHTML = html;
+    return document.getElementById('kw-content');
 }
 
 async function renderCalendar(container, configData) {

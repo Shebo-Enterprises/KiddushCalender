@@ -1,0 +1,927 @@
+/* ==========================================================================
+   Kiddushware public page templates + custom content blocks.
+   Scoped entirely under #display-container so it never affects the admin
+   panel, confirmation page, or shulsign (which has its own stylesheet).
+
+   Color customization: templates that define --kw-accent / --kw-bg pick up
+   an admin override automatically — app/js/public-display.js sets these as
+   inline custom properties on #display-container from
+   configData.displaySettings.color (accent) and
+   configData.templateSettings.bgColor (background) when present. Each
+   template still declares its own default via var(--kw-x, <default>), so an
+   un-customized theme keeps its own designed personality.
+   ========================================================================== */
+
+/* ---- Custom content blocks (available in every template) ---- */
+#display-container .kw-header-banner {
+    text-align: center;
+    padding: 30px 15px 20px;
+    margin-bottom: 10px;
+}
+#display-container .kw-header-logo {
+    max-height: 90px;
+    max-width: 100%;
+    margin-bottom: 12px;
+}
+#display-container .kw-header-tagline {
+    font-size: 16px;
+    color: #7f8c8d;
+    margin: 0;
+}
+#display-container .kw-announcement-bar {
+    background: #fff8e1;
+    border: 1px solid #ffe082;
+    color: #8a6d3b;
+    padding: 12px 18px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    text-align: center;
+    font-weight: 500;
+}
+#display-container .kw-footer-message {
+    text-align: center;
+    color: #95a5a6;
+    font-size: 13px;
+    margin-top: 35px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
+
+/* ==========================================================================
+   Template: Classic (default) — matches the original look. --kw-bg is still
+   wired up (defaults to transparent) so the Background Color picker works
+   here too, it just has no visible effect until you actually pick one.
+   ========================================================================== */
+.kw-template-classic {
+    background: var(--kw-bg, transparent);
+}
+
+/* ==========================================================================
+   Template: Modern Cards — grid of elevated cards
+   ========================================================================== */
+.kw-template-cards {
+    background: var(--kw-bg, transparent);
+}
+.kw-template-cards .page-header {
+    text-align: center;
+    border-bottom: none;
+    margin-bottom: 25px;
+}
+.kw-template-cards .page-header h2 {
+    font-weight: 700;
+}
+.kw-template-cards #calendar-entries {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 18px;
+}
+.kw-template-cards .list-group-item.week-entry {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    padding: 20px;
+    margin-bottom: 0;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.kw-template-cards .list-group-item.week-entry:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+}
+.kw-template-cards .kw-announcement-bar {
+    border-radius: 30px;
+}
+
+/* ==========================================================================
+   Template: Minimal Clean — flat, airy, no card chrome
+   ========================================================================== */
+.kw-template-minimal {
+    background: var(--kw-bg, transparent);
+}
+.kw-template-minimal .page-header {
+    border-bottom: 1px solid #eee;
+}
+.kw-template-minimal .list-group-item.week-entry,
+.kw-template-minimal .panel-default {
+    border: none !important;
+    border-bottom: 1px solid #eee !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 22px 4px;
+    background: transparent;
+}
+.kw-template-minimal .list-group-item.week-entry:last-child {
+    border-bottom: none !important;
+}
+.kw-template-minimal .btn-primary,
+.kw-template-minimal #toggle-view-btn {
+    border-radius: 30px;
+    box-shadow: none;
+}
+.kw-template-minimal .kw-announcement-bar {
+    background: transparent;
+    border: 1px solid #eee;
+    color: #7f8c8d;
+}
+
+/* ==========================================================================
+   Template: Elegant — serif headings, warm palette, ornamental divider
+   ========================================================================== */
+.kw-template-elegant {
+    background-color: var(--kw-bg, #fdfbf6);
+}
+.kw-template-elegant .page-header,
+.kw-template-elegant h2,
+.kw-template-elegant .list-group-item-heading {
+    font-family: 'Merriweather', Georgia, serif;
+}
+.kw-template-elegant .page-header {
+    text-align: center;
+    border-bottom: none;
+    position: relative;
+    padding-bottom: 20px;
+}
+.kw-template-elegant .page-header::after {
+    content: '\2726';
+    display: block;
+    margin-top: 10px;
+    color: #c9a45c;
+    font-size: 18px;
+}
+.kw-template-elegant .page-header h2 {
+    font-family: 'Playfair Display', 'Merriweather', Georgia, serif;
+    font-style: italic;
+    font-size: 34px;
+}
+.kw-template-elegant .kw-header-tagline {
+    font-style: italic;
+}
+.kw-template-elegant .list-group-item.week-entry {
+    background: #fffefb;
+    border: 1px solid #ecdfc4;
+    border-left: 3px solid #c9a45c !important;
+}
+.kw-template-elegant .kw-announcement-bar {
+    background: #faf3e0;
+    border-color: #d4af7a;
+    color: #7a5c2e;
+    font-style: italic;
+}
+.kw-template-elegant .btn-primary,
+.kw-template-elegant #toggle-view-btn {
+    border-radius: 2px;
+    letter-spacing: 0.5px;
+}
+
+/* ==========================================================================
+   Template: Dark Mode — deep charcoal, neon-violet accents, glowing cards.
+   --kw-accent / --kw-bg are customizable (see file header).
+   ========================================================================== */
+.kw-template-dark {
+    --kw-accent: #7c5cff;
+    --kw-bg: #12141c;
+    background: var(--kw-bg);
+    color: #d7d9e2;
+    font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+    padding: 25px 20px 35px;
+    border-radius: 14px;
+}
+.kw-template-dark .page-header {
+    border-bottom-color: #262a3a !important;
+    text-align: center;
+}
+.kw-template-dark .page-header h2 {
+    color: #f4f5f9 !important;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+}
+.kw-template-dark a { color: var(--kw-accent) !important; }
+.kw-template-dark .list-group-item.week-entry,
+.kw-template-dark .panel-default,
+.kw-template-dark .panel-info {
+    background: #1b1e2b !important;
+    border: 1px solid #2a2e42 !important;
+    border-left: 3px solid var(--kw-accent) !important;
+    border-radius: 10px !important;
+    color: #d7d9e2;
+    box-shadow: none !important;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.kw-template-dark .list-group-item.week-entry:hover {
+    border-color: var(--kw-accent) !important;
+    box-shadow: 0 0 0 1px var(--kw-accent), 0 8px 24px color-mix(in srgb, var(--kw-accent) 30%, transparent) !important;
+}
+.kw-template-dark .list-group-item-heading { color: #f4f5f9 !important; }
+.kw-template-dark .list-group-item-text,
+.kw-template-dark .help-block,
+.kw-template-dark .text-muted { color: #8b8fa3 !important; }
+.kw-template-dark .panel-title { color: #f4f5f9 !important; }
+.kw-template-dark .btn-primary,
+.kw-template-dark .btn-default,
+.kw-template-dark #toggle-view-btn {
+    background: var(--kw-accent) !important;
+    border-color: var(--kw-accent) !important;
+    color: #fff !important;
+    border-radius: 999px !important;
+    padding: 8px 22px;
+    box-shadow: 0 0 18px color-mix(in srgb, var(--kw-accent) 50%, transparent) !important;
+}
+.kw-template-dark .btn-primary:hover,
+.kw-template-dark #toggle-view-btn:hover {
+    background: color-mix(in srgb, var(--kw-accent) 85%, black) !important;
+    border-color: color-mix(in srgb, var(--kw-accent) 85%, black) !important;
+}
+.kw-template-dark .form-control {
+    background: #1b1e2b;
+    border: 1px solid #2a2e42;
+    color: #e4e6ef;
+}
+.kw-template-dark .form-control:focus {
+    border-color: var(--kw-accent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--kw-accent) 30%, transparent);
+}
+.kw-template-dark label { color: #c3c6d6; }
+.kw-template-dark .radio-inline { color: #c3c6d6; }
+.kw-template-dark .kw-header-tagline { color: #8b8fa3; }
+.kw-template-dark .kw-announcement-bar {
+    background: color-mix(in srgb, var(--kw-accent) 15%, transparent);
+    border: 1px solid color-mix(in srgb, var(--kw-accent) 45%, transparent);
+    color: #cfc4ff;
+    border-radius: 10px;
+}
+.kw-template-dark .kw-footer-message {
+    color: #5c6079;
+    border-top-color: #262a3a;
+}
+
+/* ==========================================================================
+   Template: Neubrutalist — bold flat color, thick black borders, offset
+   "sticker" shadows, monospace type. Deliberately loud and unfussy.
+   --kw-accent / --kw-bg are customizable (see file header).
+   ========================================================================== */
+.kw-template-neubrutalist {
+    --kw-accent: #ffe14d;
+    --kw-bg: #fef9e7;
+    background: var(--kw-bg);
+    font-family: 'Space Mono', 'Courier New', monospace;
+    padding: 25px 20px 35px;
+    border-radius: 0;
+}
+.kw-template-neubrutalist .page-header {
+    border-bottom: 4px solid #111 !important;
+    text-align: center;
+    padding-bottom: 15px;
+}
+.kw-template-neubrutalist .page-header h2 {
+    color: #111 !important;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.kw-template-neubrutalist a { color: #111 !important; text-decoration: underline; }
+.kw-template-neubrutalist .list-group-item.week-entry,
+.kw-template-neubrutalist .panel-default,
+.kw-template-neubrutalist .panel-info {
+    background: #fff !important;
+    border: 3px solid #111 !important;
+    border-radius: 0 !important;
+    box-shadow: 6px 6px 0 #111 !important;
+    margin-bottom: 22px !important;
+    color: #111;
+}
+.kw-template-neubrutalist .list-group-item-heading { color: #111 !important; font-weight: 700; text-transform: uppercase; }
+.kw-template-neubrutalist .panel-title { color: #111 !important; font-weight: 700; }
+.kw-template-neubrutalist .btn-primary,
+.kw-template-neubrutalist .btn-default,
+.kw-template-neubrutalist #toggle-view-btn {
+    background: var(--kw-accent) !important;
+    border: 3px solid #111 !important;
+    color: #111 !important;
+    border-radius: 0 !important;
+    font-weight: 700;
+    text-transform: uppercase;
+    box-shadow: 4px 4px 0 #111 !important;
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+.kw-template-neubrutalist .btn-primary:hover,
+.kw-template-neubrutalist #toggle-view-btn:hover {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 #111 !important;
+}
+.kw-template-neubrutalist .form-control {
+    border: 3px solid #111;
+    border-radius: 0;
+    box-shadow: none;
+}
+.kw-template-neubrutalist .form-control:focus {
+    border-color: #111;
+    box-shadow: 4px 4px 0 #111;
+}
+.kw-template-neubrutalist .kw-header-tagline { color: #111; font-weight: 700; }
+.kw-template-neubrutalist .kw-announcement-bar {
+    background: var(--kw-accent);
+    border: 3px solid #111;
+    border-radius: 0;
+    color: #111;
+    font-weight: 700;
+    text-transform: uppercase;
+    box-shadow: 5px 5px 0 #111;
+}
+.kw-template-neubrutalist .kw-footer-message {
+    color: #111;
+    border-top: 3px solid #111;
+    font-weight: 700;
+}
+
+/* ==========================================================================
+   Template: Soft Pastel — neumorphic "pressed paper" panels, rounded pills,
+   no hard borders anywhere, entirely built from dual soft shadows.
+   --kw-accent / --kw-bg are customizable (see file header).
+   ========================================================================== */
+.kw-template-pastel {
+    --kw-accent: #8a6fd1;
+    --kw-bg: #f2eefb;
+    background: var(--kw-bg);
+    font-family: 'Poppins', 'Helvetica Neue', Arial, sans-serif;
+    padding: 25px 20px 35px;
+    border-radius: 24px;
+}
+.kw-template-pastel .page-header {
+    border-bottom: none !important;
+    text-align: center;
+}
+.kw-template-pastel .page-header h2 {
+    color: color-mix(in srgb, var(--kw-accent) 65%, black) !important;
+    font-weight: 600;
+}
+.kw-template-pastel a { color: var(--kw-accent) !important; }
+.kw-template-pastel .list-group-item.week-entry,
+.kw-template-pastel .panel-default,
+.kw-template-pastel .panel-info {
+    background: var(--kw-bg) !important;
+    border: none !important;
+    border-radius: 20px !important;
+    box-shadow: 8px 8px 16px color-mix(in srgb, var(--kw-bg) 80%, black), -8px -8px 16px color-mix(in srgb, var(--kw-bg) 80%, white) !important;
+    color: #4a4460;
+    margin-bottom: 20px !important;
+}
+.kw-template-pastel .list-group-item-heading { color: color-mix(in srgb, var(--kw-accent) 65%, black) !important; font-weight: 600; }
+.kw-template-pastel .panel-title { color: color-mix(in srgb, var(--kw-accent) 65%, black) !important; font-weight: 600; }
+.kw-template-pastel .btn-primary,
+.kw-template-pastel .btn-default,
+.kw-template-pastel #toggle-view-btn {
+    background: var(--kw-bg) !important;
+    border: none !important;
+    color: var(--kw-accent) !important;
+    border-radius: 999px !important;
+    font-weight: 600;
+    padding: 9px 24px;
+    box-shadow: 5px 5px 10px color-mix(in srgb, var(--kw-bg) 80%, black), -5px -5px 10px color-mix(in srgb, var(--kw-bg) 80%, white) !important;
+}
+.kw-template-pastel .btn-primary:hover,
+.kw-template-pastel #toggle-view-btn:hover {
+    box-shadow: inset 3px 3px 8px color-mix(in srgb, var(--kw-bg) 80%, black), inset -3px -3px 8px color-mix(in srgb, var(--kw-bg) 80%, white) !important;
+}
+.kw-template-pastel .form-control {
+    background: var(--kw-bg);
+    border: none;
+    border-radius: 14px;
+    box-shadow: inset 4px 4px 8px color-mix(in srgb, var(--kw-bg) 80%, black), inset -4px -4px 8px color-mix(in srgb, var(--kw-bg) 80%, white);
+    color: #4a4460;
+}
+.kw-template-pastel label { color: #6c608c; }
+.kw-template-pastel .kw-header-tagline { color: var(--kw-accent); }
+.kw-template-pastel .kw-announcement-bar {
+    background: var(--kw-bg);
+    border: none;
+    color: var(--kw-accent);
+    border-radius: 999px;
+    box-shadow: 6px 6px 12px color-mix(in srgb, var(--kw-bg) 80%, black), -6px -6px 12px color-mix(in srgb, var(--kw-bg) 80%, white);
+}
+.kw-template-pastel .kw-footer-message {
+    color: color-mix(in srgb, var(--kw-accent) 50%, #999);
+    border-top-color: color-mix(in srgb, var(--kw-bg) 85%, black);
+}
+
+/* ==========================================================================
+   Template: Glass — frosted translucent panels over a gradient backdrop.
+   --kw-accent customizes the panel tint; --kw-bg customizes the gradient's
+   top color (it always blends down into deep navy).
+   ========================================================================== */
+.kw-template-glass {
+    --kw-accent: #ffffff;
+    --kw-bg: #4b6cb7;
+    background: linear-gradient(135deg, var(--kw-bg) 0%, #2e3a67 55%, #1a1f3d 100%);
+    font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+    padding: 25px 20px 35px;
+    border-radius: 14px;
+    color: #f1f3fb;
+}
+.kw-template-glass .page-header {
+    border-bottom-color: rgba(255,255,255,0.25) !important;
+    text-align: center;
+}
+.kw-template-glass .page-header h2 {
+    color: #ffffff !important;
+    font-weight: 800;
+}
+.kw-template-glass a { color: #cfe0ff !important; }
+.kw-template-glass .list-group-item.week-entry,
+.kw-template-glass .panel-default,
+.kw-template-glass .panel-info {
+    background: color-mix(in srgb, var(--kw-accent) 12%, transparent) !important;
+    border: 1px solid color-mix(in srgb, var(--kw-accent) 30%, transparent) !important;
+    border-radius: 14px !important;
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2) !important;
+    color: #f1f3fb;
+}
+.kw-template-glass .list-group-item-heading { color: #ffffff !important; }
+.kw-template-glass .list-group-item-text,
+.kw-template-glass .help-block,
+.kw-template-glass .text-muted { color: #cdd4ea !important; }
+.kw-template-glass .panel-title { color: #ffffff !important; }
+.kw-template-glass .btn-primary,
+.kw-template-glass .btn-default,
+.kw-template-glass #toggle-view-btn {
+    background: color-mix(in srgb, var(--kw-accent) 18%, transparent) !important;
+    border: 1px solid color-mix(in srgb, var(--kw-accent) 40%, transparent) !important;
+    color: #ffffff !important;
+    border-radius: 999px !important;
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+}
+.kw-template-glass .btn-primary:hover,
+.kw-template-glass #toggle-view-btn:hover {
+    background: color-mix(in srgb, var(--kw-accent) 30%, transparent) !important;
+}
+.kw-template-glass .form-control {
+    background: color-mix(in srgb, var(--kw-accent) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--kw-accent) 30%, transparent);
+    color: #ffffff;
+}
+.kw-template-glass .form-control::placeholder { color: rgba(255,255,255,0.6); }
+.kw-template-glass .form-control:focus {
+    border-color: #cfe0ff;
+    box-shadow: 0 0 0 2px rgba(207,224,255,0.3);
+}
+.kw-template-glass label { color: #e3e8f7; }
+.kw-template-glass .kw-header-tagline { color: #dbe3f7; }
+.kw-template-glass .kw-announcement-bar {
+    background: color-mix(in srgb, var(--kw-accent) 15%, transparent);
+    border: 1px solid color-mix(in srgb, var(--kw-accent) 35%, transparent);
+    color: #ffffff;
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+}
+.kw-template-glass .kw-footer-message {
+    color: rgba(255,255,255,0.55);
+    border-top-color: rgba(255,255,255,0.2);
+}
+
+/* ==========================================================================
+   Template: Material — Google Material-style elevation cards, Roboto type,
+   uppercase contained buttons, 4px corner radius throughout.
+   --kw-accent / --kw-bg are customizable (see file header).
+   ========================================================================== */
+.kw-template-material {
+    --kw-accent: #6200ee;
+    --kw-bg: #fafafa;
+    background: var(--kw-bg);
+    font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    padding: 25px 20px 35px;
+    border-radius: 4px;
+}
+.kw-template-material .page-header {
+    border-bottom: none !important;
+}
+.kw-template-material .page-header h2 {
+    color: #212121 !important;
+    font-weight: 500;
+}
+.kw-template-material a { color: var(--kw-accent) !important; }
+.kw-template-material .list-group-item.week-entry,
+.kw-template-material .panel-default,
+.kw-template-material .panel-info {
+    background: #ffffff !important;
+    border: none !important;
+    border-radius: 4px !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.14), 0 1px 2px rgba(0,0,0,0.22) !important;
+    color: #424242;
+    margin-bottom: 16px !important;
+    transition: box-shadow 0.15s ease;
+}
+.kw-template-material .list-group-item.week-entry:hover {
+    box-shadow: 0 4px 10px rgba(0,0,0,0.16), 0 2px 4px rgba(0,0,0,0.2) !important;
+}
+.kw-template-material .list-group-item-heading { color: #212121 !important; font-weight: 500; }
+.kw-template-material .list-group-item-text,
+.kw-template-material .help-block,
+.kw-template-material .text-muted { color: #757575 !important; }
+.kw-template-material .panel-title { color: #212121 !important; font-weight: 500; }
+.kw-template-material .btn-primary,
+.kw-template-material .btn-default,
+.kw-template-material #toggle-view-btn {
+    background: var(--kw-accent) !important;
+    border: none !important;
+    color: #fff !important;
+    border-radius: 4px !important;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2) !important;
+}
+.kw-template-material .btn-primary:hover,
+.kw-template-material #toggle-view-btn:hover {
+    background: color-mix(in srgb, var(--kw-accent) 85%, black) !important;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.28) !important;
+}
+.kw-template-material .form-control {
+    background: #ffffff;
+    border: none;
+    border-bottom: 2px solid #e0e0e0;
+    border-radius: 4px 4px 0 0;
+    box-shadow: none;
+}
+.kw-template-material .form-control:focus {
+    border-bottom-color: var(--kw-accent);
+    box-shadow: none;
+}
+.kw-template-material label { color: #616161; }
+.kw-template-material .kw-header-tagline { color: #757575; }
+.kw-template-material .kw-announcement-bar {
+    background: color-mix(in srgb, var(--kw-accent) 10%, white);
+    border: none;
+    color: color-mix(in srgb, var(--kw-accent) 80%, black);
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+}
+.kw-template-material .kw-footer-message {
+    color: #9e9e9e;
+    border-top-color: #e0e0e0;
+}
+
+/* ==========================================================================
+   Template: Sunset — warm gradient backdrop, bold rounded cards, energetic.
+   --kw-accent / --kw-bg are customizable (see file header).
+   ========================================================================== */
+.kw-template-sunset {
+    --kw-accent: #ff5e62;
+    --kw-bg: #ff9966;
+    background: linear-gradient(135deg, var(--kw-bg) 0%, var(--kw-accent) 50%, #8e44ad 100%);
+    font-family: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;
+    padding: 25px 20px 35px;
+    border-radius: 18px;
+}
+.kw-template-sunset .page-header {
+    border-bottom: none !important;
+    text-align: center;
+}
+.kw-template-sunset .page-header h2 {
+    color: #ffffff !important;
+    font-weight: 800;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.kw-template-sunset a { color: #fff5f0 !important; text-decoration: underline; }
+.kw-template-sunset .list-group-item.week-entry,
+.kw-template-sunset .panel-default,
+.kw-template-sunset .panel-info {
+    background: #fffdfb !important;
+    border: none !important;
+    border-radius: 14px !important;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important;
+    color: #5a4038;
+    margin-bottom: 18px !important;
+}
+.kw-template-sunset .list-group-item-heading { color: #c0392b !important; font-weight: 700; }
+.kw-template-sunset .panel-title { color: #c0392b !important; font-weight: 700; }
+.kw-template-sunset .btn-primary,
+.kw-template-sunset .btn-default,
+.kw-template-sunset #toggle-view-btn {
+    background: var(--kw-accent) !important;
+    border: none !important;
+    color: #fff !important;
+    border-radius: 999px !important;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
+}
+.kw-template-sunset .btn-primary:hover,
+.kw-template-sunset #toggle-view-btn:hover {
+    background: color-mix(in srgb, var(--kw-accent) 85%, black) !important;
+}
+.kw-template-sunset .form-control {
+    background: #fffdfb;
+    border: 1px solid #f3d9c9;
+}
+.kw-template-sunset .form-control:focus {
+    border-color: var(--kw-accent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--kw-accent) 25%, transparent);
+}
+.kw-template-sunset label { color: #fff5f0; }
+.kw-template-sunset .kw-header-tagline { color: #fff0e8; }
+.kw-template-sunset .kw-announcement-bar {
+    background: rgba(255,255,255,0.92);
+    border: none;
+    color: #c0392b;
+    border-radius: 999px;
+    font-weight: 700;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+}
+.kw-template-sunset .kw-footer-message {
+    color: rgba(255,255,255,0.75);
+    border-top-color: rgba(255,255,255,0.25);
+}
+
+/* ==========================================================================
+   Template: Nature — sage background, forest-green accents, organic feel.
+   --kw-accent / --kw-bg are customizable (see file header).
+   ========================================================================== */
+.kw-template-nature {
+    --kw-accent: #2f6b3a;
+    --kw-bg: #eef3ea;
+    background: var(--kw-bg);
+    font-family: 'Lato', 'Helvetica Neue', Arial, sans-serif;
+    padding: 25px 20px 35px;
+    border-radius: 16px;
+}
+.kw-template-nature .page-header {
+    border-bottom: none !important;
+    text-align: center;
+    position: relative;
+    padding-bottom: 18px;
+}
+.kw-template-nature .page-header::after {
+    content: '\1F33F';
+    display: block;
+    margin-top: 8px;
+    font-size: 16px;
+}
+.kw-template-nature .page-header h2 {
+    color: color-mix(in srgb, var(--kw-accent) 80%, black) !important;
+    font-weight: 700;
+}
+.kw-template-nature a { color: var(--kw-accent) !important; }
+.kw-template-nature .list-group-item.week-entry,
+.kw-template-nature .panel-default,
+.kw-template-nature .panel-info {
+    background: #ffffff !important;
+    border: 1px solid color-mix(in srgb, var(--kw-bg) 60%, black) !important;
+    border-left: 4px solid var(--kw-accent) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important;
+    color: #3d4d3f;
+}
+.kw-template-nature .list-group-item-heading { color: color-mix(in srgb, var(--kw-accent) 80%, black) !important; }
+.kw-template-nature .panel-title { color: color-mix(in srgb, var(--kw-accent) 80%, black) !important; }
+.kw-template-nature .btn-primary,
+.kw-template-nature .btn-default,
+.kw-template-nature #toggle-view-btn {
+    background: var(--kw-accent) !important;
+    border-color: var(--kw-accent) !important;
+    color: #f4f9f0 !important;
+    border-radius: 30px !important;
+}
+.kw-template-nature .btn-primary:hover,
+.kw-template-nature #toggle-view-btn:hover {
+    background: color-mix(in srgb, var(--kw-accent) 85%, black) !important;
+    border-color: color-mix(in srgb, var(--kw-accent) 85%, black) !important;
+}
+.kw-template-nature .form-control {
+    background: #ffffff;
+    border: 1px solid color-mix(in srgb, var(--kw-bg) 55%, black);
+}
+.kw-template-nature .form-control:focus {
+    border-color: var(--kw-accent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--kw-accent) 20%, transparent);
+}
+.kw-template-nature label { color: #4c5d4e; }
+.kw-template-nature .kw-header-tagline { color: #6c7d6e; }
+.kw-template-nature .kw-announcement-bar {
+    background: color-mix(in srgb, var(--kw-accent) 12%, white);
+    border: 1px solid color-mix(in srgb, var(--kw-accent) 35%, transparent);
+    color: color-mix(in srgb, var(--kw-accent) 80%, black);
+    border-radius: 10px;
+}
+.kw-template-nature .kw-footer-message {
+    color: #8a9a8c;
+    border-top-color: color-mix(in srgb, var(--kw-bg) 60%, black);
+}
+
+/* ==========================================================================
+   Template: Materialize — genuinely loads the real Materialize CSS CDN
+   (see BOOTSWATCH_THEMES/EXTRA_LIBRARY_CDN in public-display.js) as an
+   additional stylesheet, then applies this compatibility skin on top using
+   Materialize's actual signature tokens (teal, Roboto, waves-style flat
+   buttons, z-depth card shadows) — the real stylesheet alone can't restyle
+   our .btn/.panel/.list-group markup since Materialize uses its own class
+   names, so this layer is what makes the look actually apply.
+   --kw-accent / --kw-bg are customizable (see file header).
+   ========================================================================== */
+.kw-template-materialize {
+    --kw-accent: #26a69a;
+    --kw-bg: #fafafa;
+    background: var(--kw-bg);
+    font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    padding: 25px 20px 35px;
+    border-radius: 2px;
+}
+.kw-template-materialize .page-header { border-bottom: none !important; }
+.kw-template-materialize .page-header h2 { color: #212121 !important; font-weight: 500; }
+.kw-template-materialize a { color: var(--kw-accent) !important; }
+.kw-template-materialize .list-group-item.week-entry,
+.kw-template-materialize .panel-default,
+.kw-template-materialize .panel-info {
+    background: #ffffff !important;
+    border: none !important;
+    border-radius: 2px !important;
+    box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 3px 1px -2px rgba(0,0,0,0.12), 0 1px 5px 0 rgba(0,0,0,0.2) !important;
+    color: #424242;
+    margin-bottom: 18px !important;
+}
+.kw-template-materialize .list-group-item-heading { color: #212121 !important; font-weight: 500; }
+.kw-template-materialize .panel-title { color: #212121 !important; font-weight: 500; }
+.kw-template-materialize .btn-primary,
+.kw-template-materialize .btn-default,
+.kw-template-materialize #toggle-view-btn {
+    background: var(--kw-accent) !important;
+    border: none !important;
+    color: #fff !important;
+    border-radius: 2px !important;
+    text-transform: uppercase;
+    box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16), 0 2px 10px 0 rgba(0,0,0,0.12) !important;
+}
+.kw-template-materialize .btn-primary:hover,
+.kw-template-materialize #toggle-view-btn:hover {
+    background: color-mix(in srgb, var(--kw-accent) 85%, black) !important;
+}
+.kw-template-materialize .form-control {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid #9e9e9e;
+    border-radius: 0;
+    box-shadow: none;
+}
+.kw-template-materialize .form-control:focus {
+    border-bottom: 1px solid var(--kw-accent);
+    box-shadow: 0 1px 0 0 var(--kw-accent);
+}
+.kw-template-materialize label { color: #616161; }
+.kw-template-materialize .kw-announcement-bar {
+    background: color-mix(in srgb, var(--kw-accent) 12%, white);
+    border: none;
+    color: color-mix(in srgb, var(--kw-accent) 80%, black);
+}
+.kw-template-materialize .kw-footer-message { color: #9e9e9e; border-top-color: #e0e0e0; }
+
+/* ==========================================================================
+   Template: Semantic — genuinely loads the real Semantic UI CSS CDN as an
+   additional stylesheet (see EXTRA_LIBRARY_CDN in public-display.js), then
+   applies this compatibility skin using Semantic UI's real tokens (blue
+   primary, Lato type, its signature 0.28571429rem corner radius) so our
+   existing .btn/.panel/.list-group markup actually picks up the look.
+   --kw-accent / --kw-bg are customizable (see file header).
+   ========================================================================== */
+.kw-template-semantic {
+    --kw-accent: #2185d0;
+    --kw-bg: #ffffff;
+    background: var(--kw-bg);
+    font-family: 'Lato', 'Helvetica Neue', Arial, sans-serif;
+    padding: 25px 20px 35px;
+    border-radius: 0.28571429rem;
+}
+.kw-template-semantic .page-header {
+    border-bottom: 1px solid rgba(34,36,38,0.15) !important;
+}
+.kw-template-semantic .page-header h2 { color: rgba(0,0,0,0.85) !important; font-weight: 700; }
+.kw-template-semantic a { color: var(--kw-accent) !important; }
+.kw-template-semantic .list-group-item.week-entry,
+.kw-template-semantic .panel-default,
+.kw-template-semantic .panel-info {
+    background: #ffffff !important;
+    border: 1px solid rgba(34,36,38,0.15) !important;
+    border-radius: 0.28571429rem !important;
+    box-shadow: 0 1px 2px 0 rgba(34,36,38,0.15) !important;
+    color: rgba(0,0,0,0.87);
+    margin-bottom: 18px !important;
+}
+.kw-template-semantic .list-group-item-heading { color: rgba(0,0,0,0.85) !important; font-weight: 700; }
+.kw-template-semantic .panel-title { color: rgba(0,0,0,0.85) !important; font-weight: 700; }
+.kw-template-semantic .btn-primary,
+.kw-template-semantic .btn-default,
+.kw-template-semantic #toggle-view-btn {
+    background: var(--kw-accent) !important;
+    border: none !important;
+    color: #fff !important;
+    border-radius: 0.28571429rem !important;
+    font-weight: 700;
+    box-shadow: 0 0 0 1px transparent inset, 0 0 0 0 rgba(34,36,38,0.15) inset !important;
+}
+.kw-template-semantic .btn-primary:hover,
+.kw-template-semantic #toggle-view-btn:hover {
+    background: color-mix(in srgb, var(--kw-accent) 85%, black) !important;
+}
+.kw-template-semantic .form-control {
+    border: 1px solid rgba(34,36,38,0.15);
+    border-radius: 0.28571429rem;
+    box-shadow: 0 0 0 0 transparent inset;
+}
+.kw-template-semantic .form-control:focus {
+    border-color: var(--kw-accent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--kw-accent) 20%, transparent);
+}
+.kw-template-semantic label { color: rgba(0,0,0,0.87); font-weight: 700; }
+.kw-template-semantic .kw-announcement-bar {
+    background: color-mix(in srgb, var(--kw-accent) 10%, white);
+    border: 1px solid color-mix(in srgb, var(--kw-accent) 35%, transparent);
+    color: color-mix(in srgb, var(--kw-accent) 80%, black);
+}
+.kw-template-semantic .kw-footer-message { color: rgba(0,0,0,0.4); border-top-color: rgba(34,36,38,0.15); }
+
+/* ==========================================================================
+   Template: Tailwind — genuinely loads the real Tailwind Play CDN
+   (see EXTRA_LIBRARY_CDN in public-display.js; it also applies Tailwind's
+   Preflight reset globally), then applies this compatibility skin using
+   Tailwind UI's real tokens (Inter, indigo-600, ring-bordered white cards,
+   rounded-lg) so our existing markup actually renders that look.
+   --kw-accent / --kw-bg are customizable (see file header).
+   ========================================================================== */
+.kw-template-tailwind {
+    --kw-accent: #4f46e5;
+    --kw-bg: #f9fafb;
+    background: var(--kw-bg);
+    font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+    padding: 25px 20px 35px;
+    border-radius: 0.75rem;
+}
+.kw-template-tailwind .page-header { border-bottom: none !important; }
+.kw-template-tailwind .page-header h2 { color: #111827 !important; font-weight: 700; }
+.kw-template-tailwind a { color: var(--kw-accent) !important; }
+.kw-template-tailwind .list-group-item.week-entry,
+.kw-template-tailwind .panel-default,
+.kw-template-tailwind .panel-info {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 0.5rem !important;
+    box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05) !important;
+    color: #374151;
+    margin-bottom: 16px !important;
+}
+.kw-template-tailwind .list-group-item-heading { color: #111827 !important; font-weight: 600; }
+.kw-template-tailwind .list-group-item-text,
+.kw-template-tailwind .help-block,
+.kw-template-tailwind .text-muted { color: #6b7280 !important; }
+.kw-template-tailwind .panel-title { color: #111827 !important; font-weight: 600; }
+.kw-template-tailwind .btn-primary,
+.kw-template-tailwind .btn-default,
+.kw-template-tailwind #toggle-view-btn {
+    background: var(--kw-accent) !important;
+    border: none !important;
+    color: #fff !important;
+    border-radius: 0.5rem !important;
+    font-weight: 600;
+    box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05) !important;
+}
+.kw-template-tailwind .btn-primary:hover,
+.kw-template-tailwind #toggle-view-btn:hover {
+    background: color-mix(in srgb, var(--kw-accent) 85%, black) !important;
+}
+.kw-template-tailwind .form-control {
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
+}
+.kw-template-tailwind .form-control:focus {
+    border-color: var(--kw-accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--kw-accent) 20%, transparent);
+}
+.kw-template-tailwind label { color: #374151; font-weight: 500; }
+.kw-template-tailwind .kw-announcement-bar {
+    background: color-mix(in srgb, var(--kw-accent) 8%, white);
+    border: 1px solid color-mix(in srgb, var(--kw-accent) 25%, transparent);
+    color: color-mix(in srgb, var(--kw-accent) 80%, black);
+    border-radius: 0.5rem;
+}
+.kw-template-tailwind .kw-footer-message { color: #9ca3af; border-top-color: #e5e7eb; }
+
+/* ==========================================================================
+   Template: "New Bootstrap" (bs5) — real Bootstrap 5 loaded from CDN in
+   place of Bootstrap 3 (see applyLibraryTheme in public-display.js). Most
+   of our markup (.btn, .list-group-item, .form-control) carries over
+   natively; this patch just recreates the handful of Bootstrap 3 things
+   BS5 removed (.page-header, .panel-*) and hides Glyphicons, which BS5
+   dropped, so no broken-icon boxes show.
+   ========================================================================== */
+.kw-template-bs5 .page-header {
+    padding-bottom: 9px;
+    margin: 20px 0;
+    border-bottom: 1px solid #dee2e6;
+}
+.kw-template-bs5 .panel {
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    margin-bottom: 18px;
+}
+.kw-template-bs5 .panel-body { padding: 15px; }
+.kw-template-bs5 .panel-heading { padding: 10px 15px; border-bottom: 1px solid #dee2e6; }
+.kw-template-bs5 .glyphicon { display: none; }
